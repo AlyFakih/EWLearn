@@ -1,0 +1,72 @@
+.title-info .icon {
+  cursor: pointer;
+  /* margin-right: 50px;
+  line-height: 60px; */
+}
+
+.title-info .icon span {
+  background-color: black;
+  padding: 6px;
+  border-radius: 50%;
+  vertical-align: top;
+  margin-left: -25px;
+}
+.title-info i {
+  display: inline-block !important;
+  width: 40px !important;
+  margin-top: 10px;
+  font-size: 35px;
+}
+.title-info .icon:hover {
+  opacity: 0.7;
+}
+.title-info .notifi-box {
+  width: 400px;
+  height: 0px;
+  /* opacity: 0; */
+  /* display: none; */
+  position: absolute;
+  top: 94px;
+  right: 35px;
+  transition: 0.5s;
+  border-top-right-radius: 8px;
+  border-top-left-radius: 8px;
+  box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+  background-color: rgb(49, 49, 49);
+  z-index: 999;
+}
+.title-info .notifi-box h2 {
+  font-size: 17px;
+  padding: 10px;
+  border-bottom: 1px solid rgb(255, 0, 0);
+  color: black;
+  font-weight: 800 !important;
+}
+.notifi-box h2 span {
+  color: black;
+}
+.notifi-items {
+  display: flex;
+  border-bottom: 1px solid red;
+  padding: 15px 5px;
+  /* margin-bottom: 15px; */
+  cursor: pointer;
+}
+.notifi-items:hover {
+  background-color: rgb(156, 0, 0);
+}
+.notifi-items img {
+  display: block;
+  width: 50px;
+  margin-right: 10px;
+  border-radius: 50%;
+}
+.notifi-items .textMessage h4 {
+  color: rgb(213, 213, 238);
+  font-size: 16px;
+  margin-right: 10px;
+}
+.notifi-items .textMessage p {
+  color: rgb(0, 0, 0);
+  font-size: 14px;
+}

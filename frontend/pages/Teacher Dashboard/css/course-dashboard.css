@@ -1,0 +1,488 @@
+/* Global Styles */
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  body {
+    background-color: #001;
+    display: flex;
+  }
+  
+  
+  
+  
+  /* Subject Section */
+  .cont-skill {
+    display: flex;
+    justify-content: space-between;
+    margin: 15px;
+  }
+  
+  main {
+    position: relative;
+    margin-top: 1.4rem;
+  }
+
+  .title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border: 2px solid darkgray;
+    background-color: green;
+  }
+  
+  .title button {
+    padding: 7px;
+    background-color: gray;
+    color: white;
+    font-size: 18px;
+    font-weight: bold;
+    text-align: center;
+    width: 80px;
+    border-radius: 10px 5px;
+  }
+  
+  
+  /* --------------------------------------------------------- */
+  
+  /*--------------------------------------------------------------------------*/
+  main .subjects > div {
+    flex: 0 0 auto; /* Disable flex grow and shrink */
+      position: relative;
+      border: 4px solid whitesmoke;
+      width: 300px;
+      margin: 10px;
+      background-color: #810000;
+      text-align: center;
+      border-radius: 10px;
+      padding: 10px;
+      box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+  
+  }
+  
+  
+  main .subjects h4 {
+    margin: 1rem 0 0.3rem;
+    font-size: 15px;
+    text-align: center;
+    /* text-transform: uppercase; */
+  }
+  
+  main .subjects p{
+    font-size: 16px;
+    margin-bottom: 15px;
+    /* text-transform: uppercase; */
+    text-align: center;
+  }
+  
+  main h2 {
+    text-align: left;
+    margin-left: 20px;
+  }
+  
+  main .subjects .progress img{
+    position: relative;
+    width: 150px;
+    height: 150px;
+    /* border-radius: 50%; */
+    margin: auto;
+  }
+  
+  
+  
+  
+  /* Popup */
+  .popup {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 10px;
+    background-color: white;
+    border: 1px solid #ccc;
+    z-index: 1;
+    width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  }
+  
+  .popup .close {
+    font-weight: bold;
+    font-size: 29px;
+    margin-top: 5px;
+    margin-bottom: 9px;
+    cursor: pointer;
+    color: #810000;
+  }
+  
+  .popup h3 {
+    margin-bottom: 8px;
+  }
+  
+  #popup {
+    background-color: #001;
+    color: #fff;
+    text-align: center;
+    padding: 20px;
+  }
+  
+  #cardForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-gap: 10px;
+    align-items: center;
+  }
+  
+  label {
+    color: #810000;
+    margin-bottom: 5px;
+  }
+  
+  select,
+  input {
+    color: #810000;
+    padding: 5px;
+    background-color: #810000;
+    border: none;
+    color: #fff;
+    text-align: center;
+    font-weight: bold;
+    border-radius: 10px;
+  }
+  
+  /* Card Form Button */
+  button {
+    grid-column: span 2;
+    background-color: #810000;
+    color: #fff;
+    padding: 10px;
+    border: none;
+    cursor: pointer;
+    border-radius: 15px 30px;
+  }
+  
+  button:hover {
+    background-color: #d32f2f;
+  }
+  
+  /* Card Form Ends */
+  
+  /* Card Form Popup */
+  .card-form {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: #001;
+    padding: 20px;
+    border: 1px solid #ccc;
+    width: 400px;
+    margin-left: 20%;
+    margin-right: 20%;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  .card-form h3 {
+    text-align: center;
+    margin-bottom: 10px;
+    color: whitesmoke;
+  }
+  
+  .card-form .form-design {
+    margin-bottom: 15px;
+  }
+  
+  .card-form label {
+    color: whitesmoke;
+    font-size: 18px;
+    font-weight: bold;
+    display: block;
+    margin-bottom: 5px;
+  }
+  
+  .card-form input,
+  .card-form select {
+    width: calc(100% - 20px);
+    box-sizing: border-box;
+    padding: 8px;
+    margin-top: 5px;
+  }
+  
+  .card-form .button-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  
+  .card-form button:first-child {
+    margin: auto;
+  }
+  
+  .card-form button:last-child {
+    margin: auto;
+  }
+  
+  /* Delete Card */
+  .subjects {
+    display: flex;
+    flex-wrap: wrap;
+  }
+  
+  .eg {
+    border: 1px solid #ccc;
+    padding: 10px;
+    margin: 10px;
+    position: relative;
+    width: 150px;
+  }
+  
+  .eg.selected {
+    border: 3px solid red;
+    background-color: #ffe6e6;
+    box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+  }
+  
+  .eg .delete-overlay {
+    position: absolute;
+    top: 0;
+    right: 0;
+    background: rgba(255, 0, 0, 0.7);
+    padding: 5px;
+    cursor: pointer;
+  }
+  
+  /*---------------------------------------------------
+    Schedule Section  starts
+  -------------------------------------------------------*/
+  
+  
+  /*---------------------------------------------
+   Update row Section starts 
+  ------------------------------------------------*/
+  .popupForm {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: darkgray;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .popupForm h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #001;
+  }
+  
+  .first,
+  .second {
+    margin-bottom: 15px;
+  }
+  
+  /* Form styles */
+  #editForm {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  #editForm label {
+    font-weight: bold;
+    grid-column: span 2;
+    color: #810000;
+  }
+  
+  /* input field for the time label */
+  #editPopup .time-section input {
+    width: 200%;
+  }
+  
+  #editForm input,
+  #editForm select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    border: 4px solid #001;
+    border-radius: 2px 20px 2px 20px;
+    text-align: center;
+    color: #001;
+  }
+  
+  
+  
+  #editForm .buttons {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+  }
+  
+  #editForm button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  #editForm button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Close button styles */
+  #editForm button[type="button"] {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  #editForm button[type="button"]:hover {
+    background-color: #123;
+  }
+  
+  /*---------------------------------------------
+   Update row Section ends 
+  ------------------------------------------------*/
+  
+  /*---------------------------------------------
+   Add a new row Section starts 
+  ------------------------------------------------*/
+  .modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: darkgray;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  .modal h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #001;
+  }
+  
+  #addModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: darkgray;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  }
+  
+  #addModal h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #001;
+  }
+  
+  /* Classes for the divs inside the form */
+  .first,
+  .second {
+    margin-bottom: 15px;
+  }
+  
+  /* Form styles */
+  #addForm {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  
+  #addForm label {
+    font-weight: bold;
+    grid-column: span 2;
+    color: #810000; /* Updated color */
+  }
+  /* input field for the time label */
+  #addForm .time-section input {
+    width: 200%;
+  }
+  
+  #addForm input,
+  #addForm select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    border: 4px solid #001;
+    border-radius: 2px 20px 2px 20px;
+    text-align: center;
+    color: #001;
+  }
+  
+  
+  
+  #addForm .buttons {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+  }
+  
+  #addForm button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+  }
+  
+  #addForm button:hover {
+    background-color: #45a049;
+  }
+  
+  /* Close button styles */
+  #addModal button[type="button"] {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  
+  #addModal button[type="button"]:hover {
+    background-color: #123;
+  }
+  
+  /*---------------------------------------------
+   Add a new row Section ends 
+  ------------------------------------------------*/

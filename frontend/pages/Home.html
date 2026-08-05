@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>EWlearn</title>
+
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+      integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
+      crossorigin="anonymous"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="../assets/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="../assets/swiper-bundle.min.css" />
+    <link rel="stylesheet" href="../styles/Home/topbar.css" />
+    <link rel="stylesheet" href="../styles/Home/home.css" />
+  </head>
+
+  <!--Body -->
+  <body>
+    <button onclick="topFunction()" id="myBtn" title="Go to top">
+      <i class="fa-solid fa-arrow-up fa-lg" style="color: #000000"></i>
+    </button>
+
+    <!--todo Include the navigation bar -->
+    <div id="navbar-container"></div>
+    <script>
+      $("#navbar-container").load("./navbar.html");
+    </script>
+
+    <!--todo SECtion carousel bootstrap -->
+    <section class="carousel">
+      <div
+        id="carouselExampleInterval"
+        class="carousel slide"
+        data-bs-ride="carousel"
+      >
+        <div class="carousel-inner">
+          <div class="carousel-item active" data-bs-interval="10000">
+            <img
+              src="../assets/images/rectangle-19-bg.png"
+              class="d-block w-100"
+              alt="..."
+            />
+          </div>
+          <div class="carousel-item" data-bs-interval="2000">
+            <img
+              src="../assets/images/rectangle-36-bg.png"
+              class="d-block w-100"
+              alt="..."
+            />
+          </div>
+        </div>
+        <div class="carousel-caption d-md-block fbtn">
+          <h2>Third slide label</h2>
+          <h3>Some representative placeholder content for the third slide.</h3>
+          <button>
+            <a
+              style="text-decoration: none; color: white"
+              href="../pages/aboutUs.html"
+              >Learn More</a
+            >
+          </button>
+          <button>
+            <a
+              style="text-decoration: none; color: white"
+              onclick="checkLogin() "
+              >Get Started Now</a
+            >
+          </button>
+        </div>
+        <button
+          class="carousel-control-prev"
+          type="button"
+          data-bs-target="#carouselExampleInterval"
+          data-bs-slide="prev"
+        >
+          <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Previous</span>
+        </button>
+        <button
+          class="carousel-control-next"
+          type="button"
+          data-bs-target="#carouselExampleInterval"
+          data-bs-slide="next"
+        >
+          <span class="carousel-control-next-icon" aria-hidden="true"></span>
+          <span class="visually-hidden">Next</span>
+        </button>
+      </div>
+    </section>
+
+    <!--todo Section boxes -->
+    <section class="box_info">
+      <div class="rectangle">
+        <div class="items">
+          <i
+            class="fa-solid fa-hand-holding-hand fa-fade fa-3x"
+            style="color: #e00600"
+          ></i>
+          <h4>Trending Courses</h4>
+          <p>Lorem Ipsum has been the industry’s when an unknown printerit</p>
+        </div>
+      </div>
+
+      <div class="rectangle">
+        <div class="items">
+          <i class="fa-solid fa-book fa-fade fa-3x" style="color: #e00600"> </i>
+          <h4>Trending Courses</h4>
+          <p>Lorem Ipsum has been the industry’s when an unknown printerit</p>
+        </div>
+      </div>
+      <div class="rectangle">
+        <div class="items">
+          <i
+            class="fa-sharp fa-solid fa-chalkboard-user fa-fade fa-3x"
+            style="color: #e00600"
+          ></i>
+          <h4>Trending Courses</h4>
+          <p>Lorem Ipsum has been the industry’s when an unknown printerit</p>
+        </div>
+      </div>
+      <div class="rectangle">
+        <div class="items">
+          <i
+            class="fa-solid fa-certificate fa-fade fa-3x"
+            style="color: #e00600"
+          ></i>
+          <h4>Trending Courses</h4>
+          <p>Lorem Ipsum has been the industry’s when an unknown printerit</p>
+        </div>
+      </div>
+    </section>
+
+    <!--todo Section  AboutUS -->
+    <section class="about">
+      <h2><span class="tit"> AboutUS</span></h2>
+      <div class="boot">
+        <img src="../assets/images/college students.gif" alt="" />
+        <div>
+          <h4>Welcome to EWlearn</h4>
+          <p>
+            Placeholder content for this accordion, which is intended to
+            demonstrate the <code>.accordion-flush</code> class. This is the
+            first item's accordion body.
+          </p>
+          <div class="accordion">
+            <div class="accordion accordion-flush" id="accordionFlushExample">
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingOne">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseOne"
+                    aria-expanded="false"
+                    aria-controls="flush-collapseOne"
+                  >
+                    Accordion Item #1
+                  </button>
+                </h2>
+                <div
+                  id="flush-collapseOne"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="flush-headingOne"
+                  data-bs-parent="#accordionFlushExample"
+                >
+                  <div class="accordion-body">
+                    Placeholder content for this accordion, which is intended to
+                    demonstrate the <code>.accordion-flush</code> class. This is
+                    the first item's accordion body.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingTwo">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseTwo"
+                    aria-expanded="false"
+                    aria-controls="flush-collapseTwo"
+                  >
+                    Accordion Item #2
+                  </button>
+                </h2>
+                <div
+                  id="flush-collapseTwo"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="flush-headingTwo"
+                  data-bs-parent="#accordionFlushExample"
+                >
+                  <div class="accordion-body">
+                    Placeholder content for this accordion, which is intended to
+                    demonstrate the <code>.accordion-flush</code> class. This is
+                    the second item's accordion body. Let's imagine this being
+                    filled with some actual content.
+                  </div>
+                </div>
+              </div>
+              <div class="accordion-item">
+                <h2 class="accordion-header" id="flush-headingThree">
+                  <button
+                    class="accordion-button collapsed"
+                    type="button"
+                    data-bs-toggle="collapse"
+                    data-bs-target="#flush-collapseThree"
+                    aria-expanded="false"
+                    aria-controls="flush-collapseThree"
+                  >
+                    Accordion Item #3
+                  </button>
+                </h2>
+                <div
+                  id="flush-collapseThree"
+                  class="accordion-collapse collapse"
+                  aria-labelledby="flush-headingThree"
+                  data-bs-parent="#accordionFlushExample"
+                >
+                  <div class="accordion-body">
+                    Placeholder content for this accordion, which is intended to
+                    demonstrate the <code>.accordion-flush</code> class. This is
+                    the third item's accordion body. Nothing more exciting
+                    happening here in terms of content, but just filling up the
+                    space to make it look, at least at first glance, a bit more
+                    representative of how this would look in a real-world
+                    application.
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- todo section cards of courses -->
+    <section class="container_course">
+      <h2><span class="tit"> Courses</span></h2>
+      <p class="dsec">
+        Lorem ipsum, dolor sit amet consectetur adipisicing elit. A earum minima
+        adipisci voluptatem.
+      </p>
+      <div class="card_container swiper">
+        <div class="card_contant">
+          <div class="swiper-wrapper">
+            <article class="card_article swiper-slide">
+              <div class="card_image">
+                <img
+                  src="../assets/images/course1.png"
+                  alt="image"
+                  class="card-img"
+                />
+                <div class="card_shadow"></div>
+              </div>
+              <div class="card_data">
+                <h3 class="card_name">Java Learn</h3>
+                <p class="card_description">
+                  Nothing more exciting happening here in terms of content, but
+                  just filling up the space to make it look, at least at first
+                  glance
+                </p>
+                <a href="./courses.html" class="card_button">View More</a>
+              </div>
+            </article>
+
+            <article class="card_article swiper-slide">
+              <div class="card_image">
+                <img
+                  src="../assets/images/course2.png"
+                  alt="image"
+                  class="card-img"
+                />
+                <div class="card_shadow"></div>
+              </div>
+              <div class="card_data">
+                <h3 class="card_name">Web Programming</h3>
+                <p class="card_description">
+                  Nothing more exciting happening here in terms of content, but
+                  just filling up the space to make it look, at least at first
+                  glance
+                </p>
+                <a href="./courses.html" class="card_button">View More</a>
+              </div>
+            </article>
+
+            <article class="card_article swiper-slide">
+              <div class="card_image">
+                <img
+                  src="../assets/images/course3.png"
+                  alt="image"
+                  class="card-img"
+                />
+                <div class="card_shadow"></div>
+              </div>
+              <div class="card_data">
+                <h3 class="card_name">English Course</h3>
+                <p class="card_description">
+                  Nothing more exciting happening here in terms of content, but
+                  just filling up the space to make it look, at least at first
+                  glance
+                </p>
+                <a href="./courses.html" class="card_button">View More</a>
+              </div>
+            </article>
+            <article class="card_article swiper-slide">
+              <div class="card_image">
+                <img
+                  src="../assets/images/course4.png"
+                  alt="image"
+                  class="card-img"
+                />
+                <div class="card_shadow"></div>
+              </div>
+              <div class="card_data">
+                <h3 class="card_name">Math300 Course</h3>
+                <p class="card_description">
+                  Nothing more exciting happening here in terms of content, but
+                  just filling up the space to make it look, at least at first
+                  glance
+                </p>
+                <a href="#" class="card_button">View More</a>
+              </div>
+            </article>
+            <article class="card_article swiper-slide">
+              <div class="card_image">
+                <img
+                  src="../assets/images/course3.png"
+                  alt="image"
+                  class="card-img"
+                />
+                <div class="card_shadow"></div>
+              </div>
+              <div class="card_data">
+                <h3 class="card_name">Network Security</h3>
+                <p class="card_description">
+                  Nothing more exciting happening here in terms of content, but
+                  just filling up the space to make it look, at least at first
+                  glance
+                </p>
+                <a href="./courses.html" class="card_button">View More</a>
+              </div>
+            </article>
+          </div>
+        </div>
+        <!-- navigation buttons -->
+        <div class="swiper-button-prev">
+          <!-- <i class="fa-solid fa-arrow-left fa-shake fa-2xl"></i> -->
+        </div>
+        <div class="swiper-button-next">
+          <!-- <i class="fa-solid fa-arrow-right fa-shake fa-2xl"></i> -->
+        </div>
+        <!-- pagination -->
+        <div class="swiper-pagination"></div>
+      </div>
+    </section>
+
+    <!--todo section ACHIEVEMENTS -->
+    <section class="achievements-section">
+      <div class="left-content">
+        <div class="title">ACHIEVEMENTS</div>
+        <div class="description">
+          A wonderful serenity has taken possession of my entire soul, like
+          these sweet mornings of spring which I enjoy with my whole heart like
+          mine.
+        </div>
+        <div class="image-border">
+          <img src="../assets/images/Seminar.gif" alt="Achievements Image" />
+        </div>
+      </div>
+
+      <div class="right-content">
+        <div class="count-box">
+          <div class="count-number">50</div>
+          <div class="count-label">Teachers</div>
+        </div>
+        <div class="count-box">
+          <div class="count-number">100</div>
+          <div class="count-label">Courses</div>
+        </div>
+        <div class="count-box">
+          <div class="count-number">500</div>
+          <div class="count-label">Students</div>
+        </div>
+        <div class="count-box">
+          <div class="count-number">1000</div>
+          <div class="count-label">Clients</div>
+        </div>
+      </div>
+    </section>
+
+    <!--todo section events  -->
+    <section class="blog-section">
+      <div class="section-content blog">
+        <div class="title">
+          <h2><span class="tit">Events</span></h2>
+          <p>
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Laboriosam
+            placeat neque quae quam.
+          </p>
+        </div>
+        <div class="cards">
+          <div class="card">
+            <div class="image-section">
+              <img src="../assets/images/events2.png" alt="image Events" />
+              <div class="article">
+                <h4>Title One</h4>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo
+                  quos explicabo dolorum modi hic est ipsam, molestias eos iste
+                  magnam vel quas! Eveniet eum excepturi, esse consequatur vel
+                  cum quidem?
+                </p>
+              </div>
+              <div class="blog-view">
+                <a href="../pages/Events.html" class="button">Read More</a>
+              </div>
+              <div class="posted-date">
+                <p>
+                  <i class="fa-solid fa-calendar-days"></i>Posted on jan 15 2023
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="image-section">
+              <img src="../assets/images/events3.png" alt="image Events" />
+              <div class="article">
+                <h4>Title Two</h4>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo
+                  quos explicabo dolorum modi hic est ipsam, molestias eos iste
+                  magnam vel quas! Eveniet eum excepturi, esse consequatur vel
+                  cum quidem?
+                </p>
+              </div>
+              <div class="blog-view">
+                <a href="../pages/Events.html" class="button">Read More</a>
+              </div>
+
+              <div class="posted-date">
+                <p>
+                  <i class="fa-solid fa-calendar-days"></i>Posted on jan 15 2023
+                </p>
+              </div>
+            </div>
+          </div>
+          <div class="card">
+            <div class="image-section">
+              <img src="../assets/images/events1.png" alt="image Events" />
+              <div class="article">
+                <h4>Title Three</h4>
+                <p>
+                  Lorem ipsum dolor sit amet consectetur, adipisicing elit. Quo
+                  quos explicabo dolorum modi hic est ipsam, molestias eos iste
+                  magnam vel quas! Eveniet eum excepturi, esse consequatur vel
+                  cum quidem?
+                </p>
+              </div>
+              <div class="blog-view">
+                <a href="../pages/Events.html" class="button">Read More</a>
+              </div>
+              <div class="posted-date">
+                <p>
+                  <i class="fa-solid fa-calendar-days"></i>Posted on jan 15 2023
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- todo our team -->
+    <section id="team" class="team section-bg">
+      <div class="container" data-aos="fade-up">
+        <div class="section-tilte">
+          <h2><span>Our Team</span></h2>
+          <p>
+            Lorem ipsum, dolor sit amet consectetur adipisicing elit. A earum
+            minima adipisci voluptatem.
+          </p>
+        </div>
+        <div class="row" id="teamMembersContainer">
+          <!-- ! member 1 -->
+          <!-- <div class="col-lg-3 col-md-6 d-flex align-items-stretch">
+            <div class="member" data-aos="fade-up" data-aos-delay="100">
+              <div class="member-img">
+                <div class="image">
+                  <img src="../assets/images/member2.jpg" alt="member1" />
+                </div>
+                <div class="social">
+                  <a href=""><i class="fa-brands fa-twitter"></i></a>
+                  <a href=""><i class="fa-brands fa-facebook"></i></a>
+                  <a href=""><i class="fa-brands fa-linkedin"></i></a>
+                  <a href=""><i class="fa-brands fa-youtube"></i></a>
+                </div>
+              </div>
+
+              <div class="member-info">
+                <h4>Roza White</h4>
+                <span>Web Developer</span>
+              </div>
+            </div>
+          </div> -->
+          <!-- Team members will be added here dynamically -->
+        </div>
+      </div>
+    </section>
+
+    <!--todo Include the footer -->
+    <div id="footer-container"></div>
+    <script>
+      $("#footer-container").load("Footer.html");
+    </script>
+    <!-- Bootstrap JavaScript and dependencies -->
+    <script src="../javascript/dashboard/staff.js"></script>
+    <script
+      12
+      src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.8/dist/umd/popper.min.js"
+      integrity="sha384-I7E8VVD/ismYTF4hNIPjVp/Zjvgyol6VFvRkX/vR+Vc4jQkC+hVqc2pM8ODewa9r"
+      crossorigin="anonymous"
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.min.js"
+      integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
+      crossorigin="anonymous"
+    ></script>
+
+    <script src="../assets/swiper-bundle.min.js"></script>
+    <script src="../javascript/home.js"></script>
+  </body>
+</html>

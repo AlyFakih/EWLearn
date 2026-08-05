@@ -1,0 +1,28 @@
+# IDE
+.vscode/
+
+# XAMPP temporary files
+*.log
+
+# Uploads
+uploads/
+
+# Environment files
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Composer dependencies
+backend/vendor/
+
+# VS Code history/cache
+.history/
+
+# All VS Code extension files
+**/.history/
+
+# Temporary files
+*.tmp
+*.bak

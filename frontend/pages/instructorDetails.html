@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- <link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css"> -->
+    <title>EWlearn</title>
+    <!-- Include Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <!-- Include Font Awesome CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      integrity="sha512-xxx"
+      crossorigin="anonymous"
+    />
+    <!-- Include Animate.css link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+      integrity="sha512-xxx"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+    <link
+      rel="stylesheet"
+      href="../styles/instructors/instructorsDetails.css"
+    />
+  </head>
+  <body class="w3-light-grey">
+    <!--todo Include the navigation bar -->
+    <div id="navbar-container"></div>
+    <script>
+      $("#navbar-container").load("./navbar.html");
+    </script>
+
+    <!-- Page Container -->
+    <div class="container-fluid mt-3">
+      <!-- The Grid -->
+      <div class="row">
+        <!-- Left Column -->
+        <div class="col-md-4 leftbox">
+          <div class="card text-grey">
+            <div class="position-relative">
+              <img
+                src="../assets/images/member3.png"
+                class="img-fluid"
+                style="width: 100%"
+                alt="Avatar"
+              />
+              <div
+                class="position-absolute bottom-0 start-0 container text-black"
+              >
+                <h2>Jane Doe</h2>
+              </div>
+            </div>
+            <div class="container info">
+              <p>
+                <i class="fa fa-briefcase fa-fw me-2 large text-teal"></i
+                >Designer
+              </p>
+              <p>
+                <i class="fa fa-home fa-fw me-2 large text-teal"></i>London, UK
+              </p>
+              <p>
+                <i class="fa fa-envelope fa-fw me-2 large text-teal"></i
+                >ex@mail.com
+              </p>
+              <p>
+                <i class="fa fa-phone fa-fw me-2 large text-teal"></i>1224435534
+              </p>
+              <hr />
+
+              <p class="large">
+                <b><i class="fa fa-asterisk fa-fw me-2 text-teal"></i>Skills</b>
+              </p>
+              <p>Adobe Photoshop</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 90%"
+                  aria-valuenow="90"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  90%
+                </div>
+              </div>
+              <p>Photography</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 80%"
+                  aria-valuenow="80"
+                  aria-valuemin="0"
+                  course-body
+                  aria-valuemax="100"
+                >
+                  80%
+                </div>
+              </div>
+              <p>Illustrator</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 75%"
+                  aria-valuenow="75"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  75%
+                </div>
+              </div>
+              <p>Media</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 50%"
+                  aria-valuenow="50"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                >
+                  50%
+                </div>
+              </div>
+              <br />
+
+              <p class="large text-theme">
+                <b><i class="fa fa-globe fa-fw me-2 text-teal"></i>Languages</b>
+              </p>
+              <p>English</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 100%"
+                  aria-valuenow="100"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <p>Spanish</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 55%"
+                  aria-valuenow="55"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <p>German</p>
+              <div class="progress">
+                <div
+                  class="progress-bar bg-danger progress-bar-striped progress-bar-animated bg-teal"
+                  role="progressbar"
+                  style="width: 25%"
+                  aria-valuenow="25"
+                  aria-valuemin="0"
+                  aria-valuemax="100"
+                ></div>
+              </div>
+              <br />
+            </div>
+          </div>
+          <br />
+
+          <!-- End Left Column -->
+        </div>
+
+        <!-- Right Column -->
+        <div class="col-md-8 rightbox">
+          <div class="card mb-3">
+            <h2 class="text-grey padding-16">
+              <i class="fa fa-suitcase me-2 xxlarge text-teal"></i>Work
+              Experience
+            </h2>
+            <div class="container">
+              <h5 class="opacity">
+                <b>Front End Developer</b>
+              </h5>
+              <h6 class="text-teal">
+                <i class="fa fa-calendar me-2"></i>Jan 2015 -
+                <span class="badge bg-teal rounded">Current</span>
+              </h6>
+              <p>
+                Lorem ipsum dolor sit amet. Praesentium magnam consectetur vel
+                in deserunt aspernatur est reprehenderit sunt hic. Nulla tempora
+                soluta ea et odio, unde doloremque repellendus iure, iste.
+              </p>
+              <hr />
+            </div>
+            <div class="container">
+              <h5 class="opacity"><b>Web Developer </b></h5>
+              <h6 class="text-teal">
+                <i class="fa fa-calendar me-2"></i>Mar 2012 - Dec 2014
+              </h6>
+              <p>
+                Consectetur adipisicing elit. Praesentium magnam consectetur vel
+                in deserunt aspernatur est reprehenderit sunt hic. Nulla tempora
+                soluta ea et odio, unde doloremque repellendus iure, iste.
+              </p>
+              <hr />
+            </div>
+            <div class="container">
+              <h5 class="opacity">
+                <b>Graphic Designer</b>
+               
+              </h5>
+              <h6 class="text-teal">
+                <i class="fa fa-calendar me-2"></i>Jun 2010 - Mar 2012
+              </h6>
+              <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</p>
+              <br />
+            </div>
+          </div>
+
+          <div class="card">
+            <h2 class="text-grey padding-16">
+              <i class="fa fa-certificate me-2 xxlarge text-teal"></i>Courses
+            </h2>
+            <div class="row">
+              <div class="col-md-3">
+                <!-- Instructor Card 1 -->
+                <div class="instructor-card">
+                  <div class="instructor-image">
+                    <img
+                      src="../assets/images/course1.png"
+                      alt="courseimg"
+                    />
+                  </div>
+                  <p>Web Advanced</p>
+                  <p><i class="fa-solid fa-people-group fa-lg" style="color: #ffffff;margin-right: 5px;"></i>12 Students</p>
+                  <button class="btn">View</button>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <!-- Instructor Card 2 -->
+                <div class="instructor-card">
+                  <div class="instructor-image">
+                    <img
+                      src="../assets/images/course2.png"
+                      alt="courseimg"
+                    />
+                  </div>
+                  <p>Computer Engineering</p>
+                  <p><i class="fa-solid fa-people-group fa-lg" style="color: #ffffff;margin-right: 5px;"></i>10 Students</p>
+                  <button class="btn">View</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- End Right Column -->
+        </div>
+      </div>
+    </div>
+
+    <!--todo Menu Responsive -->
+    <div class="dropdown_menu">
+      <a href="../index/Home.html"><i class="fas fa-home"></i>Home</a>
+      <a href="#about"><i class="fas fa-info-circle"></i>About</a>
+      <a href="#courses"><i class="fas fa-book"></i>Courses</a>
+      <a href="../index/Instructor.html"
+        ><i class="fas fa-chalkboard-teacher"></i>Instructors</a
+      >
+      <a href="#events"><i class="fas fa-calendar-alt"></i>Events</a>
+      <a href="#contact"><i class="fas fa-envelope"></i>Contact</a>
+      <a href="#contact" class="search"
+        ><i class="fa-solid fa-magnifying-glass"></i
+      ></a>
+    </div>
+    <!-- Include the footer -->
+    <div id="footer-container"></div>
+    <script>
+      $("#footer-container").load("Footer.html");
+    </script>
+  </body>
+</html>

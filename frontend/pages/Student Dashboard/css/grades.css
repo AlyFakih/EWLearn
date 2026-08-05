@@ -1,0 +1,265 @@
+/* Grades Page Styles */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
+}
+
+.header h1 {
+    color: #810000;
+    margin: 0;
+    font-size: 24px;
+}
+
+.filter-container select {
+    padding: 8px 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 5px;
+    font-size: 14px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.filter-container select:focus {
+    border-color: #810000;
+    box-shadow: 0 0 5px rgba(129, 0, 0, 0.2);
+}
+
+/* Grades Summary */
+.grades-summary {
+    display: flex;
+    gap: 30px;
+    margin-bottom: 30px;
+}
+
+.summary-card {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+}
+
+.summary-card.overall {
+    display: flex;
+    gap: 20px;
+    width: 250px;
+    flex-shrink: 0;
+}
+
+.summary-info {
+    flex: 1;
+}
+
+.chart-container {
+    width: 100px;
+    height: 100px;
+    position: relative;
+}
+
+.courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    flex: 1;
+}
+
+.summary-card h3 {
+    margin-top: 0;
+    margin-bottom: 15px;
+    color: #363949;
+    font-size: 16px;
+}
+
+.grade-display {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+.grade-letter {
+    font-size: 36px;
+    font-weight: bold;
+    color: #810000;
+}
+
+.grade-percent {
+    font-size: 18px;
+    color: #363949;
+}
+
+.grade-points {
+    color: #7d8da1;
+    font-size: 14px;
+    margin-bottom: 10px;
+}
+
+.progress-container {
+    height: 8px;
+    background-color: #f1f1f1;
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: #810000;
+    border-radius: 4px;
+}
+
+.no-grades {
+    grid-column: 1 / -1;
+    padding: 30px;
+    text-align: center;
+    color: #7d8da1;
+    font-style: italic;
+}
+
+/* Detailed Grades */
+.detailed-grades {
+    margin-bottom: 30px;
+}
+
+.course-grades {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.course-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background-color: #f9f9f9;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.course-header h3 {
+    margin: 0;
+    color: #363949;
+    font-size: 18px;
+}
+
+.course-grade {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.course-grade .grade-letter {
+    font-size: 24px;
+}
+
+.course-grade .grade-percent {
+    font-size: 16px;
+}
+
+.grades-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.grades-table th,
+.grades-table td {
+    padding: 15px 20px;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.grades-table th {
+    font-weight: bold;
+    color: #363949;
+}
+
+.grades-table tr:last-child td {
+    border-bottom: none;
+}
+
+.assignment-name a {
+    color: #810000;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.assignment-name a:hover {
+    text-decoration: underline;
+}
+
+.score-display {
+    display: flex;
+    flex-direction: column;
+}
+
+.score-percent {
+    font-size: 12px;
+    color: #7d8da1;
+    margin-top: 3px;
+}
+
+/* No grades state */
+.no-detailed-grades {
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    padding: 40px 20px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 48px;
+    color: #e0e0e0;
+    margin-bottom: 15px;
+}
+
+.no-detailed-grades h3 {
+    color: #363949;
+    margin: 0 0 10px 0;
+}
+
+.no-detailed-grades p {
+    color: #7d8da1;
+    margin: 0;
+    max-width: 500px;
+    margin: 0 auto;
+}
+
+/* Responsive design */
+@media screen and (max-width: 768px) {
+    .grades-summary {
+        flex-direction: column;
+    }
+    
+    .summary-card.overall {
+        width: 100%;
+    }
+    
+    .header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .filter-container {
+        width: 100%;
+        margin-top: 15px;
+    }
+    
+    .filter-container select {
+        width: 100%;
+    }
+    
+    .grades-table {
+        min-width: 600px;
+    }
+    
+    .course-grades {
+        overflow-x: auto;
+    }
+}

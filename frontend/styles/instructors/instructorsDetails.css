@@ -1,0 +1,62 @@
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+.info {
+  margin-top: 10px;
+}
+.container .progress {
+  height: 20px;
+}
+.container .bg-teal {
+  font-size: 15px;
+  font-weight: 600;
+}
+.container-fluid .card {
+  box-shadow: 2px 4px 4px 4px rgba(0, 0, 0, 0.2);
+
+  border: 1px solid red;
+}
+.container-fluid .card:hover {
+  transform: scale(1.01);
+}
+.rightbox .text-teal {
+  margin: 12px;
+}
+.instructor-card {
+  background-color: #000000;
+  padding: 30px;
+  border-radius: 30px;
+  color: white;
+  text-align: center;
+  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-right: 10px; /* Adjust the right margin for spacing */
+  margin-left: 10px; /* Adjust the left margin for spacing */
+}
+
+.instructor-image {
+  width: 100%;
+  height: 100%;
+  border-radius: 10px;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.instructor-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.btn {
+  background-color: #ff0000 !important;
+  font-weight: 600;
+}
+.btn:hover {
+  transform: scaleX(1.1);
+}

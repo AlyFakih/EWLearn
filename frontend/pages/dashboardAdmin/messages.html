@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="../../styles/DashBoards/messages.css" />
+  </head>
+  <body>
+    <!-- <div class="title-info">
+      <p>Message</p>
+      <i class="fa-solid fa-bell"></i>
+    </div> -->
+    <div id="boxNotifi"></div>
+    <script>
+      $("#boxNotifi").each(function () {
+        $(this).load("./NotifiAdmin.html");
+      });
+    </script>
+
+    <div class="container conMessage">
+      <div class="message-card">
+        <div class="logo-img">
+          <img
+            src="../../assets/images/ph-student-fill.png"
+            alt="logo-img"
+            width="150px"
+          />
+        </div>
+        <div class="title">
+          <h1>Email Users</h1>
+        </div>
+        <form class="formMessage" action="" method="post">
+          <div class="Choose">
+            <select name="role" class="selectRole">
+              <option value="allUsers">All Users</option>
+              <option value="student">Student</option>
+              <option value="instructor">Instructor</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+            </select>
+            <input
+              type="text"
+              name="search"
+              id="search"
+              placeholder="Search"
+              autocomplete="off"
+            />
+          </div>
+          <div class="twotype">
+            <div class="chooseEmail">
+              <h3>Choose Email To Send Message:</h3>
+              <select
+                name="selectedEmails[]"
+                id="selectedEmails"
+                multiple
+                required
+              >
+                <!-- Options will be added dynamically using JavaScript -->
+              </select>
+            </div>
+
+            <div class="allInputs">
+              <!-- <input
+                type="email"
+                name="email"
+                id="email"
+                placeholder="Email"
+                autocomplete="off"
+                required
+              /> -->
+              <input
+                type="text"
+                name="subject"
+                id="subject"
+                placeholder="Subject"
+                autocomplete="off"
+                required
+              />
+              <textarea
+                name="message"
+                id="message"
+                cols="30"
+                rows="4"
+                placeholder="Send A Message"
+                autocomplete="off"
+              ></textarea>
+              <button id="send">Send Message</button>
+              <p style="text-align: center" id="sendMessgeEmail"></p>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+    <script src="https://smtpjs.com/v3/smtp.js"></script>
+    <script src="../../javascript/dashboard/messages.js"></script>
+  </body>
+</html>

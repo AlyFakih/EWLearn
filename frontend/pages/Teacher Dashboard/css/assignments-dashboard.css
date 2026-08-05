@@ -1,0 +1,421 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background-color: #001;
+    display: flex;
+}
+
+.container {
+    display: flex;
+}
+
+/*-------------------------
+    Profile Section begin
+---------------------------*/
+.profilee {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    width: 300px;
+}
+
+.profilee .top {
+    display: flex;
+    align-items: left;
+    gap: 15px;
+    margin-left: 0px;
+    margin-top: 10px;
+}
+
+.profilee .top .profilee-photo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 3px solid whitesmoke;
+    margin-left: 0px;
+}
+
+.profilee .top img {
+    width: 100%;
+    border-radius: 50%;
+    overflow: hidden;
+}
+
+.profilee .top .para-detials p b {
+    color: #810000;
+}
+
+.profilee .top .para-detials .text-muted {
+    color: gray;
+    margin-left: 10px;
+}
+
+.profilee p {
+    font-size: 15px;
+    margin: 0;
+}
+
+/*-------------------------
+    Profile Section end
+---------------------------*/
+
+/*-------------------------
+    About Section begin
+---------------------------*/
+
+/*-------------------------------
+ Doctor's onLeave Section starts
+---------------------------------*/
+.doctor-leave-announcements {
+    border: 4px solid #810000;
+    border-radius: 10px;
+    padding-left: 10px;
+    width: 250px;
+    height: 450px;
+}
+
+.announcements {
+    display: flex;
+    flex-direction: column;
+}
+
+.doctor-leave-announcements .message {
+    flex-grow: 1;
+    margin-bottom: 15px;
+}
+
+.doctor-leave-announcements .message-container {
+    display: flex;
+    align-items: center;
+}
+
+img {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.doctor-leave-announcements h4 {
+    margin-top: 0.9rem;
+    margin-bottom: 1.2rem;
+    color: #810000;
+    text-align: left;
+}
+
+.doctor-leave-announcements .message p {
+    gap: 1rem;
+    line-height: 1.5;
+    padding: 0.5rem 0;
+    color: #810000;
+}
+
+.doctor-leave-announcements .message .text-muted {
+    color: #888;
+    display: block;
+    text-align: center;
+    margin-top: 5px;
+}
+
+/*-------------------------
+    about Section ends
+---------------------------*/
+/*teachers section begin */
+.main .main-top h1 {
+    margin-top: 10px;
+}
+
+.main .main-top h1 i {
+    margin-right: 5px;
+    color: #810000;
+}
+
+.main-course {
+    margin-top: 20px;
+    text-transform: capitalize;
+}
+
+
+
+
+
+/* Attendance list Section starts */
+
+.attendance {
+    margin-top: 20px;
+    margin-bottom: 20px;
+    text-transform: capitalize;
+    margin-right: 25px;
+}
+
+.attendance-list {
+    width: 100%;
+    padding: 10px;
+    margin-top: 10px;
+    background-color: #810000;
+    border-radius: 10px;
+    box-shadow: 0 20px 35px rgb(0, 0, 0, 0.1);
+}
+
+/* text and the add button section*/
+.cont {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.customButton button {
+    color: gray;
+    font-size: 18px;
+    font-weight: bold;
+    padding: 5px;
+    border-top: 0;
+    border-bottom: 0;
+    border-right: 4px solid gray;
+    border-left: 4px solid gray;
+    border-radius: 10px;
+    
+}
+
+.customButton button i {
+    margin-left: 5px;
+    font-size: 14px;
+    color: gray;
+    font-weight: bold;
+}
+
+.attendance-list .cont .customButton button:hover {
+    background: #810000;
+    color: #fff;
+    transition: 0.5s ease-in-out;
+}
+/* text and the add button section ends*/
+
+.table-attend {
+    border-collapse: collapse;
+    margin: 25px 0;
+    font-size: 15px;
+    width: 700px;
+    overflow: hidden;
+    height: 300px;
+    border-radius: 10px 10px 0 0;
+}
+
+.table-attend thead tr {
+    color: whitesmoke;
+    background: black;
+    text-align: left;
+    font-weight: bold;
+}
+
+.table-attend th,
+.table-attend td {
+    padding: 5px 10px;
+}
+
+.table-attend tbody tr {
+    border-bottom: 1px solid gray;
+}
+
+.table-attend tbody tr:nth-of-type(even) {
+    background-color: gray;
+}
+
+.table-attend tbody tr.active {
+    font-weight: bold;
+    color: purple;
+}
+
+.table-attend tbody:last-of-type {
+    border-bottom: 2px solid gray;
+}
+
+
+
+.table-attend button {
+    padding: 6px 10px;
+    border-radius: 10px;
+    cursor: pointer;
+    background: transparent;
+   
+    border-radius: 10px;
+}
+
+.table-attend button:hover {
+    background: black;
+    color: #fff;
+    transition: 0.5rem;
+}
+
+.option {
+    background-color: #001;
+}
+/* Attendance List section ends*/
+
+.table-attend .edit{
+    border: 0px;
+}
+
+/* Style for the delete button */
+.cancel,
+.save,
+.edit,
+.del {
+    
+    border-top: 0;
+    border-left: 0;
+    border-right: 0;
+    border-bottom: 0;
+    border: none;
+}
+
+/* Style for all icons inside buttons */
+
+.save i,
+.cancel i{
+    color: #fff; /* White text color for icons */
+}
+
+.edit i{
+  color: darkblue;
+}
+
+.del i {
+    color: #001; /* White text color for icons */
+}
+.del:hover {
+    background-color: gray; /* Gray color on hover */
+    color: gray;
+}
+
+
+
+/*---------------------------------------------
+   Add a new row Section starts 
+------------------------------------------------*/
+.modal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: darkgray;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #001;
+}
+
+#addModal {
+    display: none;
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px;
+    background-color: darkgray;
+    z-index: 1000;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#addModal h2 {
+    margin-bottom: 10px;
+    text-align: center;
+    color: #001;
+}
+
+/* Classes for the divs inside the form */
+.first,
+.second {
+    margin-bottom: 15px;
+}
+
+/* Form styles */
+#addForm {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+#addForm label {
+    font-weight: bold;
+    grid-column: span 2;
+    color: #810000; /* Updated color */
+}
+
+#addForm input,
+#addForm select {
+    width: 100%;
+    padding: 8px;
+    box-sizing: border-box;
+    margin-top: 5px;
+    border: 4px solid #001;
+    border-radius: 2px 20px 2px 20px;
+    text-align: center;
+    color: #001;
+}
+
+#addForm select option {
+    background-color: #001;
+    color: #810000; /* Updated color */
+}
+
+#addForm .buttons {
+    grid-column: span 2;
+    display: flex;
+    justify-content: center;
+}
+
+#addForm button {
+    background-color: #4caf50;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+#addForm button:hover {
+    background-color: #45a049;
+}
+
+/* Close button styles */
+#addModal button[type="button"] {
+    background-color: #f44336;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+#addModal button[type="button"]:hover {
+    background-color: #123;
+}
+
+/*---------------------------------------------
+   Add a new row Section ends 
+------------------------------------------------*/

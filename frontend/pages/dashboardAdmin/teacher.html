@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>teacher</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+      integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA=="
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+    <!-- <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"
+    /> -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+
+    <link rel="stylesheet" href="../../styles/DashBoards/teacher.css" />
+  </head>
+  <body>
+    <!-- <div class="title-info">
+      <p>Instructor</p>
+      <i class="fa-solid fa-bell"></i>
+    </div> -->
+    <div id="boxNotifi"></div>
+    <script>
+      $("#boxNotifi").load("./NotifiAdmin.html");
+    </script>
+    <!-- ! the add form  -->
+    <div id="id01" class="modal">
+      <form id="addInstructorForm" class="modal-content animate" method="post">
+        <div class="imgcontainer">
+          <h1>ADD Instructor</h1>
+          <span
+            onclick="document.getElementById('id01').style.display='none'"
+            class="close"
+            title="Close Modal"
+            >&times;</span
+          >
+        </div>
+
+        <div class="container contadd">
+          <div class="form-row">
+            <input type="text" name="full_name" placeholder="Full Name" />
+            <select name="blood" class="selectRole">
+              <option value="">Choose Blood Type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <input type="email" name="email" placeholder="Email" />
+            <input type="tel" name="phone_number" placeholder="Phone Number" />
+          </div>
+          <div class="form-row">
+            <select name="role" class="selectRole">
+              <option value="instructor">Instructor</option>
+              <option value="student">Student</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+            </select>
+            <input type="text" name="country" placeholder="Country" />
+          </div>
+          <div class="form-row">
+            <input type="password" name="password" placeholder="Password" />
+            <input
+              type="password"
+              name="confirm_password"
+              placeholder="Confirm Password"
+            />
+          </div>
+
+          <div class="gender">
+            <input type="radio" name="gender" id="male" value="male" />
+            <label for="male">Male</label>
+
+            <input type="radio" name="gender" id="female" value="female" />
+            <label for="female">Female</label>
+          </div>
+
+          <div class="sub-button">
+            <input type="submit" value="Add Instructor" />
+            <p id="messageResult" style="color: red; margin-top: 10px"></p>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- ! End  the add form  -->
+
+    <!-- ! the update form   -->
+    <div id="id02" class="modal">
+      <form
+        id="updateUserForm"
+        class="modal-content animate"
+        action=""
+        method="post"
+      >
+        <div class="imgcontainer">
+          <h1>Update Instructor Details</h1>
+          <span
+            onclick="document.getElementById('id02').style.display='none'"
+            class="close"
+            title="Close Modal"
+            >&times;</span
+          >
+        </div>
+
+        <div class="container contadd">
+          <div class="form-row">
+            <input
+              type="text"
+              name="full_name"
+              id="FullName"
+              placeholder="Full Name"
+            />
+            <select name="blood" id="BloodType" class="selectRole">
+              <option value="">Choose Blood Type</option>
+              <option value="A+">A+</option>
+              <option value="A-">A-</option>
+              <option value="B+">B+</option>
+              <option value="B-">B-</option>
+              <option value="AB+">AB+</option>
+              <option value="AB-">AB-</option>
+              <option value="O+">O+</option>
+              <option value="O-">O-</option>
+            </select>
+          </div>
+
+          <div class="form-row">
+            <input type="email" name="email" id="Email" placeholder="Email" />
+            <input
+              type="tel"
+              name="phone_number"
+              id="PhoneNumber"
+              placeholder="Phone Number"
+            />
+          </div>
+          <div class="form-row">
+            <select name="role" id="Role" class="selectRole">
+              <option value="instructor">Instructor</option>
+              <option value="student">Student</option>
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
+            </select>
+            <input
+              type="text"
+              name="country"
+              id="Country"
+              placeholder="Country"
+            />
+          </div>
+
+          <div class="sub-button">
+            <input type="submit" value="Update Details" />
+            <p id="updateUserMessage" style="color: red; margin-top: 10px"></p>
+          </div>
+        </div>
+      </form>
+    </div>
+    <!-- ! end update form  -->
+    <div class="table">
+      <section class="table__header">
+        <h1>Instructors</h1>
+        <div class="input-group">
+          <input
+            type="search"
+            id="searchinstructor"
+            placeholder="Search Data..."
+          />
+          <i
+            class="fa-solid fa-magnifying-glass fa-lg"
+            style="color: #000000"
+          ></i>
+        </div>
+        <button
+          class="log"
+          onclick="document.getElementById('id01').style.display='block'"
+        >
+          ADD
+        </button>
+      </section>
+
+      <section class="table__body">
+        <table>
+          <thead>
+            <tr>
+              <th>Id <span class="icon-arrow">&UpArrow;</span></th>
+              <th>Name<span class="icon-arrow">&UpArrow;</span></th>
+              <th>Gmail <span class="icon-arrow">&UpArrow;</span></th>
+              <th>Number <span class="icon-arrow">&UpArrow;</span></th>
+              <th>Country <span class="icon-arrow">&UpArrow;</span></th>
+              <th>Action <span class="icon-arrow">&UpArrow;</span></th>
+            </tr>
+          </thead>
+
+          <tbody id="instructorTableBody">
+            <!-- ! message --------------- -->
+            <div
+              id="no-cards-message"
+              style="
+                display: none;
+                text-align: center;
+                font-size: 25px;
+                color: white;
+              "
+              class="color-animation"
+            >
+              This Instructor Not Found
+            </div>
+          </tbody>
+        </table>
+      </section>
+    </div>
+
+    <!--  ! Choose Ins Course -->
+    <section class="container InsCourse">
+      <h1 style="text-align: center; margin-bottom: 20px">
+        Choose A Course To Instructor
+      </h1>
+      <form id="addTeamMemberForm" class="addEvent">
+        <div class="formChoose">
+          <select id="instructorName" name="instructorName">
+            <!-- Options will be added dynamically using JavaScript -->
+          </select>
+
+          <select id="courseName" name="courseName">
+            <!-- Options will be added dynamically using JavaScript -->
+          </select>
+          <button type="button" onclick="addCourseMember()">Choose</button>
+        </div>
+        <div class="formChoose">
+          <!-- Add the select input for team member names -->
+          <select id="instructorCourses" name="instructorCourses">
+            <!-- Options will be added dynamically using JavaScript -->
+          </select>
+          <div>
+            <!-- Add the Delete button -->
+            <button type="button" onclick="updateDetails()">Update</button>
+            <button type="button" onclick="deletedetials()">Delete</button>
+          </div>
+        </div>
+      </form>
+      <div id="successMessage"></div>
+    </section>
+
+    <!-- !  000000000 -->
+    <script src="../../javascript/dashboard/teacher.js"></script>
+  </body>
+</html>

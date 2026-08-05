@@ -1,0 +1,275 @@
+* {
+  margin: 0;
+  padding: 0;
+  /* font-family: "Courier New", Courier, monospace; */
+}
+
+body {
+  height: 100%;
+  /* background-color: #222222; */
+}
+
+.container2 {
+  width: 100%;
+  height: 100%;
+  margin: 3% auto;
+  background-color: #222222;
+}
+
+.ui {
+  border: 0;
+  box-shadow: 0 0 10´x 0 rgba(255, 0, 0, 0.5);
+  border-radius: 10px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 10%;
+  display: flex;
+  gap: 20px;
+  background-color: #000000;
+}
+
+.container-left {
+  width: 40%;
+}
+
+.container-right {
+  width: 60%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.card {
+  width: 360px !important;
+  height: 230px !important;
+  margin: 0 auto;
+  background-color: #ff0000 !important;
+  border: 1px solid rgb(255, 255, 255) !important;
+  border-radius: 15px !important;
+}
+
+.intern {
+  padding: 20px !important;
+
+  position: absolute !important;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.approximation {
+  width: 30px;
+  transform: rotate(90deg);
+}
+
+.chip {
+  position: absolute;
+  top: 20px;
+  left: 100px;
+  height: 40px;
+
+  bottom: 20px;
+}
+
+.card-number {
+  margin-top: 40px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: white;
+  display: flex;
+}
+
+.card-holder {
+  color: whitesmoke;
+}
+
+.card label {
+  font-size: 0.7rem;
+}
+
+.card-infos {
+  display: flex;
+  width: 40%;
+  justify-content: space-between;
+  color: white;
+}
+
+#credit-card {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  font-size: 1.1rem;
+  color: white;
+  text-transform: uppercase;
+}
+
+.number-container,
+.name-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.expiration-container,
+.cvv-container {
+  width: 100%;
+}
+
+input#valid-thru-text,
+input#cvv-text {
+  width: 90%;
+}
+input#cvv-text {
+  margin-left: 20px;
+}
+input {
+  border: 0;
+  border-radius: 5px;
+  padding: 10px;
+  /* background-color: #333333; */
+  color: #000000;
+  font-weight: 600;
+  font-size: 1.1rem;
+  outline: 0;
+  width: 100%;
+}
+
+input[type="text"]:focus {
+  border: 1px solid #95b8d1;
+}
+
+input[type="submit"] {
+  width: 100%;
+  background-color: #ff0000e7;
+  color: rgb(0, 0, 0);
+  cursor: pointer;
+  margin-top: 20px;
+}
+
+.infos-container {
+  display: flex;
+}
+
+@media (max-width: 1024px) {
+  .ui {
+    flex-direction: column-reverse;
+  }
+
+  .container-left,
+  .container-right {
+    width: 100%;
+  }
+}
+/* Add custom styles for instructor cards and dropdown */
+/* Add custom styles for instructor cards and spacing */
+.instructor-card {
+  background-color: #000000;
+  padding: 30px;
+  border-radius: 30px;
+  color: white;
+  text-align: center;
+  margin-bottom: 50px;
+  margin-top: 20px;
+  margin-right: 10px; /* Adjust the right margin for spacing */
+  margin-left: 10px; /* Adjust the left margin for spacing */
+}
+
+.instructor-image {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  margin: 0 auto 10px;
+}
+
+.instructor-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Styles for the dropdown */
+.dropdown {
+  display: inline-block;
+  margin-left: 15px;
+}
+.btn {
+  background-color: #ff0000 !important;
+  font-weight: 600;
+  margin: 5px;
+}
+.btn:hover {
+  transform: scaleX(1.1);
+}
+
+.course-details {
+  margin-top: 100px;
+}
+.course-details ul li {
+  font-weight: 800;
+  font-size: larger;
+  margin-top: 10px;
+}
+input#add:hover {
+ border: 2px solid white;
+  color: white;
+}
+.dropdown-menu .dropdown-item.active {
+  background-color: red; /* Replace with your desired color */
+  color: white; /* Replace with your desired text color */
+}
+.dropdown-menu {
+  background-color: #200000 !important;
+}
+@media (max-width: 767px) {
+  .dropdown-menu {
+    max-width: none; /* Allow the width to adjust based on content */
+    width: auto;
+    height: auto;
+  }
+}
+
+/*  !table */
+table {
+  width: 100%;
+  border-radius: 8px;
+  background-color: #d6d6d6;
+}
+
+table,
+th,
+td {
+  border-collapse: collapse;
+  padding: 1rem;
+  text-align: left;
+}
+
+thead th {
+  position: sticky;
+  top: 0;
+  left: 0;
+  background-color: #000000d8;
+  cursor: pointer;
+  text-transform: capitalize;
+  color: white;
+  font-size: 20px;
+}
+
+tbody tr:nth-child(even) {
+  background-color: #0000000b;
+}
+
+tbody tr {
+  --delay: 0.1s;
+  transition: 0.5s ease-in-out var(--delay), background-color 0s;
+}
+
+tbody tr:hover {
+  background-color: rgba(41, 41, 41, 0.582) !important;
+}
+
+tbody tr td {
+  transition: 0.2s ease-in-out;
+  font-size: 18px;
+  letter-spacing: 1px;
+}

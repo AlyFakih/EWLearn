@@ -1,0 +1,70 @@
+.container {
+ width: 50%;
+  align-items: center;
+  text-align: center;
+ margin: auto;
+  padding: 50px;
+  color: white;
+  justify-content: center;
+  background-color: #202020;
+  border-radius: 10px;
+  margin-top: 50px;
+}
+.addEvent input {
+  width: 100%;
+  padding: 12px 20px;
+  margin: 8px 5px;
+  display: inline-block;
+  border: 2px solid #ff0000;
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #000;
+  font-size: 20px;
+  font-weight: 700;
+}
+.addEvent input[type="file"]{
+  color: white;
+}
+.addEvent button{
+    padding: 14px;
+    border: 2px solid white;
+    border-radius: 10px;
+    background-color: #ff0000;
+    font-size: 15px;
+    font-weight: 500;
+    margin: 15px;
+}
+.addEvent button:hover{
+    color: #ff0000;
+  border: 2px solid rgb(255, 0, 0);
+  background-color: black;
+  transform: scale(1.1);
+  transition: 0.5s;
+}
+
+.addEvent select {
+  width: 80%;
+  padding: 12px 20px !important;
+  height: 50px;
+  margin: 8px 5px;
+  display: inline-block;
+  border: 2px solid #ff0000;
+  border-radius: 10px;
+  box-sizing: border-box;
+  color: #000;
+  font-size: 20px;
+  font-weight: 700;
+}
+.addEvent select {
+  color: #ffffff;
+  background-color: #333333;
+  appearance: none;
+}
+.addEvent select option {
+  color: #ffffff;
+  margin: 40px !important;
+}
+
+.addEvent select option:checked {
+  background-color: #ff0000 !important;
+}

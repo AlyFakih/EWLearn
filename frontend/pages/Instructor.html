@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EWlearn</title>
+    <!-- Include Bootstrap CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
+      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
+      crossorigin="anonymous"
+    />
+    <!-- Include Font Awesome CSS link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+      integrity="sha512-xxx"
+      crossorigin="anonymous"
+    />
+
+    <!-- Include Animate.css link -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+      integrity="sha512-xxx"
+      crossorigin="anonymous"
+    />
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <link rel="stylesheet" href="../styles/instructors/instructor.css" />
+    <link rel="stylesheet" href="../styles/Home/home.css" />
+  </head>
+  <body>
+    <!-- Include the navigation bar -->
+    <div id="navbar-container"></div>
+    <script>
+      $("#navbar-container").load("./navbar.html");
+    </script>
+    <!-- todo Welcome Image -->
+    <div id="welcome"></div>
+    <script>
+      $("#welcome").load("./WelcomeImages.html");
+    </script>
+    <!-- todo Welcome Image -->
+    <!-- <div class="WelcomeImage">
+      <div class="container-fluid bg-primary py-5 hero-header-about mb-3">
+        <div class="row py-3">
+          <div class="col-12 text-center">
+            <h1 class="display-3 text-white animated aboutus">Welcome</h1>
+            <a href="../index/Home.html" class="h4 text-white word"> Home </a>
+            <i class="far fa-circle text-white px-2"></i>
+            <a href="../index/Instructor.html" class="h4 text-white word">
+              Instructor
+            </a>
+          </div>
+        </div>
+      </div>
+    </div> -->
+    <!-- Todo title page -->
+    <div class="intro">
+      <h2>
+        <span>Instructor Cards</span>
+      </h2>
+      <h4>
+        Lorem ipsum dolor sit amet consectetur adipisicing elit. Odit tenetur
+        cupiditate eius ratione autem fugit minima, itaque obcaecati nemo facere
+        doloremque iste ullam quaerat repudiandae totam quo dolorem saepe. Hic!
+      </h4>
+    </div>
+
+    <!--todo Search Bar start -->
+    <div class="search-bar">
+      <!-- Dropdown start -->
+      <div class="dropdown">
+        <div id="drop-text" class="dropdown-text">
+          <span id="span">Everything</span>
+          <i id="icon" class="fa-solid fa-chevron-down"></i>
+        </div>
+        <ul id="list" class="dropdown-list">
+          <li class="dropdown-list-item" data-value="Everything">Everything</li>
+          <li class="dropdown-list-item" data-value="Web Development">
+            Web Development
+          </li>
+          <li class="dropdown-list-item" data-value="Web Designer">
+            Web Designer
+          </li>
+          <li class="dropdown-list-item" data-value="CEO & Founder">
+            CEO & Founder
+          </li>
+          <li class="dropdown-list-item" data-value="UI/UX Designer">
+            PUI/UX Designer
+          </li>
+          <li class="dropdown-list-item" data-value="Software">Software</li>
+        </ul>
+      </div>
+      <!-- Dropdown ends -->
+
+      <!-- Search box input start -->
+      <div class="search-box">
+        <input type="text" id="search-input" placeholder="Search anything..." />
+        <i class="fa-solid fa-magnifying-glass"></i>
+      </div>
+      <!-- Search box input ends -->
+    </div>
+    <!-- todo  cards intructors -->
+    <section class="container instcard">
+      <div class="no-cards-message" style="display: none">
+        No matching cards found.
+      </div>
+      <div
+        class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"
+        id="instructorCards"
+      >
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member3.png" alt="John" />
+            <h1 class="namein">John Doe</h1>
+            <p class="inf">Web Development</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 2 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p>
+              <a href="./instructorDetails.html"
+                ><button>View Profile</button></a
+              >
+            </p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member4.png" alt="John" />
+            <h1 class="namein">John Doe</h1>
+            <p class="inf">Web Designer</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 6 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member1.jpg" alt="John" />
+            <h1 class="namein">John Doe</h1>
+            <p class="inf">CEO & Founder</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 1 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member2.jpg" alt="John" />
+            <h1 class="namein">John Doe</h1>
+            <p class="inf">UI/UX Designer</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 5 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member3.png" alt="John" />
+            <h1 class="namein">Ahmad Ray</h1>
+            <p class="inf">Software</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 0 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member3.png" alt="John" />
+            <h1 class="namein">John Doe</h1>
+            <p class="inf">Enginnering</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 9 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member3.png" alt="John" />
+            <h1 class="namein">Ali Mallah</h1>
+            <p class="inf">CEO & Founder</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 10 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+        <div class="col">
+          <div class="card">
+            <img src="../assets/images/member4.png" alt="John" />
+            <h1 class="namein">Zeinab Doe</h1>
+            <p class="inf">Web Designer</p>
+            <p class="infocourse">
+              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 6 Courses
+            </p>
+            <div class="shareinfo" style="margin: 24px 0">
+              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
+              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
+              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
+              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
+            </div>
+            <p><button>View Profile</button></p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!--todo Menu Responsive -->
+    <div class="dropdown_menu">
+      <a href="../index/Home.html"><i class="fas fa-home"></i>Home</a>
+      <a href="#about"><i class="fas fa-info-circle"></i>About</a>
+      <a href="#courses"><i class="fas fa-book"></i>Courses</a>
+      <a href="../index/Instructor.html"
+        ><i class="fas fa-chalkboard-teacher"></i>Instructors</a
+      >
+      <a href="#events"><i class="fas fa-calendar-alt"></i>Events</a>
+      <a href="#contact"><i class="fas fa-envelope"></i>Contact</a>
+      <a href="#contact" class="search"
+        ><i class="fa-solid fa-magnifying-glass"></i
+      ></a>
+    </div>
+    <!-- Include the footer -->
+    <div id="footer-container"></div>
+    <script>
+      $("#footer-container").load("Footer.html");
+    </script>
+    <!-- Include jQuery and Bootstrap JS scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script
+      src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
+      integrity="sha384-JjSmVgydDPzHIthvhm75L8/kjjgB4Yb6JnyRnHxMGnNQ9Il/5UJ4Jn5+5IdXJpuG"
+      crossorigin="anonymous"
+    ></script>
+    <script src="../javascript/instructor.js"></script>
+  </body>
+</html>

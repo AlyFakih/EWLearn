@@ -1,0 +1,549 @@
+* {
+    margin: 0;
+    padding: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    color: white;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  
+  body {
+    background-color: #001;
+    display: flex;
+  }
+
+main {
+  position: relative;
+  margin-top: 0.2rem;
+}
+
+
+.title {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px;
+}
+
+.title h1 i{
+  color: #810000;
+  margin-right: 4px;
+}
+
+.title button {
+  padding: 7px;
+  background-color: #810000;
+  color: white;
+  font-size: 18px;
+  font-weight: bold;
+  text-align: center;
+  width: 80px;
+  border-radius: 10px 5px;
+}
+
+main .subjects{
+  padding: 10px;
+}
+
+main .subjects > div {
+  flex: 0 0 auto; /* Disable flex grow and shrink */
+    position: relative;
+    border: 4px solid whitesmoke;
+    width: 300px;
+    margin: 10px;
+    background-color: #810000;
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px;
+    box-shadow: 0 20px 35px rgba(0, 0, 0, 0.1);
+
+}
+
+
+main .subjects h4 {
+  margin: 1rem 0 0.3rem;
+  font-size: 15px;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+main .subjects p{
+  font-size: 16px;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  text-align: center;
+}
+
+main h2 {
+  text-align: left;
+  margin-left: 20px;
+}
+
+main .subjects .progress img{
+  position: relative;
+  width: 89px;
+  height: 89px;
+  border-radius: 50%;
+  margin: auto;
+}
+
+main .subjects small {
+  padding: 5px;
+    border-radius: 10px;
+    background-color: gray;
+    margin-bottom: 0.6rem;
+}
+
+main .subjects button{
+  margin-top: 15px;
+  width: 50%;
+  background-color: gray;
+  padding: 5px;
+  border-top: 0;
+  border-bottom: 0;
+  border-right: 4px solid whitesmoke;
+  border-left: 4px solid whitesmoke;
+  border-radius: 10px;
+}
+
+/* Popup */
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 10px;
+  background-color: white;
+  border: 1px solid #ccc;
+  z-index: 1;
+  width: 500px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.popup .close {
+  font-weight: bold;
+  font-size: 29px;
+  margin-top: 5px;
+  margin-bottom: 9px;
+  cursor: pointer;
+  color: #810000;
+}
+
+.popup h3 {
+  margin-bottom: 8px;
+}
+
+#popup {
+  background-color: #001;
+  color: #fff;
+  text-align: center;
+  padding: 20px;
+}
+
+#cardForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-gap: 10px;
+  align-items: center;
+}
+
+label {
+  color: #810000;
+  margin-bottom: 5px;
+}
+
+select,
+input {
+  color: #810000;
+  padding: 5px;
+  background-color: #810000;
+  border: none;
+  color: #fff;
+  text-align: center;
+  font-weight: bold;
+  border-radius: 10px;
+}
+
+/* Card Form Button */
+button {
+  grid-column: span 2;
+  background-color: #810000;
+  color: #fff;
+  padding: 10px;
+  border: none;
+  cursor: pointer;
+  border-radius: 15px 30px;
+}
+
+button:hover {
+  background-color: #d32f2f;
+}
+
+/* Card Form Ends */
+
+/* Card Form Popup */
+.card-form {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #001;
+  padding: 20px;
+  border: 1px solid #ccc;
+  width: 400px;
+  margin-left: 20%;
+  margin-right: 20%;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.card-form h3 {
+  text-align: center;
+  margin-bottom: 10px;
+  color: whitesmoke;
+}
+
+.card-form .form-design {
+  margin-bottom: 15px;
+}
+
+.card-form label {
+  color: whitesmoke;
+  font-size: 18px;
+  font-weight: bold;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.card-form input,
+.card-form select {
+  width: calc(100% - 20px);
+  box-sizing: border-box;
+  padding: 8px;
+  margin-top: 5px;
+}
+
+.card-form .button-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.card-form button:first-child {
+  margin: auto;
+}
+
+.card-form button:last-child {
+  margin: auto;
+}
+
+/* Delete Card */
+.subjects {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.eg {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px;
+  position: relative;
+  width: 150px;
+}
+
+.eg.selected {
+  border: 3px solid red;
+  background-color: #ffe6e6;
+  box-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
+.eg .delete-overlay {
+  position: absolute;
+  top: 0;
+  right: 0;
+  background: rgba(255, 0, 0, 0.7);
+  padding: 5px;
+  cursor: pointer;
+}
+
+  
+/*------------------------------
+  cards section ends
+--------------------------------*/
+
+/*-------------------------------
+  Table Section starts
+---------------------------------*/
+/* Attendance list Section starts */
+
+.attendance {
+  margin-top: 10px;
+  margin-left: 10px;
+  margin-bottom: 20px;
+  text-transform: capitalize;
+  margin-right: 25px;
+  width: 100%;
+}
+
+.attendance-list {
+  width: 100%;
+  padding: 10px;
+  margin-top: 10px;
+  background-color: #810000;
+  border-radius: 10px;
+  box-shadow: 0 20px 35px rgb(0, 0, 0, 0.1);
+}
+
+/* text and the add button section*/
+.cont {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.customButton button {
+  color: gray;
+  font-size: 18px;
+  font-weight: bold;
+  padding: 5px;
+  border-top: 0;
+  border-bottom: 0;
+  border-right: 4px solid gray;
+  border-left: 4px solid gray;
+  border-radius: 10px;
+}
+
+.customButton button i {
+  margin-left: 5px;
+  font-size: 14px;
+  color: gray;
+  font-weight: bold;
+}
+
+.attendance-list .cont .customButton button:hover {
+  background: #810000;
+  color: #fff;
+  transition: 0.5s ease-in-out;
+}
+
+/* text and the add button section ends*/
+
+.table-attend {
+  border-collapse: collapse;
+  margin: 25px 0;
+  font-size: 15px;
+  width: 700px;
+  overflow: hidden;
+  height: 300px;
+  border-radius: 10px 10px 0 0;
+  width: 100%;
+}
+
+.table-attend thead tr {
+  color: whitesmoke;
+  background: black;
+  text-align: left;
+  font-weight: bold;
+}
+
+.table-attend th,
+.table-attend td {
+  padding: 5px 10px;
+}
+
+.table-attend tbody tr {
+  border-bottom: 1px solid gray;
+}
+
+.table-attend tbody tr:nth-of-type(even) {
+  background-color: gray;
+}
+
+.table-attend tbody tr.active {
+  font-weight: bold;
+  color: purple;
+}
+
+.table-attend tbody:last-of-type {
+  border-bottom: 2px solid gray;
+}
+
+.table-attend button {
+  padding: 6px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  background: transparent;
+
+  border-radius: 10px;
+}
+
+.table-attend button:hover {
+  background: black;
+  color: #fff;
+  transition: 0.5rem;
+}
+
+.option {
+  background-color: #001;
+}
+
+/* Attendance List section ends*/
+
+.table-attend .edit {
+  border: 0px;
+}
+
+/* Style for the delete button */
+.cancel,
+.save,
+.edit,
+.del {
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border-bottom: 0;
+  border: none;
+}
+
+/* Style for all icons inside buttons */
+
+.save i,
+.cancel i {
+  color: #fff;
+  /* White text color for icons */
+}
+
+.edit i {
+  color: darkblue;
+}
+
+.del i {
+  color: #001;
+  /* White text color for icons */
+}
+
+.del:hover {
+  background-color: gray;
+  /* Gray color on hover */
+  color: gray;
+}
+
+/*---------------------------------------------
+   Add a new row Section starts 
+------------------------------------------------*/
+.modal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: darkgray;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+.modal h2 {
+  margin-bottom: 10px;
+  text-align: center;
+  color: #001;
+}
+
+#addModal {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 20px;
+  background-color: darkgray;
+  z-index: 1000;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+}
+
+#addModal h2 {
+  margin-bottom: 10px;
+  text-align: center;
+  color: #001;
+}
+
+/* Classes for the divs inside the form */
+.first,
+.second {
+  margin-bottom: 15px;
+}
+
+/* Form styles */
+#addForm {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+}
+
+#addForm label {
+  font-weight: bold;
+  grid-column: span 2;
+  color: #810000;
+  /* Updated color */
+}
+
+#addForm input,
+#addForm select {
+  width: 100%;
+  padding: 8px;
+  box-sizing: border-box;
+  margin-top: 5px;
+  border: 4px solid #001;
+  border-radius: 2px 20px 2px 20px;
+  text-align: center;
+  color: #001;
+}
+
+#addForm select option {
+  background-color: #001;
+  color: #810000;
+  /* Updated color */
+}
+
+#addForm .buttons {
+  grid-column: span 2;
+  display: flex;
+  justify-content: center;
+}
+
+#addForm button {
+  background-color: #4caf50;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  margin-right: 10px;
+}
+
+#addForm button:hover {
+  background-color: #45a049;
+}
+
+/* Close button styles */
+#addModal button[type="button"] {
+  background-color: #f44336;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  cursor: pointer;
+  margin-top: 10px;
+}
+
+#addModal button[type="button"]:hover {
+  background-color: #123;
+}

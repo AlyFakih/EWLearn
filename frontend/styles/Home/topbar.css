@@ -1,0 +1,74 @@
+body {
+  width: 100%;
+}
+* {
+  margin: 0;
+  padding: 0;
+}
+:root {
+  --white-color: #ffffff;
+  --red-color: #ff0000;
+  --text-color: #979797;
+  --black-color: #111111;
+  --less-black: #1d1919;
+  --dark-red: #810000;
+}
+.topbar {
+  box-sizing: border-box;
+  padding: 0.5rem 10rem 0.5rem 10rem;
+  justify-content: space-between;
+  display: flex;
+  align-items: center;
+  background-color: #111111;
+  color: #ffffff;
+}
+.topbar p {
+  font-size: larger;
+  margin-top: 18px;
+  text-align: center;
+}
+.left-section {
+  display: flex;
+  align-items: center;
+}
+.left-section i,
+.right-section i {
+  margin-right: 10px; /* Adjust the value to control the spacing between icons */
+}
+.left-section i {
+  color: var(--red-color);
+}
+
+.right-section a {
+  color: var(--red-color);
+  font-weight: bold;
+  text-decoration: none;
+}
+.right-section {
+  color: var(--text-color);
+}
+.right-section i:hover {
+  color: var(--red-color);
+  transform: scale(1.3, 1.3);
+}
+
+.right-section {
+  display: flex;
+  align-items: center;
+}
+.right-section p {
+  margin-left: 10px;
+}
+.right-section a:hover {
+  color: var(--white-color);
+}
+.right-section p:hover {
+  /* transform: rotate(10deg); */
+  transform: scale(1.09);
+  color: var(--white-color);
+}
+@media (max-width: 576px) {
+  .topbar {
+    padding: 1rem 2rem 1rem 2rem;
+  }
+}
