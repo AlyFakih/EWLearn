@@ -4,7 +4,7 @@ require_once "dbcontroller.php";
 require_once "../../common/notifications.php";
 
 // Check if user is logged in and is a teacher (role = 1)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
     $response = array('success' => false, 'message' => 'Unauthorized access');
     echo json_encode($response);
     exit();

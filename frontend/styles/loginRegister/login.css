@@ -19,7 +19,8 @@ body {
   width: 100%;
 
   min-height: 100vh;
-  overflow: hidden;
+  overflow-y: auto;
+  overflow-x: hidden;
 }
 
 .forms-container {
@@ -209,6 +210,8 @@ form {
   display: grid;
   grid-template-columns: 1fr;
   z-index: 6;
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .image {
@@ -224,11 +227,11 @@ form {
   left: 0;
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  z-index: 3;
+  z-index: 8;
   pointer-events: none;
 }
 
-.panels {
+.panel {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -248,7 +251,6 @@ form {
 .panel .content {
   color: #ffffff;
   transition: 0.9s ease-in-out;
-  pointer-events: all;
 }
 
 .panel h3 {
@@ -260,6 +262,10 @@ form {
 .panel p {
   font-size: 0.95rem;
   padding: 0.7rem 0;
+}
+
+#sign-up-button, #sign-in-button {
+  pointer-events: all;
 }
 
 .btn.transparent {
@@ -302,7 +308,6 @@ form {
 /* !!=----------------- */
 form.sign-in-form {
   z-index: 7;
-  margin-left: 700px;
   position: relative;
 }
 
@@ -503,4 +508,55 @@ form.sign-up-form {
   top: 50%;
   transform: translateY(-50%);
   cursor: pointer;
+}
+
+/* Safety fix: ensure all signup fields (not just email) receive clicks/typing */
+.input-fields input,
+.input-fields select {
+  pointer-events: all !important;
+  position: relative !important;
+  z-index: 20 !important;
+}
+
+/* Fix: panels were blocking form input in sign-up mode. Only the toggle buttons need clicks. */
+.panels-container,
+.panel,
+.left-panel,
+.right-panel {
+  pointer-events: none !important;
+}
+#sign-up-button,
+#sign-in-button {
+  pointer-events: all !important;
+}
+
+/* Fix: blood type select was covered by social-text paragraph below it */
+.slet select {
+  position: relative !important;
+  z-index: 20 !important;
+  pointer-events: all !important;
+}
+
+/* Fix: .gender wrapper had no stacking context, so select's z-index wasn't being honored */
+.gender,
+.slet {
+  position: relative !important;
+  z-index: 25 !important;
+}
+
+/* Fix: invisible (opacity:0) form was still intercepting clicks on the visible form beneath it */
+.container:not(.sign-up-mode) form.sign-up-form {
+  pointer-events: none !important;
+}
+.container.sign-up-mode form.sign-in-form {
+  pointer-events: none !important;
+}
+
+/* Fix: .signin-signup wrapper (not just its form) was still catching clicks in sign-up mode */
+.container.sign-up-mode .signin-signup {
+  pointer-events: none !important;
+}
+.container.sign-up-mode .signup-signup {
+  pointer-events: all !important;
+  z-index: 10 !important;
 }

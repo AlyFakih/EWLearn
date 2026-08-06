@@ -1,6 +1,6 @@
 // ! chart 1 :
 
-const ctx = document.getElementById("lineChart");
+var ctx = document.getElementById("lineChart");
 
 new Chart(ctx, {
   type: "line",
@@ -37,7 +37,7 @@ new Chart(ctx, {
 });
 
 // ! chart 2 :
-const ctxd = document.getElementById("doughnut");
+var ctxd = document.getElementById("doughnut");
 
 new Chart(ctxd, {
   type: "doughnut",

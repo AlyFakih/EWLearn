@@ -21,7 +21,7 @@ if (isset($_POST["newstudentID"])) {
     echo '<tr>';
     echo '<td data-id="student_id">' . $newstudentID . '</td>';
     // Get student name from users table
-    $student_sql = "SELECT fullName FROM users WHERE id = '$newstudentID' AND role = 0";
+    $student_sql = "SELECT fullName FROM users WHERE id = '$newstudentID' AND role = 'student'";
     $student_result = $db_handle->readData($student_sql);
     $studentName = !empty($student_result) ? $student_result[0]['fullName'] : 'Unknown';
     echo '<td data-id="student_name">' . $studentName . '</td>';

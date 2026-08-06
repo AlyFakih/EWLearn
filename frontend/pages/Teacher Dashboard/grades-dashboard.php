@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Check if user is logged in and has teacher role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'instructor') {
     header("Location: ../../login.php");
     exit;
 }
@@ -24,7 +24,7 @@ $stmt = $conn->prepare(
     FROM
         course_grades cg
     JOIN users u ON cg.student_id = u.id
-    WHERE u.role = 0"
+    WHERE u.role = 'student'"
 );
 $stmt->execute();
 $result = $stmt->get_result();

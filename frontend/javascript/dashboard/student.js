@@ -1,7 +1,7 @@
 // !  Get the modal ADD and update
 
-let modal = document.getElementById("id01");
-let modalupdate = document.getElementById("id02");
+var modal = document.getElementById("id01");
+var modalupdate = document.getElementById("id02");
 
 // When the user clicks anywhere outside of any modal, close it
 window.onclick = function (event) {
@@ -91,9 +91,8 @@ $(document).ready(function () {
 });
 // !-------------get role students
 
-$(document).ready(function () {
-  // Fetch instructor data on page load
-  fetchstudentData();
+window.fetchstudentData = function () {
+  
   function fetchstudentData() {
     $.ajax({
       type: "GET",
@@ -117,7 +116,13 @@ $(document).ready(function () {
     });
   }
 
-  function displayStudents(students) {
+};
+
+$(document).ready(function () {
+  window.fetchstudentData();
+});
+
+function displayStudents(students) {
     // Get the table body element
     var tableBody = $("#studentTableBody");
 
@@ -229,15 +234,9 @@ function updateUserDetails(formData) {
         // }, 2000);
 
         // Optionally, update the displayed user details on the page
-        updateDisplayedUser(response.email, {
-          fullName: response.fullName,
-          blood: response.blood,
-          email: response.email,
-          mobile: response.mobile,
-          role: response.role,
-          country: response.country,
-        });
-      }
+        fetchStudentData();
+        document.getElementById("id02").style.display = "none";
+}
     },
     error: function (xhr, status, error) {
       // Display an error message

@@ -1,5 +1,4 @@
 // !   SEARCH
-// Add this line at the beginning to select the message element
 const noCardsMessage = $(".no-cards-message");
 
 let dropdownBtnText = document.getElementById("drop-text");
@@ -35,7 +34,65 @@ for (item of listItems) {
     }
   };
 }
-// Filter and Search Logic for Courses Page
+
+// Single unified filter function - combines search, category, and price
+function updateCards() {
+  const searchTerm = $("#search-input").val().toLowerCase();
+
+  const selectedCategoryEl = $(".dropdown-list-item.active");
+  const selectedCategory = selectedCategoryEl.length
+    ? selectedCategoryEl.data("value").toLowerCase()
+    : "everything";
+
+  const selectedPriceEl = $(".dropdown-list-price.active");
+  const selectedPriceRange = selectedPriceEl.length
+    ? selectedPriceEl.data("value").toLowerCase()
+    : "any price";
+
+  let anyMatches = false;
+
+  $(".course-item").each(function () {
+    const courseTitle = $(this).find(".course-title a").text().toLowerCase();
+    const courseCategory = $(this)
+      .find(".course-category a")
+      .text()
+      .toLowerCase();
+    const coursePriceText = $(this)
+      .find(".course-price")
+      .text()
+      .replace("$", "");
+    const coursePrice = parseFloat(coursePriceText);
+
+    const matchesSearch = courseTitle.includes(searchTerm);
+    const matchesCategory =
+      selectedCategory === "everything" ||
+      courseCategory.includes(selectedCategory);
+
+    let matchesPriceRange = true;
+    if (selectedPriceRange !== "any price") {
+      if (selectedPriceRange === "120+") {
+        matchesPriceRange = coursePrice >= 120;
+      } else {
+        const priceRangeValues = selectedPriceRange.split("-");
+        const minPrice = parseFloat(priceRangeValues[0]);
+        const maxPrice = parseFloat(priceRangeValues[1]);
+        matchesPriceRange = coursePrice >= minPrice && coursePrice <= maxPrice;
+      }
+    }
+
+    const cardMatchesCriteria =
+      matchesSearch && matchesCategory && matchesPriceRange;
+
+    $(this).toggle(cardMatchesCriteria);
+
+    if (cardMatchesCriteria) {
+      anyMatches = true;
+    }
+  });
+
+  noCardsMessage.toggle(!anyMatches);
+}
+
 $(document).ready(function () {
   $("#search-input").on("input", function () {
     updateCards();
@@ -47,42 +104,6 @@ $(document).ready(function () {
     updateCards();
   });
 
-  function updateCards() {
-    const searchTerm = $("#search-input").val().toLowerCase();
-    const selectedCategory = $(".dropdown-list-item.active")
-      .data("value")
-      .toLowerCase();
-
-    let anyMatches = false; // Flag to track if any cards match the criteria
-
-    $(".course-item").each(function () {
-      const courseTitle = $(this).find(".course-title a").text().toLowerCase();
-      const courseCategory = $(this)
-        .find(".course-category a")
-        .text()
-        .toLowerCase();
-
-      const matchesSearch = courseTitle.includes(searchTerm);
-      const matchesCategory =
-        selectedCategory === "everything" ||
-        courseCategory.includes(selectedCategory);
-
-      const cardMatchesCriteria = matchesSearch && matchesCategory;
-
-      $(this).toggle(cardMatchesCriteria);
-
-      if (cardMatchesCriteria) {
-        anyMatches = true; // At least one card matches the criteria
-      }
-    });
-
-    // Display or hide the message based on whether any matches were found
-    noCardsMessage.toggle(!anyMatches);
-  }
-});
-
-// Dropdown for Price
-$(document).ready(function () {
   $("#drop-text-price").on("click", function (e) {
     e.stopPropagation();
     $("#price-list").toggleClass("show");
@@ -105,49 +126,7 @@ $(document).ready(function () {
   $(".dropdown-list-price").on("click", function () {
     $(".dropdown-list-price").removeClass("active");
     $(this).addClass("active");
-    updateCards(); // Call the function to update the displayed cards when the price range changes
+    updateCards();
   });
 });
-
-// Modify the updateCards function to consider the price filter
-function updateCards() {
-  const selectedPriceRange = $(".dropdown-list-price.active")
-    .data("value")
-    .toLowerCase();
-
-  let anyMatches = false; // Flag to track if any cards match the criteria
-
-  $(".course-item").each(function () {
-    const coursePriceText = $(this)
-      .find(".course-price")
-      .text()
-      .replace("$", "");
-    const coursePrice = parseFloat(coursePriceText);
-    let matchesPriceRange = true;
-
-    if (selectedPriceRange !== "any price") {
-      const priceRangeValues = selectedPriceRange.split("-");
-      const minPrice = parseFloat(priceRangeValues[0]);
-      const maxPrice = parseFloat(priceRangeValues[1]);
-
-      if (selectedPriceRange === "120+") {
-        // Handle the "$120+" case separately
-        matchesPriceRange = coursePrice >= 120;
-      } else {
-        matchesPriceRange = coursePrice >= minPrice && coursePrice <= maxPrice;
-      }
-    }
-
-    const cardMatchesCriteria = matchesPriceRange;
-
-    $(this).toggle(cardMatchesCriteria);
-
-    if (cardMatchesCriteria) {
-      anyMatches = true; // At least one card matches the criteria
-    }
-  });
-
-  // Display or hide the message based on whether any matches were found
-  noCardsMessage.toggle(!anyMatches);
-}
 // ! finish

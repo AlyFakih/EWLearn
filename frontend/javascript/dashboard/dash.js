@@ -48,7 +48,28 @@ $(document).ready(function () {
       url: section + ".html",
       method: "GET",
       success: function (data) {
-        $("#dashboard-content").html(data); // Update the content of #dashboard-content
+        $("#dashboard-content").html(data);
+
+        const scripts = {
+          teacher: "../../javascript/dashboard/teacher.js",
+          students: "../../javascript/dashboard/student.js",
+          coursesAdmin: "../../javascript/dashboard/coursesadmin.js",
+          messages: "../../javascript/dashboard/messages.js",
+          staff: "../../javascript/dashboard/staff.js",
+          eventsAdmin: "../../javascript/dashboard/eventAdmin.js",
+          NotifiAdmin: "../../javascript/dashboard/NotifiAdmin.js",
+          dash: "../../javascript/dashboard/adminDash.js"
+        };
+
+        if (scripts[section]) {
+          $.getScript(scripts[section])
+            .done(function () {
+              console.log(section + " JavaScript loaded.");
+            })
+            .fail(function () {
+              console.error("Failed to load " + scripts[section]);
+            });
+        }
       },
 
       error: function () {
@@ -64,3 +85,95 @@ function removeLoginState() {
   // Remove other user-related information if needed
   // localStorage.removeItem("userRole");
 }
+
+
+// ===============================
+// ADMIN DASHBOARD GLOBAL REFRESH
+// ===============================
+
+window.fetchInstructorData = function () {
+
+    $.ajax({
+        url: "../../../backend/instructors.php",
+        method: "GET",
+        dataType: "json",
+        success: function(data){
+
+            if(Array.isArray(data)){
+
+                let table = $("#instructorTableBody");
+
+                if(table.length){
+                    table.empty();
+
+                    data.forEach(function(instructor){
+
+                        table.append(`
+                        <tr>
+                            <td>${instructor.id}</td>
+                            <td class="namein">${instructor.fullName}</td>
+                            <td class="emailin">${instructor.email}</td>
+                            <td>${instructor.mobile}</td>
+                            <td>${instructor.country}</td>
+                            <td>
+                                <button onclick='editInstructor("${instructor.email}")'>
+                                Edit
+                                </button>
+                            </td>
+                        </tr>
+                        `);
+
+                    });
+                }
+
+            }
+
+        }
+    });
+
+};
+
+
+
+window.fetchstudentData = function(){
+
+    $.ajax({
+
+        url:"../../../backend/dashStudent/getStudent.php",
+        method:"GET",
+        dataType:"json",
+
+        success:function(data){
+
+            if(Array.isArray(data)){
+
+                let table=$("#studentTableBody");
+
+                if(table.length){
+
+                    table.empty();
+
+                    data.forEach(function(student){
+
+                        table.append(`
+                        <tr>
+                            <td>${student.id}</td>
+                            <td class="namein">${student.fullName}</td>
+                            <td class="emailin">${student.email}</td>
+                            <td>${student.mobile}</td>
+                            <td>${student.country}</td>
+                        </tr>
+                        `);
+
+                    });
+
+                }
+
+            }
+
+        }
+
+    });
+
+};
+

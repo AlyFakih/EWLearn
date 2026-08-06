@@ -64,7 +64,7 @@ if (isset($_POST['student_id'])) {
     FROM
     course_grades cg
     JOIN users u ON cg.student_id = u.id
-    WHERE u.role = 0;";
+    WHERE u.role = 'student';";
     $allRows = $db_handle->readData($sql);
 }
 

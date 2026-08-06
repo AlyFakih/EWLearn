@@ -5,7 +5,7 @@ require_once "../common/file_handler.php";
 require_once "../common/notifications.php";
 
 // Check if user is logged in and is a student
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
     header("Location: ../../login.php");
     exit;
 }

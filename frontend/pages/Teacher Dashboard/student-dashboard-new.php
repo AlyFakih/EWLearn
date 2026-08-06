@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Check if user is logged in and has teacher role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'instructor') {
     header("Location: ../../login.php");
     exit;
 }
@@ -26,7 +26,7 @@ $stmt = $conn->prepare("
     FROM 
         users u 
     WHERE 
-        u.role = 0
+        u.role = 'student'
     ORDER BY 
         u.fullName
 ");

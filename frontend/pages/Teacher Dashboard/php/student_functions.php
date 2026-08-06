@@ -5,7 +5,7 @@ if (session_status() === PHP_SESSION_NONE) {
 }
 
 // Check if user is logged in and has teacher role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'instructor') {
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
     exit;
@@ -39,7 +39,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'get_all') {
         FROM 
             users u 
         WHERE 
-            u.role = 0
+            u.role = 'student'
         ORDER BY 
             u.fullName
     ");
@@ -72,7 +72,7 @@ if (isset($_GET['action']) && $_GET['action'] == 'view' && isset($_GET['id'])) {
         FROM 
             users u 
         WHERE 
-            u.id = ? AND u.role = 0
+            u.id = ? AND u.role = 'student'
     ");
     
     $stmt->bind_param("i", $student_id);
@@ -202,7 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['newstudentID'], $_POST
     
     // Insert new student
     $defaultPassword = password_hash("password123", PASSWORD_DEFAULT); // Default password
-    $role = 0; // Student role
+    $role = 'student'; // Student role
     
     $stmt = $conn->prepare("
         INSERT INTO users (
@@ -284,7 +284,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             email = ?, 
             mobile = ?, 
             country = ? 
-        WHERE id = ? AND role = 0
+        WHERE id = ? AND role = 'student'
     ");
     
     $stmt->bind_param("ssssi", $name, $email, $mobile, $country, $student_id);
@@ -301,7 +301,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
             FROM 
                 users u 
             WHERE 
-                u.role = 0
+                u.role = 'student'
             ORDER BY 
                 u.fullName
         ");
@@ -379,7 +379,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
         $stmt5->close();
         
         // Finally delete the student
-        $stmt6 = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 0");
+        $stmt6 = $conn->prepare("DELETE FROM users WHERE id = ? AND role = 'student'");
         $stmt6->bind_param("i", $student_id);
         $stmt6->execute();
         

@@ -1,4 +1,4 @@
-const form = document.querySelector("#credit-card");
+const form = document.querySelector("#payment-form");
 
 const cardNumber = document.querySelector("#card-number");
 const cardHolder = document.querySelector("#name-text");
@@ -12,7 +12,7 @@ const cardCVVText = document.querySelector(".cvv-vl");
 
 cardNumber.addEventListener("keyup", (e) => {
   if (!e.target.value) {
-    cardNumberText.innerText = "1234 5678 9101 1121";
+    cardNumberText.innerText = "";
   } else {
     const valuesOfInput = e.target.value.replaceAll(" ", "");
 
@@ -48,7 +48,7 @@ cardNumber.addEventListener("keyup", (e) => {
 
 cardHolder.addEventListener("keyup", (e) => {
   if (!e.target.value) {
-    cardHolderText.innerHTML = "NOAH JACOB";
+    cardHolderText.innerHTML = "";
   } else {
     cardHolderText.innerHTML = e.target.value.toUpperCase();
   }
@@ -56,7 +56,7 @@ cardHolder.addEventListener("keyup", (e) => {
 
 cardExpiration.addEventListener("keyup", (e) => {
   if (!e.target.value) {
-    cardExpirationText.innerHTML = "02/40";
+    cardExpirationText.innerHTML = "";
   } else {
     const valuesOfInput = e.target.value.replace("/", "");
 

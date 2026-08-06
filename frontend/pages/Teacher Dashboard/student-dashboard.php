@@ -4,7 +4,7 @@ $db_handle = new DBController();
 
 $sql = "SELECT u.id AS ID, u.fullName AS NAME, u.email AS EMAIL, u.mobile AS MOBILE, u.country AS COUNTRY
 FROM users u 
-WHERE u.role = 0";
+WHERE u.role = 'student'";
 $studentResult = $db_handle->readData($sql);
 ?>
 

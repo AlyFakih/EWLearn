@@ -7,7 +7,7 @@ $db_handle = new DBController();
 
 // Check if user is logged in and is a teacher
 session_start();
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
     echo json_encode([
         'success' => false,
         'message' => 'Access denied. Only teachers can access this functionality.'
@@ -336,7 +336,7 @@ function getAllGrades() {
             FROM
                 course_grades cg
             JOIN users u ON cg.student_id = u.id
-            WHERE u.role = 0"
+            WHERE u.role = 'student'"
         );
         
         $stmt->execute();

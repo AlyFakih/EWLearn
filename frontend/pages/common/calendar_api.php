@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $calendar_manager = new CalendarManager();
 $user_id = $_SESSION['user_id'];
-$isTeacher = isset($_SESSION['role']) && $_SESSION['role'] == 1;
+$isTeacher = isset($_SESSION['role']) && $_SESSION['role'] == 'instructor';
 
 // Handle different API actions
 $action = isset($_GET['action']) ? $_GET['action'] : '';

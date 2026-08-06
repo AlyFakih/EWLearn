@@ -1,8 +1,8 @@
 <?php
 class DBController {
-    private $host = "ali-fakih";
-    private $user = "AliFakih";
-    private $password = "***REMOVED***"; // Use the same password you set in config.php
+    private $host = "localhost";
+    private $user = "root";
+    private $password = ""; // Use the same password you set in config.php
     private $database = "student_management";
     private $conn;
     

@@ -2,8 +2,8 @@
 // Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 0)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) {
+// Check if the user is logged in and is a student (role = 'student')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
   // Redirect to login page if not logged in as student
   header("Location: ../loginRegister.html");
   exit();
@@ -15,7 +15,7 @@ $db_handle = new DBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
-$sql = "SELECT * FROM users WHERE id = $user_id AND role = 0";
+$sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
 

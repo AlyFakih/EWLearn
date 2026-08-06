@@ -2,8 +2,8 @@
 // Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 0)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) {
+// Check if the user is logged in and is a student (role = 'student')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
   echo json_encode([]);
   exit();
 }

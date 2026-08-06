@@ -17,8 +17,6 @@
 
 //   Email.send({
 //     Host: "smtp.gmail.com",
-//     Username: "***REMOVED***",
-//     Password: "***REMOVED***",
 //     To: "abbassmallah58@gmail.com",
 //     From: email,
 //     Subject: subject,

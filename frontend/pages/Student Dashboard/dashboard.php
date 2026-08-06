@@ -2,8 +2,8 @@
 // Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 0)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) {
+// Check if the user is logged in and is a student (role = 'student')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
   // Redirect to login page if not logged in as student
   header("Location: ../loginRegister.html");
   exit();
@@ -20,16 +20,16 @@ $calendar_manager = new CalendarManager();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
-$query = "SELECT * FROM users WHERE id = ? AND role = 0";
+$query = "SELECT * FROM users WHERE id = ? AND role = 'student'";
 $result = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 $student = $result[0];
 
 // Get enrolled courses
-$query = "SELECT c.id, c.courseTitle as name, c.description, c.image_path, t.full_name as instructor_name 
+$query = "SELECT c.id, c.courseTitle as name, c.description, c.image, u.fullName as instructor_name 
         FROM courses c 
-        JOIN studentcourse sc ON c.id = sc.course_id 
-        JOIN users t ON c.teacher_id = t.id
-        WHERE sc.student_id = ?";
+        JOIN studentcourse sc ON c.id = sc.courseID 
+        JOIN users u ON sc.userInstructorID = u.id
+        WHERE sc.userStudentID = ?";
 $courses = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 
 // Get upcoming events from calendar
@@ -60,7 +60,7 @@ $unread_count = $notification_manager->countUnreadNotifications($user_id);
         <div class="img-box">
           <img src="./images/profile.jpg" alt="profile image">
         </div>
-        <h2><?php echo $student['full_name']; ?></h2>
+        <h2><?php echo $student['fullName']; ?></h2>
       </li>
       <li>
         <a class="active" href="./dashboard.php">
@@ -111,7 +111,7 @@ $unread_count = $notification_manager->countUnreadNotifications($user_id);
   <section class="main">
     <!-- Welcome Header -->
     <div class="header">
-      <h1>Welcome, <?php echo $student['full_name']; ?></h1>
+      <h1>Welcome, <?php echo $student['fullName']; ?></h1>
       <div class="date">
         <p><?php echo date('l, F j, Y'); ?></p>
       </div>

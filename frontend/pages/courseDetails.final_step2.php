@@ -1,3 +1,143 @@
+<?php
+
+include "../../backend/config.php";
+
+
+if (!isset($_GET['id'])) {
+    die("Course ID is missing");
+}
+
+
+$courseID = intval($_GET['id']);
+
+
+// Get course
+
+$stmt = $conn->prepare(
+    "SELECT * FROM courses WHERE id=?"
+);
+
+$stmt->bind_param(
+    "i",
+    $courseID
+);
+
+$stmt->execute();
+
+$result = $stmt->get_result();
+
+
+if ($result->num_rows == 0) {
+    die("Course not found");
+}
+
+
+$course = $result->fetch_assoc();
+
+$courseTitle = $course['courseTitle'];
+
+$stmt->close();
+
+
+
+// Get course details
+
+$courseDetail = null;
+
+$stmt = $conn->prepare(
+    "SELECT * FROM coursedetails WHERE courseID=?"
+);
+
+$stmt->bind_param(
+    "s",
+    $courseTitle
+);
+
+$stmt->execute();
+
+
+$result = $stmt->get_result();
+
+
+if ($result->num_rows > 0) {
+
+    $courseDetail = $result->fetch_assoc();
+
+}
+
+$stmt->close();
+
+
+
+
+// Get chapters
+
+$chapters = [];
+
+
+$stmt = $conn->prepare(
+    "SELECT * FROM chapterdetails WHERE courseName=? ORDER BY chapter"
+);
+
+
+$stmt->bind_param(
+    "s",
+    $courseTitle
+);
+
+
+$stmt->execute();
+
+
+$result = $stmt->get_result();
+
+
+while($row = $result->fetch_assoc()) {
+
+    $chapters[] = $row;
+
+}
+
+
+$stmt->close();
+
+
+
+
+// Get instructors
+
+$instructors = [];
+
+
+$stmt = $conn->prepare(
+    "SELECT * FROM instructorcourse WHERE courseID=?"
+);
+
+
+$stmt->bind_param(
+    "s",
+    $courseTitle
+);
+
+
+$stmt->execute();
+
+
+$result = $stmt->get_result();
+
+
+
+while($row = $result->fetch_assoc()) {
+
+    $instructors[] = $row;
+
+}
+
+
+$stmt->close();
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
   <head>
@@ -10,7 +150,6 @@
       integrity="sha384-rbsA2VBKQhggwzxH7pPCaAqO46MgnOM80zW1RWuH61DGLwZJEdK2Kadq2F9CUG65"
       crossorigin="anonymous"
     />
-
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
@@ -19,7 +158,6 @@
       referrerpolicy="no-referrer"
     />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
-    <!-- ! js for dropdown -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
     <link rel="stylesheet" href="../styles/bstyle.css" />
     <link rel="stylesheet" href="../styles/courses/courseDetails.css" />
@@ -42,114 +180,72 @@
                 class="fa-solid fa-bookmark fa-lg"
                 style="color: #ff0000; margin-right: 10px"
               ></i
-              >Computer Engineering
+              ><?php echo htmlspecialchars($course['courseTitle']); ?>
             </h2>
+<?php if(!empty($course['image'])): ?>
+
+<div class="course-image mb-4">
+
+<img 
+src="<?php echo htmlspecialchars($course['image']); ?>"
+class="img-fluid rounded shadow"
+alt="<?php echo htmlspecialchars($course['courseTitle']); ?>">
+
+</div>
+
+<?php endif; ?>
+
             <h3 style="color: black; margin: 20px 0">&rarr; Description:</h3>
             <p style="font-weight: 600">
-              "Embark on a journey into the exciting world of Computer
-              Engineering with our comprehensive course. This program is
-              designed to provide students with a solid foundation in both
-              hardware and software aspects of computer systems. From
-              understanding digital logic and circuit design to delving into
-              computer architecture, operating systems, and software
-              engineering, this course offers a holistic approach to the field.
-              Participants will explore the intricacies of building and
-              designing computer systems, gaining valuable insights into the
-              technologies that power modern computing. With a focus on hands-on
-              learning and real-world applications, students will develop the
-              skills needed to navigate the dynamic landscape of Computer
-              Engineering. Whether you're a beginner seeking an introduction to
-              the field or an enthusiast looking to deepen your knowledge, this
-              course is your gateway to the fascinating realm of Computer
-              Engineering."
+              <?php echo nl2br(htmlspecialchars($course['description'])); ?>
             </p>
+
             <h3 style="color: black; margin: 20px 0">&rarr; Course Details:</h3>
             <div>
               <table>
                 <thead>
                   <tr>
-                    <th>Nb. of Chapters</th>
-                    <th>Name of Chapters</th>
+                    <th>Chapter</th>
+                    <th>Name of Chapter</th>
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>Chapter 1</td>
-                    <td>Introduction to Computer Engineering</td>
-                  </tr>
-                  <tr>
-                    <td>Chapter 2</td>
-                    <td>Digital Logic and Circuit Design</td>
-                  </tr>
-                  <tr>
-                    <td>Chapter 3</td>
-                    <td>Computer Architecture and Organization</td>
-                  </tr>
-                  <tr>
-                    <td>Chapter 4</td>
-                    <td>Operating Systems and Software Engineering</td>
-                  </tr>
-                  <tr>
-                    <td>Chapter 5</td>
-                    <td>Networking and Communication Systems</td>
-                  </tr>
-
-                  <!-- Add more rows as needed -->
+                  <?php if (count($chapters) > 0): ?>
+                    <?php foreach ($chapters as $ch): ?>
+                      <tr>
+                        <td><?php echo htmlspecialchars($ch['chapter']); ?></td>
+                        <td><?php echo htmlspecialchars($ch['chapterName']); ?></td>
+                      </tr>
+                    <?php endforeach; ?>
+                  <?php else: ?>
+                    <tr>
+                      <td colspan="2">No chapters listed yet.</td>
+                    </tr>
+                  <?php endif; ?>
                 </tbody>
               </table>
             </div>
 
-            <!-- Course Details -->
-
             <ul>
-              <!-- <li>
-                Nb. of Chapters:
-
-                <div class="dropdown">
-                  <button
-                    type="button"
-                    class="btn btn-primary dropdown-toggle"
-                    data-bs-toggle="dropdown"
-                  >
-                    Chapter Names
-                  </button>
-                  <ul class="dropdown-menu">
-                    <li>
-                      <a class="dropdown-item active" href="#">5 Chapters</a>
-                    </li>
-
-                    <li>
-                      <a class="dropdown-item disabled" href="#"
-                        >Chapter 1: Introduction to Computer Engineering</a
-                      >
-                    </li>
-                    <li>
-                      <a class="dropdown-item disabled" href="#"
-                        >Chapter 2: Digital Logic and Circuit Design</a
-                      >
-                    </li>
-                    <li>
-                      <a class="dropdown-item disabled" href="#"
-                        >Chapter 3: Computer Architecture and Organization</a
-                      >
-                    </li>
-                    <li>
-                      <a class="dropdown-item disabled" href="#"
-                        >Chapter 4: Operating Systems and Software
-                        Engineering</a
-                      >
-                    </li>
-                    <li>
-                      <a class="dropdown-item disabled" href="#"
-                        >Chapter 5: Networking and Communication Systems</a
-                      >
-                    </li>
-                  </ul>
-                </div>
-              </li> -->
-              <li>Number of Lectures: 50</li>
-              <li>Credits: 4</li>
-              <li>Price: $120</li>
+              <li>
+                Credits:
+                <?php echo $courseDetail ? htmlspecialchars($courseDetail['credit']) : 'N/A'; ?>
+              </li>
+              <li>
+                Category:
+                <?php echo htmlspecialchars($course['category']); ?>
+              </li>
+              <li>
+                Duration:
+                <?php echo htmlspecialchars($course['duration']); ?>
+              </li>
+              <li>
+                Seats:
+                <?php echo htmlspecialchars($course['courseSeats']); ?>
+              </li>
+              <li>
+                Price: $<?php echo htmlspecialchars($course['price']); ?>
+              </li>
             </ul>
 
             <!-- Instructor Selection -->
@@ -157,39 +253,28 @@
               &rarr; Select Instructor:
             </h3>
 
-            <!-- Instructor Card 1 -->
             <div class="row">
-              <div class="col-md-3">
-                <!-- Instructor Card 1 -->
-                <div class="instructor-card">
-                  <div class="instructor-image">
-                    <img
-                      src="../assets/images/member4.png"
-                      alt="Instructor 1"
-                    />
+              <?php if (count($instructors) > 0): ?>
+                <?php foreach ($instructors as $inst): ?>
+                  <div class="col-md-3">
+                    <div class="instructor-card">
+                      <div class="instructor-image">
+                        <img
+                          src="../assets/images/member1.jpg"
+                          alt="<?php echo htmlspecialchars($inst['name']); ?>"
+                        />
+                      </div>
+                      <p><?php echo htmlspecialchars($inst['name']); ?></p>
+                      <div class="bttdetials">
+                        <button class="btn">Select</button>
+                        <button class="btn">View</button>
+                      </div>
+                    </div>
                   </div>
-                  <p>Instructor 1</p>
-                  <div class="bttdetials">
-                    <button class="btn">Select</button>
-                    <button class="btn">View</button>
-                  </div>
-                </div>
-              </div>
-
-              <div class="col-md-3">
-                <!-- Instructor Card 2 -->
-                <div class="instructor-card">
-                  <div class="instructor-image">
-                    <img
-                      src="../assets/images/member1.jpg"
-                      alt="Instructor 2"
-                    />
-                  </div>
-                  <p>Instructor 2</p>
-                  <button class="btn">Select</button>
-                  <button class="btn">View</button>
-                </div>
-              </div>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <p>No instructors assigned to this course yet.</p>
+              <?php endif; ?>
             </div>
           </div>
         </div>
@@ -202,13 +287,11 @@
         <h2>Enroll in the Course</h2>
         <p>Complete your payment to enroll in the course.</p>
 
-        <!-- Payment Form -->
-        <form id="payment-form">
-          <!-- Payment details fields (e.g., card number, expiration date, CVV) go here -->
+        <form id="payment-form" method="POST">
           <main class="container2">
             <section class="ui">
               <div class="container-left">
-                <form id="credit-card">
+                <div id="credit-card">
                   <div class="number-container">
                     <label>Card Number</label>
                     <input
@@ -260,7 +343,7 @@
                     </div>
                   </div>
                   <input type="submit" value="ADD" id="add" />
-                </form>
+                </div>
               </div>
               <div class="container-right">
                 <div class="card">

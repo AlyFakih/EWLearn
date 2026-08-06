@@ -2,8 +2,8 @@
 // Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 0)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 0) {
+// Check if the user is logged in and is a student (role = 'student')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
     // Return error response
     header('Content-Type: application/json');
     echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
@@ -48,7 +48,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             gender = '$gender', 
             bloodType = '$bloodType', 
             country = '$country' 
-            WHERE id = $user_id AND role = 0";
+            WHERE id = $user_id AND role = 'student'";
             
     if ($db_handle->executeQuery($sql)) {
         header('Content-Type: application/json');

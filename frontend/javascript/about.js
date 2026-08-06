@@ -59,6 +59,10 @@ const swiper = new Swiper(".testimonial-slider", {
   autoplay: {
     delay: 5000,
   },
+  navigation: {
+    nextEl: ".swiper-button-next",
+    prevEl: ".swiper-button-prev",
+  },
 });
 
 // Hide the remaining cards on initial load

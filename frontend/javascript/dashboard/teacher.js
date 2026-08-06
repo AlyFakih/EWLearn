@@ -46,9 +46,8 @@ searchInput.addEventListener("keyup", function (event) {
   }
 });
 // !-------------Inside teacher.js
-$(document).ready(function () {
-  // Fetch instructor data on page load
-  fetchInstructorData();
+window.fetchInstructorData = function () {
+  
 
   function fetchInstructorData() {
     $.ajax({
@@ -72,7 +71,13 @@ $(document).ready(function () {
     });
   }
 
-  function displayInstructors(instructors) {
+};
+
+$(document).ready(function () {
+  
+});
+
+function displayInstructors(instructors) {
     // Get the table body element
     var tableBody = $("#instructorTableBody");
 
@@ -118,7 +123,7 @@ function confirmDelete(email) {
         if (response.status === "success") {
           alert(`Instructor with email "${email}" deleted successfully!`);
           // Refresh the instructor data after deletion
-          fetchInstructorData();
+          window.fetchInstructorData();
         } else {
           alert(`Error deleting instructor: ${response.message}`);
         }
@@ -224,7 +229,7 @@ $(document).ready(function () {
 
         // You can perform additional actions after a successful insert
         if (response.status === "success") {
-          fetchInstructorData();
+          window.fetchInstructorData();
           // For example, close the modal after a short delay
           setTimeout(function () {
             document.getElementById("id01").style.display = "none";

@@ -153,7 +153,6 @@ nav .search i:hover {
   align-items: center;
   justify-content: center;
 }
-/* todo  Responsive  */
 @media (max-width: 1140px) {
   .menu {
     display: none;
@@ -331,7 +330,6 @@ h3 {
   max-width: 100%;
   height: auto;
 }
-/* todo imp */
 .container_course {
   position: relative;
   margin-top: 100px;

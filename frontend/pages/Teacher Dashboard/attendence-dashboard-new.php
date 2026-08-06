@@ -22,7 +22,7 @@ $courses_query = "SELECT id, courseTitle FROM courses WHERE teacher_id = ?";
 $courses = $db_handle->executeSelectPrepared($courses_query, "i", [$user_id]);
 
 // Get students for the form
-$students_query = "SELECT id, full_name FROM users WHERE role = 0";
+$students_query = "SELECT id, full_name FROM users WHERE role = 'student'";
 $students = $db_handle->executeSelectPrepared($students_query);
 ?>
 

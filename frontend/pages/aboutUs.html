@@ -19,6 +19,7 @@
       referrerpolicy="no-referrer"
     />
     <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="../styles/about/aboutUs.css" />
     <link rel="stylesheet" href="../styles/bstyle.css" />
@@ -26,7 +27,6 @@
     <link rel="stylesheet" href="../styles/contactUs/contact.css" />
   </head>
   <body>
-    <!--todo Include the navigation bar -->
     <div id="navbar-container"></div>
     <script>
       $("#navbar-container").load("./navbar.html");
@@ -186,9 +186,9 @@
         </div>
         <div class="row">
           <div class="col-lg-12">
-            <div class="row">
-              <div class="testimonial-slider owl-carousel">
-                <div class="col-lg-4">
+            <div class="testimonial-slider">
+              <div class="swiper-wrapper">
+                <div class="swiper-slide col-lg-4">
                   <div class="testimonial-item">
                     <div class="ti-author">
                       <div class="quote-pic">
@@ -203,13 +203,13 @@
                       </div>
                     </div>
                     <p>
-                      “ As an Ali's University grad, I excel as a Full Stack
+                      " As a Full Stack Developer, I excel through practical learning and innovative
                       Developer with a robust skill set from diverse tech
-                      exposure. ”
+                      exposure. "
                     </p>
                   </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="swiper-slide col-lg-4">
                   <div class="testimonial-item">
                     <div class="ti-author">
                       <div class="quote-pic">
@@ -224,35 +224,35 @@
                       </div>
                     </div>
                     <p>
-                      “ My journalism prowess is honed through immersive
+                      " My journalism prowess is honed through immersive
                       experiences, making me a versatile storyteller in dynamic
-                      media landscapes. ”
+                      media landscapes. "
                     </p>
                   </div>
                 </div>
-                <div class="col-lg-4">
+                <div class="swiper-slide col-lg-4">
                   <div class="testimonial-item">
                     <div class="ti-author">
                       <div class="quote-pic">
                         <img src="../assets/images/quote.png" alt="" />
                       </div>
                       <div class="ta-pic">
-                        <img src="../assets/images/testimonial-2.jpg" alt="" />
+                        <img src="../assets/images/testimonial-1.jpg" alt="" />
                       </div>
                       <div class="ta-text">
-                        <h5>Eva Botros</h5>
-                        <span>journalist</span>
+                        <h5>Karim Nassar</h5>
+                        <span>Software Engineering Student</span>
                       </div>
                     </div>
                     <p>
-                      “ My journalism prowess is honed through immersive
-                      experiences, making me a versatile storyteller in dynamic
-                      media landscapes. ”
+                      " EWLearn made it so much easier to keep track of my
+                      courses, grades, and schedule — everything I need as a
+                      student is in one dashboard. "
                     </p>
                   </div>
                 </div>
-                <div class="col-lg-4">
-                  <div class="testimonial-item hidden">
+                <div class="swiper-slide col-lg-4">
+                  <div class="testimonial-item">
                     <div class="ti-author">
                       <div class="quote-pic">
                         <img src="../assets/images/quote.png" alt="" />
@@ -261,18 +261,20 @@
                         <img src="../assets/images/testimonial-3.jpg" alt="" />
                       </div>
                       <div class="ta-text">
-                        <h5>Sara Smith</h5>
+                        <h5>Maya Hassan</h5>
                         <span>Computer science</span>
                       </div>
                     </div>
                     <p>
-                      “ As a Computer Scientist from Ali's University, I excel
+                      " As a Computer Scientist, I excel
                       through a comprehensive curriculum, navigating tech
-                      challenges . ”
+                      challenges . "
                     </p>
                   </div>
                 </div>
               </div>
+              <div class="swiper-button-prev"></div>
+              <div class="swiper-button-next"></div>
             </div>
           </div>
         </div>

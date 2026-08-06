@@ -18,8 +18,8 @@ try {
     $mail->isSMTP();                         // Send using SMTP
     $mail->Host       = 'smtp.gmail.com';   // Set the SMTP server to send through
     $mail->SMTPAuth   = true;                // Enable SMTP authentication
-    $mail->Username   = '***REMOVED***'; // SMTP username
-    $mail->Password   = '***REMOVED***'; // SMTP password
+    $mail->Username   = 'alyfakeeh@gmail.com'; // SMTP username
+    $mail->Password   = 'YOUR_SMTP_PASSWORD'; // SMTP password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Enable implicit TLS encryption
     $mail->Port       = 465;                 // TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 
@@ -32,14 +32,14 @@ try {
     // Extract the part before '@' from the email address
     // list($username) = explode('@', $email);
 
-    $mail->setFrom('from@example.com', 'EWlearn'); // Set sender
+    $mail->setFrom('no-reply@ewlearn.com', 'EWlearn'); // Set sender
     //! $mail->addAddress($email, $username); // Add recipient
       // Add additional recipients
       foreach ($selectedEmails as $selectedEmail) {
         list($selectedUsername) = explode('@', $selectedEmail);
         $mail->addAddress($selectedEmail, $selectedUsername);
 }
-    $mail->addReplyTo('***REMOVED***', 'EWlearn'); // Set reply-to address
+    $mail->addReplyTo('alyfakeeh@gmail.com', 'EWlearn'); // Set reply-to address
 
     // Attachments
     $mail->addAttachment('./ph-student-fill.png', "Logo-For-EWlearn.png");

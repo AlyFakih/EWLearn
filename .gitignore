@@ -1,28 +1,84 @@
-# IDE
-.vscode/
+# ======================
+# Environment
+# ======================
+.env
+.env.*
+!.env.example
 
-# XAMPP temporary files
+# ======================
+# XAMPP
+# ======================
+xampp/
+htdocs/
+
+# ======================
+# Composer
+# ======================
+vendor/
+composer.lock
+
+# ======================
+# Database
+# ======================
+*.sql
+*.sqlite
+*.db
+
+# ======================
+# Logs
+# ======================
 *.log
 
-# Uploads
-uploads/
+# ======================
+# Backups
+# ======================
+*.backup
+*.bak
+*.old
+*.before*
+backup*/
+*_backup*
+backups*/
 
-# Environment files
-.env
+# ======================
+# Temporary files
+# ======================
+*.tmp
+*.temp
+*.cache
 
-# OS files
+# ======================
+# Python scripts/testing
+# ======================
+__pycache__/
+*.pyc
+
+# ======================
+# IDE
+# ======================
+.vscode/
+.idea/
+
+# ======================
+# OS
+# ======================
 .DS_Store
 Thumbs.db
 
-# Composer dependencies
-backend/vendor/
+# ======================
+# Test files
+# ======================
+test/
+tests/
+*_test.php
+# Development scripts and temporary files
+*.txt
+find_*.py
+fix_*.py
+fix_*.php
+verify_*.py
 
-# VS Code history/cache
-.history/
-
-# All VS Code extension files
-**/.history/
-
-# Temporary files
-*.tmp
+# Backup files
+*.before_*
+*.backup*
 *.bak

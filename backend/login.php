@@ -6,6 +6,7 @@ header("Access-Control-Allow-Credentials: true");
 header("Content-Type: application/json; charset=UTF-8");
 
 ob_start();
+session_start();
 include "./config.php";
 
 $response = array(); // Initialize an associative array for the response
@@ -26,6 +27,10 @@ if ($getUserResult->num_rows > 0) {
 
     // Verify the provided password
     if (password_verify($loginPassword, $hashedPassword)) {
+
+        $_SESSION['user_id'] = $userData['id'];
+        $_SESSION['role'] = $userRole;
+        $_SESSION['fullName'] = $userData['fullName'];
         // Password is correct
 
         if ($userRole === 'admin') {
@@ -42,7 +47,7 @@ if ($getUserResult->num_rows > 0) {
             // Redirect to the student dashboard
             $response['status'] = 'success';
             $response['role'] = 'student';
-            $response['redirect'] = '../pages/Home.html';
+            $response['redirect'] = '../pages/Student%20Dashboard/dashboard.php';
         }
     } else {
         // Incorrect password

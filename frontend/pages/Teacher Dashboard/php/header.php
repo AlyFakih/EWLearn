@@ -2,7 +2,7 @@
 session_start();
 
 // Check if user is logged in and is a teacher (role = 1)
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 1) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
     header("Location: ../../../login.php");
     exit();
 }

@@ -66,7 +66,7 @@ elseif (isset($_POST["student_id"])) {
     // Fetch all rows to send them back to the client after update
     $sql = "SELECT u.id AS ID, u.fullName AS NAME, u.email AS EMAIL, u.mobile AS MOBILE, u.country AS COUNTRY
     FROM users u 
-    WHERE u.role = 0";
+    WHERE u.role = 'student'";
     $allRows = $db_handle->readData($sql);
 }
 

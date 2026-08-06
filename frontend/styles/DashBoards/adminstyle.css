@@ -111,7 +111,6 @@ ul li a i {
 .title-info i ,p {
   font-size: 30px;
 }
-/* todo--------------------------- */
 .menu:hover + .bodydash {
   margin-left: 305px;
   transition: 0.5s;
@@ -174,7 +173,6 @@ ul li a i {
 .ch1 {
   width: 95% !important;
 }
-/* todo  responsive -------------- */
 @media (max-width: 880px) {
     .menu{
        position: fixed;
