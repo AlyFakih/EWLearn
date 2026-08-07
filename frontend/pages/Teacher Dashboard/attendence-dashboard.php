@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
+    header("Location: ../../login.php");
+    exit();
+}
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -248,7 +253,7 @@ $attendanceResult = $db_handle->readData($sql);
         foreach ($skillsData as $rowSkills) {
           echo "<div class='eg' data-id='" . $rowSkills['ID'] . "' onclick='selectCard(this)'>";
           echo "<div class='progress'>";
-          echo "<img src='" . $rowSkills['Image'] . "' alt='Progress Image'>";
+          echo "<img src='../../images/" . $rowSkills['Image'] . "' alt='Progress Image'>";
           echo "</div>";
           echo "<h4>" . $rowSkills['Name'] . "</h4>";
           echo "<p>" . $rowSkills['Major'] . "</p>";

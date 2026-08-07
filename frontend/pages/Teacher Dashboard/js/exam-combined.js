@@ -395,7 +395,7 @@ $(document).ready(function() {
     // Update notification count
     function updateNotificationCount() {
         $.ajax({
-            url: '../common/get_notifications_count.php',
+            url: '../../common/notification_api.php?action=count',
             type: 'GET',
             success: function(response) {
                 try {

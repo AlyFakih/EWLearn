@@ -20,7 +20,7 @@ $stmt = $conn->prepare(
     "SELECT
         cg.student_id AS StudentID,
         u.fullName AS Name,
-        cg.grade AS Grade
+        cg.overall_grade AS Grade
     FROM
         course_grades cg
     JOIN users u ON cg.student_id = u.id
@@ -35,7 +35,7 @@ while ($row = $result->fetch_assoc()) {
 $stmt->close();
 
 // Get all courses for dropdown menus
-$stmt = $conn->prepare("SELECT id, courseCode, courseTitle FROM courses");
+$stmt = $conn->prepare("SELECT id, courseTitle FROM courses");
 $stmt->execute();
 $courses_result = $stmt->get_result();
 $courses = [];
@@ -202,7 +202,7 @@ $stmt->close();
                             <select class="form-control" id="course_id" name="course_id" required>
                                 <option value="">Select Course</option>
                                 <?php foreach ($courses as $course): ?>
-                                    <option value="<?php echo $course['id']; ?>"><?php echo $course['courseCode'] . ' - ' . $course['courseTitle']; ?></option>
+                                    <option value="<?php echo $course['id']; ?>"><?php echo $course['courseTitle']; ?></option>
                                 <?php endforeach; ?>
                             </select>
                         </div>

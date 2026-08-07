@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
     exit;
 }
 
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 $user_id = $_SESSION['user_id'];
 $response = array();
 

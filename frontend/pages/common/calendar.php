@@ -5,7 +5,7 @@ class CalendarManager {
     private $db_handle;
     
     public function __construct() {
-        $this->db_handle = new DBController();
+        $this->db_handle = new StudentDBController();
     }
     
     /**

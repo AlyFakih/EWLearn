@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 
 // Include database controller
 require_once "php/dbcontroller.php";
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
@@ -156,14 +156,14 @@ if (!empty($student['image'])) {
               <div class="form-group">
                 <label for="bloodType">Blood Type</label>
                 <select id="bloodType" name="bloodType">
-                  <option value="A+" <?php echo ($student['bloodType'] == 'A+') ? 'selected' : ''; ?>>A+</option>
-                  <option value="A-" <?php echo ($student['bloodType'] == 'A-') ? 'selected' : ''; ?>>A-</option>
-                  <option value="B+" <?php echo ($student['bloodType'] == 'B+') ? 'selected' : ''; ?>>B+</option>
-                  <option value="B-" <?php echo ($student['bloodType'] == 'B-') ? 'selected' : ''; ?>>B-</option>
-                  <option value="AB+" <?php echo ($student['bloodType'] == 'AB+') ? 'selected' : ''; ?>>AB+</option>
-                  <option value="AB-" <?php echo ($student['bloodType'] == 'AB-') ? 'selected' : ''; ?>>AB-</option>
-                  <option value="O+" <?php echo ($student['bloodType'] == 'O+') ? 'selected' : ''; ?>>O+</option>
-                  <option value="O-" <?php echo ($student['bloodType'] == 'O-') ? 'selected' : ''; ?>>O-</option>
+                  <option value="A+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'A+') ? 'selected' : ''; ?>>A+</option>
+                  <option value="A-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'A-') ? 'selected' : ''; ?>>A-</option>
+                  <option value="B+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'B+') ? 'selected' : ''; ?>>B+</option>
+                  <option value="B-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'B-') ? 'selected' : ''; ?>>B-</option>
+                  <option value="AB+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'AB+') ? 'selected' : ''; ?>>AB+</option>
+                  <option value="AB-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'AB-') ? 'selected' : ''; ?>>AB-</option>
+                  <option value="O+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'O+') ? 'selected' : ''; ?>>O+</option>
+                  <option value="O-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'O-') ? 'selected' : ''; ?>>O-</option>
                 </select>
               </div>
             </div>
@@ -183,11 +183,11 @@ if (!empty($student['image'])) {
             <div class="academic-section">
               <h3>Enrolled Courses</h3>
               <?php 
-              $sql = "SELECT c.name, c.start_date, c.end_date, i.fullName as instructor_name 
-                      FROM courses c 
-                      JOIN student_courses sc ON c.id = sc.course_id 
-                      JOIN users i ON c.instructor_id = i.id
-                      WHERE sc.student_id = $user_id";
+              $sql = "SELECT c.courseTitle as name, sc.userInstructorID as instructor_name
+                      FROM courses c
+                      JOIN studentcourse sc ON c.courseTitle = sc.courseID
+                      JOIN users u ON sc.userStudentID = u.fullName
+                      WHERE u.id = $user_id";
               $courses = $db_handle->readData($sql);
               
               if (!empty($courses)): 
@@ -206,8 +206,7 @@ if (!empty($student['image'])) {
                     <tr>
                       <td><?php echo $course['name']; ?></td>
                       <td><?php echo $course['instructor_name']; ?></td>
-                      <td><?php echo date('M d, Y', strtotime($course['start_date'])); ?></td>
-                      <td><?php echo date('M d, Y', strtotime($course['end_date'])); ?></td>
+                      <td colspan="2">N/A</td>
                     </tr>
                     <?php endforeach; ?>
                   </tbody>

@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 
 // Include database controller
 require_once "php/dbcontroller.php";
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
@@ -240,7 +240,7 @@ $months = [
     
     <!-- Attendance Records -->
     <div class="attendance-records">
-      <h2>Attendance Records - <?php echo $months[$month_filter] . ' ' . $year_filter; ?></h2>
+      <h2>Attendance Records - <?php echo (isset($months[$month_filter]) ? $months[$month_filter] : $month_filter) . ' ' . $year_filter; ?></h2>
       
       <?php if (!empty($grouped_attendance)): ?>
         <?php foreach ($grouped_attendance as $date => $records): ?>

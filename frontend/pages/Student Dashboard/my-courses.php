@@ -7,15 +7,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 require_once "php/dbcontroller.php";
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 
 $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
 
-$sql = "SELECT c.id, c.courseTitle as name, c.description, c.image, sc.userInstructorID as instructor_name,
-        c.calendar
+$sql = "SELECT c.id, c.courseTitle as name, c.description, c.image,
+        sc.userInstructorID as instructor_name, c.calendar
         FROM courses c
         JOIN studentcourse sc ON c.courseTitle = sc.courseID
         JOIN users u ON sc.userStudentID = u.fullName
@@ -103,7 +103,7 @@ $courses = $db_handle->readData($sql);
         <?php foreach($courses as $course): ?>
           <div class="course-card">
             <div class="course-header">
-              <img src="<?php echo $course['image'] ? $course['image'] : '../../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
+              <img src="<?php echo !empty($course['image']) ? './images/' . $course['image'] : './images/default-course.png'; ?>" alt="<?php echo $course['name']; ?>">
               <div class="overlay">
                 <a href="course-details.php?id=<?php echo $course['id']; ?>" class="view-button">View Course</a>
               </div>

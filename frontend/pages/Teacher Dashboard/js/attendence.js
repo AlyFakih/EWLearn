@@ -68,7 +68,7 @@ function initNotifications() {
 // Update the notification badge count
 function updateNotificationBadge() {
     $.ajax({
-        url: '../../common/get_notifications_count.php',
+        url: '../../common/notification_api.php?action=count',
         type: 'GET',
         dataType: 'json',
         success: function(response) {

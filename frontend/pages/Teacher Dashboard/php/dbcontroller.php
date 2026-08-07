@@ -46,6 +46,25 @@ class DBController
         }
     }
 
+    function executeSelectPrepared($query, $types, $params) {
+        $conn = $this->connectDB();
+        $stmt = $conn->prepare($query);
+        if ($stmt === false) {
+            die("Prepare failed: " . $conn->error);
+        }
+        if (!empty($params)) {
+            $stmt->bind_param($types, ...$params);
+        }
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $rows = [];
+        while ($row = $result->fetch_assoc()) {
+            $rows[] = $row;
+        }
+        $stmt->close();
+        return $rows;
+    }
+
     function cleanData($data)
     {
         $data = mysqli_real_escape_string($this->conn, strip_tags($data));

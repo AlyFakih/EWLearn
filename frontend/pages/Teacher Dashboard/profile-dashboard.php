@@ -1,4 +1,9 @@
 <?php
+session_start();
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
+    header("Location: ../../login.php");
+    exit();
+}
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -16,7 +21,7 @@ if ($conn->connect_error) {
 }
 
 // Set the instructor ID based on your application logic
-$instructorID = 1; // Replace with the actual instructor ID
+$instructorID = $_SESSION['user_id'];
 
 // CRUD Operations
 
@@ -24,7 +29,7 @@ $instructorID = 1; // Replace with the actual instructor ID
 // Create (Add) Operation
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'add') {
     $subjectIcon = $_POST['subjectIcon'];
-    $instructorID = isset($_POST['instructorID']) ? intval($_POST['instructorID']) : null; // Validate as integer
+    $instructorID = $_SESSION['user_id']; // Validate as integer
     $subjectName = $_POST['subjectName'];
     $progressPercentage = $_POST['progressPercentage'];
     $experience = $_POST['experience'];
@@ -50,7 +55,7 @@ if (isset($stmtInsert)) {
 
 
 // Read Operation
-$sqlSkills = "SELECT  `id`, `subjectIcon`, `subjectName`, `progressPercentage`, `experience` FROM `instructor_skills`;";
+$sqlSkills = "SELECT `id`, `subjectIcon`, `subjectName`, `progressPercentage`, `experience` FROM `instructor_skills` WHERE instructorID = $instructorID";
 $stmtSkills = $conn->prepare($sqlSkills);
 
 if ($stmtSkills === false) {
@@ -108,9 +113,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['a
 }
 
 // Fetch user data based on the provided user ID (in this case, 4)
-$userID = 3;
-$sql = "SELECT `fullName`, `image`, `country`, `email`, `mobile` FROM `users` WHERE id = $userID";
-$result = $conn->query($sql);
+$sqlUser = "SELECT `fullName`, `image`, `country`, `email`, `mobile` FROM `users` WHERE id = ?";
+$stmtUser = $conn->prepare($sqlUser);
+$stmtUser->bind_param("i", $userID);
+$stmtUser->execute();
+$result = $stmtUser->get_result();
 
 // Initialize variables with defaults
 $fullName = "User";
@@ -294,9 +301,7 @@ $conn->close();
                             <option value="security"><i class="fas fa-shield-alt"></i> Security</option>
                         </select>
 
-                        <!-- Hidden input for instructorID (manually enterable) -->
-                        <label for="instructorID">Instructor ID:</label>
-                        <input type="text" id="instructorID" name="instructorID" required>
+                        <!-- instructorID now comes from $_SESSION['user_id'] server-side -->
 
                         <label for="subjectName">Title :</label>
                         <input type="text" id="subjectName" required>

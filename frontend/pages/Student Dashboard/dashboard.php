@@ -14,7 +14,7 @@ require_once "php/dbcontroller.php";
 require_once "../common/notifications.php";
 require_once "../common/calendar.php";
 
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 $notification_manager = new NotificationManager();
 $calendar_manager = new CalendarManager();
 
@@ -25,11 +25,12 @@ $result = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 $student = $result[0];
 
 // Get enrolled courses
-$query = "SELECT c.id, c.courseTitle as name, c.description, c.image, u.fullName as instructor_name 
-        FROM courses c 
-        JOIN studentcourse sc ON c.id = sc.courseID 
-        JOIN users u ON sc.userInstructorID = u.id
-        WHERE sc.userStudentID = ?";
+$query = "SELECT c.id, c.courseTitle as name, c.description, CONCAT('../../assets/images/', c.image) as image_path,
+        sc.userInstructorID as instructor_name
+        FROM courses c
+        JOIN studentcourse sc ON c.courseTitle = sc.courseID
+        JOIN users u ON sc.userStudentID = u.fullName
+        WHERE u.id = ?";
 $courses = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 
 // Get upcoming events from calendar
@@ -183,7 +184,7 @@ $unread_count = $notification_manager->countUnreadNotifications($user_id);
           <?php foreach($courses as $course): ?>
             <div class="course-card">
               <div class="course-image">
-                <img src="<?php echo $course['image_path'] ? $course['image_path'] : '../../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
+                <img src="<?php echo $course['image_path'] ? $course['image_path'] : '../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
               </div>
               <div class="course-info">
                 <h3><?php echo $course['name']; ?></h3>

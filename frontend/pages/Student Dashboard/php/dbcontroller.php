@@ -1,5 +1,5 @@
 <?php
-class DBController {
+class StudentDBController {
     private $host = "localhost";
     private $user = "root";
     private $password = ""; // Use the same password you set in config.php

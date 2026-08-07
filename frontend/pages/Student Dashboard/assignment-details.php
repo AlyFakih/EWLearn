@@ -11,7 +11,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 
 // Include database controller
 require_once "php/dbcontroller.php";
-$db_handle = new DBController();
+$db_handle = new StudentDBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
@@ -28,10 +28,9 @@ if (!isset($_GET['id'])) {
 $assignment_id = intval($_GET['id']);
 
 // Get assignment details
-$assignment_sql = "SELECT a.*, c.courseTitle as course_name, u.fullName as instructor_name 
+$assignment_sql = "SELECT a.*, c.courseTitle as course_name
                   FROM assignment a
                   JOIN courses c ON a.course_id = c.id
-                  JOIN users u ON c.instructorID = u.id
                   WHERE a.id = $assignment_id";
 $assignment_result = $db_handle->readData($assignment_sql);
 
@@ -43,9 +42,11 @@ if (empty($assignment_result)) {
 $assignment = $assignment_result[0];
 
 // Check if student is enrolled in the course
-$enrollment_check = "SELECT * FROM studentcourse 
-                    WHERE studentID = $user_id 
-                    AND course_id = {$assignment['course_id']}";
+$enrollment_check = "SELECT sc.*
+                    FROM studentcourse sc
+                    JOIN users u ON sc.userStudentID = u.fullName
+                    WHERE u.id = $user_id
+                    AND sc.courseID = '{$assignment['course_name']}'";
 $enrollment_result = $db_handle->readData($enrollment_check);
 
 if (empty($enrollment_result)) {
@@ -73,7 +74,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
     $submission_date = date('Y-m-d H:i:s');
     
     $insert_sql = "INSERT INTO assignment_submissions 
-                  (student_id, assignment_id, content, attachment_url, submitted_at, status) 
+                  (student_id, assignment_id, submission_text, file_path, submitted_at, status) 
                   VALUES ($user_id, $assignment_id, '$submission_text', '$file_url', '$submission_date', 'submitted')";
                   
     if ($db_handle->executeQuery($insert_sql)) {
@@ -182,7 +183,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
             $current_date = time();
             $is_overdue = $due_date < $current_date && !$is_submitted;
             
-            if ($is_submitted && $submission['grade'] !== null) {
+            if ($is_submitted && ($submission['grade'] ?? $submission['score'] ?? 'N/A') !== null) {
               $status_class = 'graded';
               $status_text = 'Graded';
             } elseif ($is_submitted) {
@@ -198,7 +199,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
           ?>
           <div class="meta-item">
             <i class="fas fa-user-tie"></i>
-            <span>Instructor: <?php echo $assignment['instructor_name']; ?></span>
+            <span>Instructor: <?php echo ($assignment['instructor_name'] ?? 'N/A'); ?></span>
           </div>
           <div class="meta-item">
             <i class="fas fa-calendar"></i>
@@ -293,14 +294,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
               <div class="submission-text">
                 <h4>Your Answer</h4>
                 <div class="text-content">
-                  <?php echo nl2br($submission['content']); ?>
+                  <?php echo nl2br(($submission['content'] ?? $submission['submission_text'] ?? '')); ?>
                 </div>
               </div>
               
-              <?php if ($submission['attachment_url']): ?>
+              <?php if (($submission['attachment_url'] ?? $submission['file_path'] ?? '')): ?>
               <div class="submission-files">
                 <h4>Your Attachments</h4>
-                <a href="<?php echo $submission['attachment_url']; ?>" class="file-link" download>
+                <a href="<?php echo ($submission['attachment_url'] ?? $submission['file_path'] ?? ''); ?>" class="file-link" download>
                   <i class="fas fa-file-alt"></i>
                   <span>View/Download Attachment</span>
                 </a>
