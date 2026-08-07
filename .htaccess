@@ -1,0 +1,4 @@
+# Block direct access to sensitive/non-web file types anywhere in the project
+<FilesMatch "\.(sql|sqlite|db|log|env|bak|backup|old|py|txt|md|gitignore)$">
+    Require all denied
+</FilesMatch>
