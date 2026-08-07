@@ -18,6 +18,11 @@ $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
+$studentImage = "./images/profile.jpg";
+
+if (!empty($student['image'])) {
+    $studentImage = "../../images/" . $student["image"];
+}
 ?>
 
 <!DOCTYPE html>
@@ -38,8 +43,8 @@ $student = $result[0];
     <ul>
       <li class="profile">
         <div class="img-box">
-          <img src="./images/profile.jpg" alt="profile image">
-        </div>
+       <img src="<?php echo $studentImage; ?>" alt="profile image">  
+      </div>
         <h2><?php echo $student['fullName']; ?></h2>
       </li>
       <li>
@@ -100,7 +105,7 @@ $student = $result[0];
     <div class="profile-container">
       <div class="profile-header">
         <div class="profile-image">
-          <img src="./images/profile.jpg" alt="Profile Picture">
+          <img src="<?php echo $studentImage; ?>" alt="Profile Picture">
           <div class="edit-overlay">
             <label for="profile-upload" class="edit-button">
               <i class="fas fa-camera"></i>

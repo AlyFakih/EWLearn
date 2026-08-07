@@ -1,79 +1,68 @@
 <?php
-// Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
-  // Redirect to login page if not logged in as student
   header("Location: ../loginRegister.html");
   exit();
 }
 
-// Include database controller
 require_once "php/dbcontroller.php";
 $db_handle = new DBController();
 
-// Get student information
 $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
 
-// Get course filter if provided
 $course_filter = isset($_GET['course']) ? intval($_GET['course']) : null;
 
-// Get student's courses
 $courses_sql = "SELECT c.id, c.courseTitle as name
-                FROM courses c 
-                JOIN studentcourse sc ON c.id = sc.course_id 
-                WHERE sc.studentID = $user_id";
+                FROM courses c
+                JOIN studentcourse sc ON c.courseTitle = sc.courseID
+                JOIN users u ON sc.userStudentID = u.fullName
+                WHERE u.id = $user_id";
 $courses = $db_handle->readData($courses_sql);
 
-// Get all assignments with grades
-$grades_sql = "SELECT a.id as assignment_id, a.title, a.max_score as points, 
-                c.id as course_id, c.courseTitle as course_name, c.courseCode as course_code,
-                cg.grade as grade, cg.feedback, s.submitted_at as submission_date
-                FROM course_grades cg
-                JOIN assignment a ON cg.assignment_id = a.id
+$grades_sql = "SELECT a.id as assignment_id, a.title, a.max_score as points,
+                c.id as course_id, c.courseTitle as course_name,
+                s.score as grade, s.feedback, s.submitted_at as submission_date
+                FROM assignment_submissions s
+                JOIN assignment a ON s.assignment_id = a.id
                 JOIN courses c ON a.course_id = c.id
-                JOIN assignment_submissions s ON cg.submission_id = s.id
-                WHERE cg.student_id = $user_id AND cg.grade IS NOT NULL";
+                WHERE s.student_id = $user_id AND s.score IS NOT NULL";
 
 if ($course_filter) {
   $grades_sql .= " AND c.id = $course_filter";
 }
 
-$grades_sql .= " ORDER BY c.name, a.due_date";
+$grades_sql .= " ORDER BY course_name, a.due_date";
 $grades = $db_handle->readData($grades_sql);
 
-// Organize grades by course
 $courses_with_grades = [];
 $overall_points = 0;
 $overall_earned = 0;
 
 foreach ($grades as $grade) {
   $course_id = $grade['course_id'];
-  
+
   if (!isset($courses_with_grades[$course_id])) {
     $courses_with_grades[$course_id] = [
       'id' => $course_id,
       'name' => $grade['course_name'],
-      'code' => $grade['course_code'],
       'grades' => [],
       'total_points' => 0,
       'earned_points' => 0
     ];
   }
-  
+
   $courses_with_grades[$course_id]['grades'][] = $grade;
   $courses_with_grades[$course_id]['total_points'] += $grade['points'];
   $courses_with_grades[$course_id]['earned_points'] += $grade['grade'];
-  
+
   $overall_points += $grade['points'];
   $overall_earned += $grade['grade'];
 }
 
-// Calculate course and overall percentages
 foreach ($courses_with_grades as $course_id => $course) {
   if ($course['total_points'] > 0) {
     $courses_with_grades[$course_id]['percentage'] = number_format(($course['earned_points'] / $course['total_points']) * 100, 1);
@@ -84,10 +73,9 @@ foreach ($courses_with_grades as $course_id => $course) {
   }
 }
 
-$overall_percentage = $overall_points > 0 ? number_format(($overall_earned / $overall_points) * 100, 1) : 0;
+$overall_percentage = $overall_points > 0 ? number_format(($overall_earned / $overall_points)* 100, 1) : 0;
 $overall_letter = calculateGradeLetter($overall_percentage);
 
-// Function to calculate letter grade from percentage
 function calculateGradeLetter($percentage) {
   if ($percentage >= 90) return 'A';
   if ($percentage >= 80) return 'B';
@@ -111,7 +99,6 @@ function calculateGradeLetter($percentage) {
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-  <!-- Sidebar Menu -->
   <div class="menu">
     <ul>
       <li class="profile">
@@ -165,9 +152,7 @@ function calculateGradeLetter($percentage) {
     </ul>
   </div>
 
-  <!-- Main Content -->
   <section class="main">
-    <!-- Page Header -->
     <div class="header">
       <h1>My Grades</h1>
       <div class="filter-container">
@@ -182,7 +167,6 @@ function calculateGradeLetter($percentage) {
       </div>
     </div>
 
-    <!-- Grade Summary -->
     <div class="grades-summary">
       <div class="summary-card overall">
         <div class="summary-info">
@@ -199,7 +183,7 @@ function calculateGradeLetter($percentage) {
           <canvas id="overallChart"></canvas>
         </div>
       </div>
-      
+
       <div class="courses-grid">
         <?php foreach ($courses_with_grades as $course): ?>
         <div class="summary-card course">
@@ -216,7 +200,7 @@ function calculateGradeLetter($percentage) {
           </div>
         </div>
         <?php endforeach; ?>
-        
+
         <?php if (empty($courses_with_grades)): ?>
         <div class="no-grades">
           <p>No graded assignments yet.</p>
@@ -224,19 +208,18 @@ function calculateGradeLetter($percentage) {
         <?php endif; ?>
       </div>
     </div>
-    
-    <!-- Detailed Grades by Course -->
+
     <div class="detailed-grades">
       <?php foreach ($courses_with_grades as $course): ?>
       <div class="course-grades">
         <div class="course-header">
-          <h3><?php echo $course['name']; ?> (<?php echo $course['code']; ?>)</h3>
+          <h3><?php echo $course['name']; ?></h3>
           <div class="course-grade">
             <span class="grade-letter"><?php echo $course['letter_grade']; ?></span>
             <span class="grade-percent"><?php echo $course['percentage']; ?>%</span>
           </div>
         </div>
-        
+
         <table class="grades-table">
           <thead>
             <tr>
@@ -268,7 +251,7 @@ function calculateGradeLetter($percentage) {
         </table>
       </div>
       <?php endforeach; ?>
-      
+
       <?php if (empty($courses_with_grades)): ?>
       <div class="no-detailed-grades">
         <i class="fas fa-award empty-icon"></i>
@@ -279,11 +262,9 @@ function calculateGradeLetter($percentage) {
     </div>
   </section>
 
-  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Course filter change
       $('#course-filter').change(function() {
         var courseId = $(this).val();
         if (courseId === 'all') {
@@ -292,8 +273,7 @@ function calculateGradeLetter($percentage) {
           window.location.href = 'grades.php?course=' + courseId;
         }
       });
-      
-      // Overall grade chart
+
       const ctx = document.getElementById('overallChart').getContext('2d');
       const overallChart = new Chart(ctx, {
         type: 'doughnut',

@@ -1,44 +1,38 @@
 <?php
-// Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
-  // Redirect to login page if not logged in as student
   header("Location: ../loginRegister.html");
   exit();
 }
 
-// Include database controller
 require_once "php/dbcontroller.php";
 $db_handle = new DBController();
 
-// Get student information
 $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
 
-// Get course filter if provided
 $course_filter = isset($_GET['course']) ? intval($_GET['course']) : null;
 
-// Get student's courses
-$courses_sql = "SELECT c.id, c.name
-                FROM courses c 
-                JOIN student_courses sc ON c.id = sc.course_id 
-                WHERE sc.student_id = $user_id";
+$courses_sql = "SELECT c.id, c.courseTitle as name
+                FROM courses c
+                JOIN studentcourse sc ON c.courseTitle = sc.courseID
+                JOIN users u ON sc.userStudentID = u.fullName
+                WHERE u.id = $user_id";
 $courses = $db_handle->readData($courses_sql);
 
-// Get assignments based on filter
-$assignments_sql = "SELECT a.id, a.title, a.description, a.due_date, a.max_score, 
+$assignments_sql = "SELECT a.id, a.title, a.description, a.due_date, a.max_score,
                     c.courseTitle as course_name, c.id as course_id,
                     s.id as submission_id, s.status, s.score, s.submitted_at, s.feedback,
                     CASE WHEN s.id IS NOT NULL THEN 1 ELSE 0 END as is_submitted
                     FROM assignment a
                     JOIN courses c ON a.course_id = c.id
-                    JOIN studentcourse sc ON c.id = sc.course_id
+                    JOIN studentcourse sc ON c.courseTitle = sc.courseID
+                    JOIN users u ON sc.userStudentID = u.fullName
                     LEFT JOIN assignment_submissions s ON a.id = s.assignment_id AND s.student_id = $user_id
-                    WHERE sc.studentID = $user_id";
+                    WHERE u.id = $user_id";
 
 if ($course_filter) {
   $assignments_sql .= " AND c.id = $course_filter";
@@ -61,7 +55,6 @@ $assignments = $db_handle->readData($assignments_sql);
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
 </head>
 <body>
-  <!-- Sidebar Menu -->
   <div class="menu">
     <ul>
       <li class="profile">
@@ -115,9 +108,7 @@ $assignments = $db_handle->readData($assignments_sql);
     </ul>
   </div>
 
-  <!-- Main Content -->
   <section class="main">
-    <!-- Page Header -->
     <div class="header">
       <h1>My Assignments</h1>
       <div class="filter-container">
@@ -138,7 +129,6 @@ $assignments = $db_handle->readData($assignments_sql);
       </div>
     </div>
 
-    <!-- Assignments List -->
     <div class="assignments-container">
       <?php if (!empty($assignments)): ?>
         <table class="assignments-table">
@@ -154,15 +144,14 @@ $assignments = $db_handle->readData($assignments_sql);
             </tr>
           </thead>
           <tbody>
-            <?php foreach($assignments as $assignment): 
+            <?php foreach($assignments as $assignment):
               $due_date = strtotime($assignment['due_date']);
               $current_date = time();
               $is_overdue = $due_date < $current_date && !$assignment['is_submitted'];
-              
-              // Determine status class based on our new status field
+
               $status_class = '';
               if ($assignment['is_submitted']) {
-                $status_class = $assignment['status']; // Will be 'submitted' or 'graded'
+                $status_class = $assignment['status'];
               } elseif ($is_overdue) {
                 $status_class = 'overdue';
               } else {
@@ -179,13 +168,13 @@ $assignments = $db_handle->readData($assignments_sql);
                 </div>
               </td>
               <td><?php echo $assignment['course_name']; ?></td>
-              <td><?php echo $assignment['type']; ?></td>
+              <td>Assignment</td>
               <td><?php echo date('M d, Y', strtotime($assignment['due_date'])); ?></td>
               <td>
                 <span class="status-badge <?php echo $status_class; ?>">
-                  <?php 
+                  <?php
                     if ($assignment['is_submitted']) {
-                      echo ucfirst($assignment['status']); // Display capitalized status from DB
+                      echo ucfirst($assignment['status']);
                     } elseif ($is_overdue) {
                       echo "Overdue";
                     } else {
@@ -195,7 +184,7 @@ $assignments = $db_handle->readData($assignments_sql);
                 </span>
               </td>
               <td>
-                <?php 
+                <?php
                   if ($assignment['score'] !== null) {
                     echo $assignment['score'] . ' / ' . $assignment['max_score'];
                   } else {
@@ -226,11 +215,9 @@ $assignments = $db_handle->readData($assignments_sql);
     </div>
   </section>
 
-  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Course filter change
       $('#course-filter').change(function() {
         var courseId = $(this).val();
         if (courseId === 'all') {
@@ -239,8 +226,7 @@ $assignments = $db_handle->readData($assignments_sql);
           window.location.href = 'assignments.php?course=' + courseId;
         }
       });
-      
-      // Status filter change
+
       $('#status-filter').change(function() {
         var status = $(this).val();
         if (status === 'all') {

@@ -1,31 +1,25 @@
 <?php
-// Start the session to maintain user login state
 session_start();
 
-// Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
-  // Redirect to login page if not logged in as student
   header("Location: ../loginRegister.html");
   exit();
 }
 
-// Include database controller
 require_once "php/dbcontroller.php";
 $db_handle = new DBController();
 
-// Get student information
 $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
 $result = $db_handle->readData($sql);
 $student = $result[0];
 
-// Get all enrolled courses
-$sql = "SELECT c.id, c.courseTitle as name, c.description, c.image_path, i.fullName as instructor_name, 
-        c.start_date, c.end_date
-        FROM courses c 
-        JOIN studentcourse sc ON c.id = sc.course_id 
-        JOIN users i ON c.instructor_id = i.id
-        WHERE sc.studentID = $user_id";
+$sql = "SELECT c.id, c.courseTitle as name, c.description, c.image, sc.userInstructorID as instructor_name,
+        c.calendar
+        FROM courses c
+        JOIN studentcourse sc ON c.courseTitle = sc.courseID
+        JOIN users u ON sc.userStudentID = u.fullName
+        WHERE u.id = $user_id";
 $courses = $db_handle->readData($sql);
 ?>
 
@@ -42,7 +36,6 @@ $courses = $db_handle->readData($sql);
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
 </head>
 <body>
-  <!-- Sidebar Menu -->
   <div class="menu">
     <ul>
       <li class="profile">
@@ -96,9 +89,7 @@ $courses = $db_handle->readData($sql);
     </ul>
   </div>
 
-  <!-- Main Content -->
   <section class="main">
-    <!-- Page Header -->
     <div class="header">
       <h1>My Courses</h1>
       <div class="search-container">
@@ -107,13 +98,12 @@ $courses = $db_handle->readData($sql);
       </div>
     </div>
 
-    <!-- Courses Container -->
     <div class="courses-container">
       <?php if (!empty($courses)): ?>
         <?php foreach($courses as $course): ?>
           <div class="course-card">
             <div class="course-header">
-              <img src="<?php echo $course['image_path'] ? $course['image_path'] : '../../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
+              <img src="<?php echo $course['image'] ? $course['image'] : '../../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
               <div class="overlay">
                 <a href="course-details.php?id=<?php echo $course['id']; ?>" class="view-button">View Course</a>
               </div>
@@ -124,13 +114,13 @@ $courses = $db_handle->readData($sql);
               <div class="course-info">
                 <div class="info-item">
                   <i class="fas fa-calendar-alt"></i>
-                  <span><?php echo date('M d, Y', strtotime($course['start_date'])); ?> - <?php echo date('M d, Y', strtotime($course['end_date'])); ?></span>
+                  <span><?php echo $course['calendar'] ? date('M d, Y', strtotime($course['calendar'])) : 'Date TBD'; ?></span>
                 </div>
               </div>
               <p class="description"><?php echo substr($course['description'], 0, 100) . '...'; ?></p>
             </div>
             <div class="course-footer">
-              <a href="course-details.php?id=<?php echo $course['id']; ?>" class="btn">Access Materials</a>
+              <a href="course-details.php?id=<?php echo $course['id']; ?>" class="btn">AccessMaterials</a>
               <a href="assignments.php?course=<?php echo $course['id']; ?>" class="btn outline">Assignments</a>
             </div>
           </div>
@@ -146,18 +136,14 @@ $courses = $db_handle->readData($sql);
     </div>
   </section>
 
-  <!-- jQuery -->
   <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
   <script>
     $(document).ready(function() {
-      // Course search functionality
       $("#courseSearch").on("keyup", function() {
         var value = $(this).val().toLowerCase();
         $(".course-card").filter(function() {
           $(this).toggle($(this).text().toLowerCase().indexOf(value) > -1)
         });
-        
-        // Show no results message if all cards are hidden
         if ($(".course-card:visible").length == 0) {
           if ($(".no-results").length == 0) {
             $(".courses-container").append('<div class="no-results"><p>No courses match your search.</p></div>');

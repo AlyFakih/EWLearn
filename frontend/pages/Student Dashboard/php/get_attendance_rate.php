@@ -20,7 +20,7 @@ $sql = "SELECT
           COUNT(CASE WHEN a.status = 'present' OR a.status = 'online' THEN 1 END) as present_count,
           COUNT(*) as total_count
         FROM attendance a 
-        WHERE a.student_id = $user_id";
+        WHERE a.studentID = $user_id";
 
 $result = $db_handle->readData($sql);
 

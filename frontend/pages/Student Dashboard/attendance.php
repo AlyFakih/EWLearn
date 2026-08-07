@@ -31,15 +31,16 @@ $year_filter = isset($_GET['year']) ? intval($_GET['year']) : $current_year;
 // Get student's courses
 $courses_sql = "SELECT c.id, c.courseTitle as name
                 FROM courses c 
-                JOIN studentcourse sc ON c.id = sc.course_id 
-                WHERE sc.studentID = $user_id";
+                JOIN studentcourse sc ON c.courseTitle = sc.courseID 
+                JOIN users u ON sc.userStudentID = u.fullName
+                WHERE u.id = $user_id";
 $courses = $db_handle->readData($courses_sql);
 
 // Get attendance data based on filters
 $attendance_sql = "SELECT a.id, a.date, a.status, c.id as course_id, c.courseTitle as course_name
                   FROM attendance a
-                  JOIN courses c ON a.course_id = c.id
-                  WHERE a.student_id = $user_id";
+                  JOIN courses c ON a.courseID = c.id
+                  WHERE a.studentID = $user_id";
 
 if ($course_filter) {
   $attendance_sql .= " AND c.id = $course_filter";
