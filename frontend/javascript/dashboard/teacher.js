@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 // !  Get the modal ADD and update
 var modal = document.getElementById("id01");
 var modalupdate = document.getElementById("id02");
@@ -47,35 +49,33 @@ searchInput.addEventListener("keyup", function (event) {
 });
 // !-------------Inside teacher.js
 window.fetchInstructorData = function () {
-  
-
-  function fetchInstructorData() {
-    $.ajax({
-      url: "../../../backend/instructors.php", // Replace with the actual path to your PHP script
-      method: "GET",
-      dataType: "json",
-      success: function (data) {
-        // Check if the data is an array
-        if (Array.isArray(data)) {
-          // Call a function to populate the table with the retrieved data
-          displayInstructors(data);
-        } else {
-          // Handle the error message if the data is not an array
-          alert("Error: " + data.message);
-        }
-      },
-      error: function (error) {
-        // Handle the error if the AJAX request fails
-        alert("Error communicating with the server. " + error.statusText);
-      },
-    });
-  }
-
+  $.ajax({
+    url: "../../../backend/instructors.php", // Replace with the actual path to your PHP script
+    method: "GET",
+    dataType: "json",
+    success: function (data) {
+      // Check if the data is an array
+      if (Array.isArray(data)) {
+        // Call a function to populate the table with the retrieved data
+        displayInstructors(data);
+      } else {
+        // Handle the error message if the data is not an array
+        alert("Error: " + data.message);
+      }
+    },
+    error: function (error) {
+      // Handle the error if the AJAX request fails
+      alert("Error communicating with the server. " + error.statusText);
+    },
+  });
 };
 
-$(document).ready(function () {
-  
-});
+// Trigger the fetch immediately -- this file is reloaded fresh via
+// $.getScript on every section switch, so this runs each time.
+window.fetchInstructorData();
+
+
+
 
 function displayInstructors(instructors) {
     // Get the table body element
@@ -106,7 +106,6 @@ function displayInstructors(instructors) {
       tableBody.append(row);
     });
   }
-});
 function confirmDelete(email) {
   if (
     confirm(
@@ -182,15 +181,7 @@ function updateUserDetails(formData) {
         //   document.getElementById("updateUserForm").style.display = "none";
         // }, 2000);
 
-        // Optionally, update the displayed user details on the page
-        updateDisplayedUser(response.email, {
-          fullName: response.fullName,
-          blood: response.blood,
-          email: response.email,
-          mobile: response.mobile,
-          role: response.role,
-          country: response.country,
-        });
+        fetchInstructorData();
       }
     },
     error: function (xhr, status, error) {
@@ -505,3 +496,14 @@ function updateDetails() {
     },
   });
 }
+
+
+/* __WINDOW_EXPOSED__ */
+// Expose functions referenced by inline onclick="..." in the HTML
+window.confirmDelete = confirmDelete;
+window.editInstructor = editInstructor;
+window.addCourseMember = addCourseMember;
+window.deletedetials = deletedetials;
+window.updateDetails = updateDetails;
+
+})();

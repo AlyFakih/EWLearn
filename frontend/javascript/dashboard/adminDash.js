@@ -1,7 +1,11 @@
+/* __CHART_GUARD_APPLIED__ */
+/* __IIFE_WRAPPED__ */
+(function () {
 // ! chart 1 :
 
 var ctx = document.getElementById("lineChart");
 
+(function(){var __c=Chart.getChart(ctx);if(__c)__c.destroy();})();
 new Chart(ctx, {
   type: "line",
   data: {
@@ -39,6 +43,7 @@ new Chart(ctx, {
 // ! chart 2 :
 var ctxd = document.getElementById("doughnut");
 
+(function(){var __c=Chart.getChart(ctxd);if(__c)__c.destroy();})();
 new Chart(ctxd, {
   type: "doughnut",
   data: {
@@ -62,3 +67,5 @@ new Chart(ctxd, {
     responsive: true,
   },
 });
+
+})();

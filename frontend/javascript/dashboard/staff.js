@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 // Function to add a new team member to the home page
 // Function to add a new team member to the home page and staff page
 function addTeamMember() {
@@ -208,3 +210,9 @@ function loadTeamMembers() {
 document.addEventListener("DOMContentLoaded", function () {
   loadTeamMembers();
 });
+
+
+/* __WINDOW_EXPOSED__ */
+window.addTeamMember = addTeamMember;
+window.deleteTeamMember = deleteTeamMember;
+})();

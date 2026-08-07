@@ -44,12 +44,10 @@ $query = "UPDATE users
                  
           WHERE email = '$email'";
 
-// Execute the query using the same connection
 $result = mysqli_query($conn, $query);
-
 if ($result) {
-    echo json_encode(['status' => 'success', 'message' => 'User updated successfully']);
+    echo json_encode(["status" => "success", "message" => "User updated successfully", "affected_rows" => mysqli_affected_rows($conn)]);
 } else {
-    echo json_encode(['status' => 'error', 'message' => 'Error updating user']);
+    echo json_encode(["status" => "error", "message" => "Error updating user: " . mysqli_error($conn)]);
 }
 ?>

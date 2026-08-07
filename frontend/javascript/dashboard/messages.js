@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 // function sendEmail() {
 //   let name = document.getElementById("name").value;
 //   let email = document.getElementById("email").value;
@@ -247,3 +249,5 @@ $(document).ready(function () {
 
   // Rest of your existing code...
 });
+
+})();

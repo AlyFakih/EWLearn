@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 let box = document.getElementById("box");
 let down = false;
 
@@ -14,3 +16,5 @@ function toggleNotifi() {
     down = true;
   }
 }
+
+})();

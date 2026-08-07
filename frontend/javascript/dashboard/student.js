@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 // !  Get the modal ADD and update
 
 var modal = document.getElementById("id01");
@@ -56,8 +58,7 @@ searchInput.addEventListener("keyup", function (event) {
   }
 });
 // ! add studnts-----
-$(document).ready(function () {
-  $("#addstudentsForm").submit(function (event) {
+$("#addstudentsForm").submit(function (event) {
     event.preventDefault();
 
     // Serialize form data
@@ -88,39 +89,35 @@ $(document).ready(function () {
       },
     });
   });
-});
+
 // !-------------get role students
 
 window.fetchstudentData = function () {
-  
-  function fetchstudentData() {
-    $.ajax({
-      type: "GET",
-      url: "../../../backend/dashStudent/getStudent.php", // Replace with the actual path to your PHP script
-      dataType: "json",
-      async: true,
-      success: function (data) {
-        // Check if the data is an array
-        if (Array.isArray(data)) {
-          // Call a function to populate the table with the retrieved data
-          displayStudents(data);
-        } else {
-          // Handle the error message if the data is not an array
-          alert("Error: " + data.message);
-        }
-      },
-      error: function (error) {
-        // Handle the error if the AJAX request fails
-        alert("Error communicating with the server. " + error.statusText);
-      },
-    });
-  }
-
+  $.ajax({
+    type: "GET",
+    url: "../../../backend/dashStudent/getStudent.php", // Replace with the actual path to your PHP script
+    dataType: "json",
+    async: true,
+    success: function (data) {
+      // Check if the data is an array
+      if (Array.isArray(data)) {
+        // Call a function to populate the table with the retrieved data
+        displayStudents(data);
+      } else {
+        // Handle the error message if the data is not an array
+        alert("Error: " + data.message);
+      }
+    },
+    error: function (error) {
+      // Handle the error if the AJAX request fails
+      alert("Error communicating with the server. " + error.statusText);
+    },
+  });
 };
 
-$(document).ready(function () {
-  window.fetchstudentData();
-});
+// Trigger the fetch immediately -- this file is reloaded fresh via
+// $.getScript on every section switch, so this runs each time.
+window.fetchstudentData();
 
 function displayStudents(students) {
     // Get the table body element
@@ -156,7 +153,6 @@ function displayStudents(students) {
       tableBody.append(row);
     });
   }
-});
 
 function confirmDelete(email) {
   if (
@@ -234,7 +230,8 @@ function updateUserDetails(formData) {
         // }, 2000);
 
         // Optionally, update the displayed user details on the page
-        fetchStudentData();
+        fetchstudentData();
+        populateStudents();
         document.getElementById("id02").style.display = "none";
 }
     },
@@ -592,3 +589,14 @@ function updateStudentCourse() {
     },
   });
 }
+
+
+/* __WINDOW_EXPOSED__ */
+// Expose functions referenced by inline onclick="..." in the HTML
+window.confirmDelete = confirmDelete;
+window.editInstructor = editInstructor;
+window.addStudentCourse = addStudentCourse;
+window.deleteStudentCourse = deleteStudentCourse;
+window.updateStudentCourse = updateStudentCourse;
+
+})();

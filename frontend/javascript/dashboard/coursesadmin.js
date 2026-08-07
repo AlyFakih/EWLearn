@@ -1,3 +1,5 @@
+/* __IIFE_WRAPPED__ */
+(function () {
 // !  Get the modal ADD and update
 let modal = document.getElementById("id01");
 let modalupdate = document.getElementById("id02");
@@ -307,3 +309,9 @@ $("#addCourseDetails").submit(function (event) {
     },
   });
 });
+
+
+/* __WINDOW_EXPOSED__ */
+window.updateCourse = updateCourse;
+window.confirmDelete = confirmDelete;
+})();
