@@ -223,7 +223,7 @@ a, button, input, select, textarea { scroll-margin-top: 90px; }
    or disconnect a clickable element. Functionality is untouched. */
 
 /* Sidebar: rounded panel jutting from the edge instead of a flush rectangle. */
-.menu { border-radius: 0 32px 32px 0; overflow: hidden; }
+.menu { border-radius: 0 32px 32px 0; overflow-x: hidden; }
 .menu .img-pro { border-radius: 40% 60% 60% 40% / 50% 40% 60% 50%; }
 
 /* Topbar: floating rounded bar. */
