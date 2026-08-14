@@ -63,9 +63,6 @@ frontend/
 database/            Schema (database_schema_full.sql) + additive migrations
                       (database/migrations/)
 uploads/             User-uploaded assignment submission files
-migration/           Migration PROCESS history: one-off scripts, audit logs,
-                      full pre-rewrite backups, dead-code archive — not
-                      schema (see docs/FILE_AUDIT.md)
 tools/               Developer utilities (account seeding, image download)
 docs/                This documentation
 ```
@@ -182,32 +179,6 @@ during development has relied on:
 
 If you want a real, repository-committed test suite, that would be a
 reasonable next step (see `docs/FILE_AUDIT.md`'s technical-debt notes).
-
-## Migration system
-
-`migration/` documents how this codebase evolved from an earlier,
-inconsistent state (mixed name-keyed and ID-keyed schema, a Teacher
-Dashboard rewrite, a security remediation pass, a UI redesign, and this
-cleanup pass):
-
-- `migration/scripts/` — one-off Python scripts used during the migration
-  and cleanup work (not part of the running application; includes the
-  former `migration/tools/phase2c_full_audit.py`, folded in 2026-08-11)
-- `migration/logs/` — JSON audit logs generated during the migration
-- `migration/snapshots/`, `migration/instructor_dashboard/discovery/` —
-  point-in-time project-state snapshots and original pre-migration codebase
-  discovery notes
-
-Schema/migration **SQL** now lives in `database/` (see Database setup
-above), not under `migration/` — `migration/` is the record of the
-*process*, `database/` is the actual schema.
-- `migration/backups/` (including `backup_before_migration/`, folded in
-  2026-08-11) — full snapshots of the Teacher Dashboard taken before major
-  rewrites, kept for historical reference. **Denied at the web server
-  level** (`.htaccess`), not part of the live application.
-- `migration/dead-code/` — confirmed-unreferenced PHP files archived out of
-  the active tree during this cleanup pass, each with documented evidence
-  in `docs/FILE_AUDIT.md`.
 
 ## Security
 

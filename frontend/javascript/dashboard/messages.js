@@ -19,7 +19,6 @@
 
 //   Email.send({
 //     Host: "smtp.gmail.com",
-//     To: "abbassmallah58@gmail.com",
 //     From: email,
 //     Subject: subject,
 //     Body: body,

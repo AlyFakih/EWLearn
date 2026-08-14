@@ -1,5 +1,0 @@
-# Archived/superseded copies of application files kept for migration history.
-# They are development artifacts, not part of the HTTP surface: serving them
-# exposes stale duplicates of endpoints (with older, potentially weaker
-# authorization logic) and leaks source. Never reachable over the web.
-Require all denied
