@@ -90,4 +90,14 @@ php_flag log_errors on
     RewriteRule ^events$ /frontend/pages/Events.html [L]
     RewriteRule ^contact$ /frontend/pages/contact.html [L]
     RewriteRule ^about$ /frontend/pages/aboutUs.html [L]
+
+    # Admin Dashboard clean URLs (proof of concept). AdminDash.php is
+    # already a single-page AJAX shell - dash.js swaps section fragments
+    # into #dashboard-content client-side, and never touched the URL
+    # before. Both rules below just serve the same shell file regardless
+    # of section; the section name lives only in the URL and is read back
+    # out by dash.js on load, so auth_guard.php's server-side admin check
+    # in AdminDash.php doesn't need to know or care which section it is.
+    RewriteRule ^admin$ /frontend/pages/dashboardAdmin/AdminDash.php [L]
+    RewriteRule ^admin/([a-zA-Z0-9_-]+)$ /frontend/pages/dashboardAdmin/AdminDash.php [L]
 </IfModule>

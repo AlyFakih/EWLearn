@@ -27,8 +27,28 @@
 // });
 
 $(document).ready(function () {
-  // Default section is 'dash'
-  loadSection("dash");
+  // Reads the section straight out of the URL, e.g. /admin/students ->
+  // "students". Bare /admin, or anything that doesn't match, falls back to
+  // the default "dash" section.
+  function sectionFromPath() {
+    var match = window.location.pathname.match(/^\/admin\/([a-zA-Z0-9_-]+)\/?$/);
+    return match ? match[1] : "dash";
+  }
+
+  // Same active-class logic the click handler below uses, factored out so
+  // the initial load and popstate (browser back/forward) can reuse it -
+  // neither of those has a click event to hang it off.
+  function highlightSection(section) {
+    $(".menu ul li a").removeClass("active");
+    $(".menu ul li[data-section='" + section + "'] a").addClass("active");
+  }
+
+  // Initial section comes from the URL instead of always being "dash" - so
+  // refreshing on /admin/students lands back on Students instead of
+  // resetting to the default dashboard view.
+  var initialSection = sectionFromPath();
+  loadSection(initialSection);
+  highlightSection(initialSection);
 
   // Menu item click event for dynamically added elements
   $(document).on("click", ".menu ul li", function (event) {
@@ -39,7 +59,20 @@ $(document).ready(function () {
       window.location.href = "../Home.html"; // Adjust the path accordingly
     } else {
       loadSection(section);
+      var url = section === "dash" ? "/admin" : "/admin/" + section;
+      if (window.location.pathname !== url) {
+        history.pushState({ section: section }, "", url);
+      }
     }
+  });
+
+  // Back/forward buttons: reload whichever section the URL now points to.
+  // No pushState here - the browser already changed the URL for us, pushing
+  // again would break the back button it's supposed to support.
+  window.addEventListener("popstate", function () {
+    var section = sectionFromPath();
+    loadSection(section);
+    highlightSection(section);
   });
 
   // Highlight the current section in the sidebar. Previously "active" only
@@ -62,6 +95,7 @@ $(document).ready(function () {
     teacher: "Instructor",
     students: "Students",
     coursesAdmin: "Courses",
+    eventsAdmin: "Events",
     staff: "Staff",
     messages: "Message",
   };
@@ -70,6 +104,7 @@ $(document).ready(function () {
     var title = SECTION_TITLES[currentSection];
     if (title) {
       $(".title-info p").first().text(title);
+      document.title = title + " - Admin - EWLearn";
     }
   });
 
