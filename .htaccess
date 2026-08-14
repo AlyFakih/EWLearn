@@ -53,6 +53,12 @@ php_flag log_errors on
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
+    # Bare domain root serves the Home page directly - internal rewrite,
+    # no redirect, so the address bar stays exactly on the domain root
+    # with no path at all. ^$ matches only an empty request URI (i.e. "/"
+    # itself), so this never touches any other route below.
+    RewriteRule ^$ /frontend/pages/Home.html [L]
+
     # Visiting the old long URL directly (an existing bookmark, a stray
     # link) redirects out to the clean one - browser address bar updates,
     # any query string (e.g. ?i=1 on a failed-login redirect) is preserved
