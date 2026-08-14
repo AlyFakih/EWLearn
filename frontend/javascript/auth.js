@@ -10,7 +10,7 @@ function saveLoginState() {
 // Function to remove login state
 function removeLoginState() {
   localStorage.removeItem("isLoggedIn");
-  window.location.href = "../pages/loginRegister.html";
+  window.location.href = "/login";
   // Remove other user-related information if needed
   // localStorage.removeItem("userRole");
 }
@@ -26,6 +26,6 @@ function checkLoginState() {
   } else {
     // User is not logged in, display the login link
     document.getElementById("loginLink").innerHTML =
-      '<a href="../pages/loginRegister.html">LOGIN</a>';
+      '<a href="/login">LOGIN</a>';
   }
 }

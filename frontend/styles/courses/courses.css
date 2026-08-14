@@ -304,6 +304,7 @@ body {
 .rs-courses-3 .course-item .course-img {
   position: relative;
   margin: -1px -1px 0 -1px;
+  min-height: 220px;
 }
 .rs-courses-3 .course-item .course-img:before {
   background: rgba(0, 0, 0, 0.5);
