@@ -1,5 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Credentials: true");
@@ -16,9 +20,11 @@ if (!$courseTitle) {
     exit;
 }
 
-// Perform the deletion in the database
-$deleteQuery = "DELETE FROM courses WHERE courseTitle = '$courseTitle'";
-$deleteResult = mysqli_query($conn, $deleteQuery);
+// Perform the deletion in the database. Parameterised - this value comes
+// straight from the request and was previously interpolated into the SQL.
+$deleteStmt = $conn->prepare("DELETE FROM courses WHERE courseTitle = ?");
+$deleteStmt->bind_param("s", $courseTitle);
+$deleteResult = $deleteStmt->execute();
 
 if ($deleteResult) {
     // If deletion was successful, return a success response

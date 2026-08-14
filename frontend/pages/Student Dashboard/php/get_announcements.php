@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('student');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -9,20 +13,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller
-require_once "dbcontroller.php";
+require_once "../../../core/DBController.php";
 $db_handle = new DBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
 
-// Get the student's enrolled courses
-$courseSql = "SELECT course_id FROM studentcourse WHERE studentID = $user_id";
-$courses = $db_handle->readData($courseSql);
+// Get the student's enrolled courses. studentcourse is keyed by
+// users.fullName / courses.courseTitle, not by a numeric student/course ID.
+$courseSql = "SELECT c.id AS course_id
+              FROM studentcourse sc
+              JOIN courses c ON c.courseTitle = sc.courseID
+              JOIN users u ON u.fullName = sc.userStudentID
+              WHERE u.id = ?";
+$courses = $db_handle->executeSelectPrepared($courseSql, "i", [$user_id]);
 
 // Build a comma-separated list of course IDs
 $courseIds = [];
 foreach ($courses as $course) {
-  $courseIds[] = $course['course_id'];
+  $courseIds[] = (int)$course['course_id'];
 }
 $courseIdList = !empty($courseIds) ? implode(',', $courseIds) : '0'; // Default to 0 if no courses found
 

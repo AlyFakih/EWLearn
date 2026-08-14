@@ -9,34 +9,37 @@ togglebtn.onclick = function () {
   const isOpen = dropdownMenu.classList.contains("open");
 };
 
-// swiper cards
+// swiper cards - only pages that load swiper-bundle.min.js (currently just
+// Home.html) have this; guard so home.js can run safely on every other page
+// too, since navbar.html loads home.js unconditionally.
+if (typeof Swiper !== 'undefined') {
+  let swiperCards = new Swiper(".card_contant", {
+    loop: true,
+    spaceBetween: 32,
+    grabCursor: true,
 
-let swiperCards = new Swiper(".card_contant", {
-  loop: true,
-  spaceBetween: 32,
-  grabCursor: true,
-
-  pagination: {
-    el: ".swiper-pagination",
-    clickable: true,
-    dynamicBullets: true,
-  },
-  navigation: {
-    nextEl: ".swiper-button-next",
-  },
-  navigation: {
-    nextEl: ".swiper-button-next",
-    prevEl: ".swiper-button-prev",
-  },
-  breakpoints: {
-    600: {
-      slidesPerView: 2,
+    pagination: {
+      el: ".swiper-pagination",
+      clickable: true,
+      dynamicBullets: true,
     },
-    968: {
-      slidesPerView: 3,
+    navigation: {
+      nextEl: ".swiper-button-next",
     },
-  },
-});
+    navigation: {
+      nextEl: ".swiper-button-next",
+      prevEl: ".swiper-button-prev",
+    },
+    breakpoints: {
+      600: {
+        slidesPerView: 2,
+      },
+      968: {
+        slidesPerView: 3,
+      },
+    },
+  });
+}
 
 // ! ----------Get the button
 let mybutton = document.getElementById("myBtn");
@@ -72,7 +75,7 @@ function checkLogin() {
   const isLoggedIn = localStorage.getItem("isLoggedIn");
 
   if (isLoggedIn) {
-    window.location.href = "../pages/courses.html";
+    window.location.href = "../pages/courses.php";
   } else {
     // User is not logged in, display the login link
     window.location.href = "../pages/loginRegister.html";

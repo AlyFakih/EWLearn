@@ -42,10 +42,41 @@ $(document).ready(function () {
     }
   });
 
+  // Highlight the current section in the sidebar. Previously "active" only
+  // ever sat on the hardcoded initial "DashBoard" item in the markup and
+  // never moved, so the sidebar gave no indication of which section you were
+  // actually viewing after navigating.
+  $(document).on("click", ".menu ul li", function () {
+    $(".menu ul li a").removeClass("active");
+    $(this).find("a").addClass("active");
+  });
+
+  // The page title in the topbar ("DashBoard") is markup that lives inside
+  // NotifiAdmin.php, which each section loads asynchronously into #boxNotifi
+  // right after its own content lands - so it isn't in the DOM yet at the
+  // moment loadSection()'s own success callback runs. ajaxStop fires once
+  // every in-flight request (the section AND its nested notification load)
+  // has actually settled, which is the reliable point to update it.
+  var SECTION_TITLES = {
+    dash: "DashBoard",
+    teacher: "Instructor",
+    students: "Students",
+    coursesAdmin: "Courses",
+    staff: "Staff",
+    messages: "Message",
+  };
+  $(document).ajaxStop(function () {
+    var currentSection = $(".menu ul li a.active").closest("li").data("section");
+    var title = SECTION_TITLES[currentSection];
+    if (title) {
+      $(".title-info p").first().text(title);
+    }
+  });
+
   function loadSection(section) {
     // Load content based on the selected section
     $.ajax({
-      url: section + ".html",
+      url: section + ".php",
       method: "GET",
       success: function (data) {
         $("#dashboard-content").html(data);
@@ -78,12 +109,13 @@ $(document).ready(function () {
     });
   }
 });
-// Function to remove login state
+// Function to remove login state.
+// Clearing localStorage alone left the server-side PHP session alive, so
+// "logging out" and then revisiting the dashboard URL still worked. Hand off to
+// the server logout endpoint, which destroys the session and then redirects.
 function removeLoginState() {
   localStorage.removeItem("isLoggedIn");
-  window.location.href = "../../pages/loginRegister.html";
-  // Remove other user-related information if needed
-  // localStorage.removeItem("userRole");
+  window.location.href = "./logout.php";
 }
 
 

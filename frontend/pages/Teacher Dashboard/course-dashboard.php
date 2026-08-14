@@ -1,331 +1,188 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+// Set page variables for the shared header/footer shell
+$page_title = "Courses";
+$current_page = "courses";
+$page_css = "course-dashboard";
+$page_js = "course";
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "student_management";
+// Include the header which handles session, DB connection and common includes
+include_once "php/header.php";
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-  die("Connection failed: " . $conn->connect_error);
-}
-
-// CRUD Operations
-
-// Create (Add) Operation
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'add') {
-  $ID = isset($_POST['id']) ? intval($_POST['id']) : null;
-  $courseTitle = isset($_POST['courseTitle']) ? $_POST['courseTitle'] : null;
-  $description = isset($_POST['description']) ? $_POST['description'] : null;
-
-
-  // Check if the file was uploaded without errors
-  if (isset($_FILES['image']) && $_FILES['image']['error'] == UPLOAD_ERR_OK) {
-    $tempName = $_FILES['image']['tmp_name'];
-    $imageName = $_FILES['image']['name'];
-    $image = 'images/' . $imageName;
-
-    // Move the uploaded file to the "images" folder
-    if (move_uploaded_file($tempName, $image)) {
-      $sqlInsert = "INSERT INTO courses (id, courseTitle, image, description) VALUES (?, ?, ?, ?)";
-      $stmtInsert = $conn->prepare($sqlInsert);
-      $stmtInsert->bind_param("isss", $ID, $courseTitle, $image, $description);
-      
-      if ($stmtInsert->execute()) {
-          echo "Add card success";
-      } else {
-          echo "Failed to add the card: " . $stmtInsert->error;
-      }
-      
-
-      $stmtInsert->close();
-    } else {
-      echo "Failed to move the uploaded file.";
-    }
-  } else {
-    // Handle file upload error
-    echo "Failed to upload file: " . $_FILES['image']['error'];
-  }
-}
-
-
-
-
-
-
-// Update Operation
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
-  $ID = isset($_POST['id']) ? intval($_POST['id']) : null;
-  $courseTitle = isset($_POST['courseTitle']) ? $_POST['courseTitle'] : null;
-  $description = isset($_POST['description']) ? $_POST['description'] : null;
-
-
-  $sqlUpdate = "UPDATE courses SET courseTitle=?, description=?";
-
-  // Check if an image is provided
-  if (!empty($_FILES['image']['name'])) {
-    $tempName = $_FILES['image']['tmp_name'];
-    $imageName = $_FILES['image']['name'];
-    $image = 'images/' . $imageName;
-
-    // Move the uploaded file to the "images" folder
-    if (move_uploaded_file($tempName, $image)) {
-      // If the move is successful, update the image column as well
-      $sqlUpdate .= ", image=?";
-    } else {
-      echo "Failed to move the uploaded file.";
-      exit();
-    }
-  }
-
-  $sqlUpdate .= " WHERE id=?";
-  $stmtUpdate = $conn->prepare($sqlUpdate);
-
-  if (!empty($_FILES['image']['name'])) {
-    $stmtUpdate->bind_param("sssi", $courseTitle, $description, $image, $ID);
-  } else {
-    $stmtUpdate->bind_param("ssi", $courseTitle, $description, $ID);
-  }
-
-  if ($stmtUpdate->execute()) {
-    echo "Update card success";
-  } else {
-    echo "Failed to update the card: " . $stmtUpdate->error;
-  }
-
-  $stmtUpdate->close();
-}
-
-
-
-// Delete Operation
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
-  $ID = isset($_POST['id']) ? intval($_POST['id']) : null;
-
-  $sqlDelete = "DELETE FROM courses WHERE id=?";
-  $stmtDelete = $conn->prepare($sqlDelete);
-  $stmtDelete->bind_param("i", $ID);
-
-  if ($stmtDelete->execute()) {
-    echo "Delete card success";
-  } else {
-    echo "Failed to delete the card: " . $stmtDelete->error;
-  }
-
-  $stmtDelete->close();
-}
-$sqlSkills = "SELECT id AS ID, courseTitle AS Title, description AS Description, image AS Image FROM courses";
-$stmtSkills = $conn->prepare($sqlSkills);
-
-if ($stmtSkills === false) {
-  die("Error in SQL query preparation: " . $conn->error);
-}
-
-$resultSkills = $stmtSkills->execute();
-
-if ($resultSkills === false) {
-  die("Error in SQL query execution: " . $stmtSkills->error);
-}
-
-$resultSkills = $stmtSkills->get_result();
-
-$skillsData = array();
-while ($rowSkills = $resultSkills->fetch_assoc()) {
-  $skillsData[] = $rowSkills;
-}
-
-$stmtSkills->close();
-
-// Close the database connection
-$conn->close();
+// Only show courses this teacher actually teaches, with enrollment counts.
+// Course ownership lives in instructorcourse (users.fullName <->
+// courses.courseTitle) - there is no courses.teacher_id column.
+$courses_query = "SELECT c.id, c.courseTitle, c.courseCode, c.courseDescription,
+                         c.startDate, c.endDate,
+                         (SELECT COUNT(*) FROM studentcourse sc WHERE sc.courseID = c.courseTitle) AS student_count
+                  FROM courses c
+                  JOIN instructorcourse ic ON ic.courseID = c.courseTitle
+                  JOIN users tu ON tu.fullName = ic.userInstructorID
+                  WHERE tu.id = ?
+                  ORDER BY c.courseTitle ASC";
+$courses = $db_handle->executeSelectPrepared($courses_query, "i", [$user_id]);
 ?>
 
+<div class="card">
+    <div class="card-header">
+        <h2>My Courses</h2>
+        <div class="card-actions">
+            <button type="button" class="btn btn-primary" id="showForm">
+                <i class="fas fa-plus"></i> Add Course
+            </button>
+        </div>
+    </div>
 
-
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="./css/course-dashboard.css">
-  <link rel="stylesheet" href="./css/dashboard-menu.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-  <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-  <title>Courses</title>
-
-</head>
-
-<body>
-
-      <div class="menu">
-        <ul>
-
-            <li class="profile">
-                <div class="img-box">
-                    <img src="./images/logo.jpg" alt="logo image">
+    <div class="card-grid" id="course-grid">
+        <?php if (!empty($courses)): ?>
+            <?php foreach ($courses as $course): ?>
+                <div class="course-card" data-id="<?php echo (int)$course['id']; ?>">
+                    <div class="course-header">
+                        <h3><?php echo htmlspecialchars($course['courseTitle']); ?></h3>
+                        <?php if (!empty($course['courseCode'])): ?>
+                            <span class="course-code"><?php echo htmlspecialchars($course['courseCode']); ?></span>
+                        <?php endif; ?>
+                    </div>
+                    <div class="course-body">
+                        <p class="course-description"><?php echo htmlspecialchars($course['courseDescription'] ?? ''); ?></p>
+                        <div class="course-stats">
+                            <div class="stat">
+                                <i class="fas fa-user-graduate"></i>
+                                <span><?php echo (int)$course['student_count']; ?> Students</span>
+                            </div>
+                            <?php if (!empty($course['startDate']) && !empty($course['endDate'])): ?>
+                                <div class="stat">
+                                    <i class="fas fa-calendar"></i>
+                                    <span><?php echo date('Y-m-d', strtotime($course['startDate'])); ?> to <?php echo date('Y-m-d', strtotime($course['endDate'])); ?></span>
+                                </div>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="course-footer">
+                        <button type="button" class="btn btn-secondary view-course" data-id="<?php echo (int)$course['id']; ?>">View Details</button>
+                        <button type="button" class="btn btn-icon edit-course" data-id="<?php echo (int)$course['id']; ?>"><i class="fas fa-edit"></i></button>
+                        <button type="button" class="btn btn-icon delete-course" data-id="<?php echo (int)$course['id']; ?>"><i class="fas fa-trash"></i></button>
+                    </div>
                 </div>
-                <h2>Ali Fakih</h2>
-            </li>
-            <li>
-                <a class="active" href="./profile-dashboard.php">
-                    <i class="fas fa-home"></i>
-                    <p>Profile</p>
-                </a>
-            </li>
-
-            <li>
-                <a href="./course-dashboard.php">
-                    <i class="fas fa-book"></i>
-                    <p>Courses</p>
-                </a>
-            </li>
-
-            <li>
-                <a href="./student-dashboard.php">
-                    <i class="fas fa-user-group"></i>
-                    <p>Students</p>
-                </a>
-            </li>
-            <li>
-                <a href="./exam-dashboard.php">
-                    <i class="fas fa-pencil-alt"></i>
-                    <p>Exams</p>
-                </a>
-            </li>
-            <li>
-                <a href="./grades-dashboard.php">
-                    <i class="fas fa-graduation-cap"></i>
-                    <p>Grades</p>
-                </a>
-            </li>
-            <li>
-                <a href="./assignment-dashboard.php">
-                    <i class="fas fa-tasks"></i>
-                    <p>Assignemts</p>
-                </a>
-            </li>
-            <li>
-                <a href="./attendence-dashboard.php">
-                    <i class="fas fa-user-check"></i>
-                    <p>Attendance</p>
-                </a>
-            </li>
-            <li class="log-out">
-                <a href="#">
-                    <i class="fas fa-sign-out"></i>
-                    <p>Log Out</p>
-                </a>
-            </li>
-        </ul>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <div class="empty-state">
+                <i class="fas fa-book empty-icon"></i>
+                <h3>No courses yet</h3>
+                <p>Create your first course to get started.</p>
+            </div>
+        <?php endif; ?>
     </div>
+</div>
 
-  <div class="container">
-    <div class="cont-skill">
-
-    
-
-      <main>
-      <div class="title" style="background-color: #810000; width: 100%; padding: 10px; border-radius:10px; ">
-          <h2 id="#skill">Courses</h2>
-          <div>
-            <button onclick="showPopup()">Add</button>
-            <button onclick="showUpdateForm()">Update</button>
-            <button type="button" id="deleteButton" onclick="deleteSelectedCard()">Delete</button>
-          </div>
-        </div>
-
-
-
-        <div class="subjects" id="subjectContainer">
-          <?php
-          // Loop through the fetched data and display subjects dynamically
-          if (!empty($skillsData)) {
-            foreach ($skillsData as $rowSkills) {
-              echo "<div class='eg' data-id='" . $rowSkills['ID'] . "' onclick='selectCard(this)'>";
-              echo "<h4>" . $rowSkills['Title'] . "</h4>";
-              echo "<p>" . $rowSkills['Description'] . "</p>";
-              echo "<div class='progress'>";
-              echo "<img src='" . $rowSkills['Image'] . "' alt='Progress Image'>";
-              echo "</div>";
-              echo "</div>";
-            }
-          } else {
-            echo "<p>No results found</p>";
-          }
-          ?>
-        </div>
-
-
-        <div id="popup" class="popup">
-          <span class="close" onclick="closePopup()">&times;</span>
-          <h3>Add New Course</h3>
-          <form id="cardForm">
-            <!-- Hidden input for studentID (manually enterable) -->
-            <label for="id">ID:</label>
-            <input type="text" id="id" name="id" required>
-
-            <label for="image">Image:</label>
-            <input type="file" id="image" name="image" required>
-
-            <label for="courseTitle">Name :</label>
-            <input type="text" id="courseTitle" name="courseTitle" required>
-
-            <label for="description">Description :</label>
-            <input type="text" id="description" name="description" required>
-
-            <button type="button" onclick="addCard()">Add Card</button>
-          </form>
-
-        </div>
-
-        <div class="card-form" id="updateForm">
-          <h3>Update Course Card</h3>
-          <div class="form-design">
-            <label for="updateImage">Image :</label>
-            <input type="file" id="updateImage" name="updateImage">
-          </div>
-          <div class="form-design">
-            <label for="updateCourseTitle">Title :</label>
-            <input type="text" id="updateCourseTitle" name="updateCourseTitle">
-          </div>
-          <div class="form-design">
-            <label for="updateDescription">Description :</label>
-            <input type="text" id="updateDescription" name="updateDescription">
-          </div>
-
-          <div class="button-container">
-            <button onclick="updateCard()">Update</button>
-            <button onclick="hideUpdateForm()">Cancel</button>
-          </div>
-        </div>
-
-
-
-      </main>
-
-
-
-
-
-
+<!-- Add Course Modal -->
+<div id="addModal" class="modal-overlay">
+    <div class="modal-panel">
+        <h2>Add New Course</h2>
+        <form id="addCourseForm">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="courseTitle">Course Title</label>
+                    <input type="text" id="courseTitle" name="courseTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="courseCode">Course Code</label>
+                    <input type="text" id="courseCode" name="courseCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="credits">Credits</label>
+                    <input type="number" id="credits" name="credits" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="semester">Semester</label>
+                    <input type="text" id="semester" name="semester" placeholder="e.g. Fall 2026">
+                </div>
+                <div class="form-group">
+                    <label for="startDate">Start Date</label>
+                    <input type="date" id="startDate" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="endDate">End Date</label>
+                    <input type="date" id="endDate" name="endDate" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="courseDescription">Description</label>
+                <textarea id="courseDescription" name="courseDescription" rows="3"></textarea>
+            </div>
+            <div class="card-actions">
+                <button type="submit" class="btn btn-primary">Add Course</button>
+                <button type="button" class="btn btn-secondary" id="closeForm">Cancel</button>
+            </div>
+        </form>
     </div>
+</div>
 
+<!-- View Course Modal -->
+<div id="viewModal" class="modal-overlay">
+    <div class="modal-panel">
+        <h2 id="viewTitle"></h2>
+        <p><span class="badge badge-muted" id="viewCode"></span></p>
+        <p id="viewDescription"></p>
+        <div class="form-grid">
+            <div><strong>Credits:</strong> <span id="viewCredits"></span></div>
+            <div><strong>Semester:</strong> <span id="viewSemester"></span></div>
+            <div><strong>Start:</strong> <span id="viewStartDate"></span></div>
+            <div><strong>End:</strong> <span id="viewEndDate"></span></div>
+        </div>
+        <h3 style="margin-top: var(--space-4);">Enrolled Students</h3>
+        <ul id="viewStudents"></ul>
+        <h3>Assignments</h3>
+        <ul id="viewAssignments"></ul>
+        <div class="card-actions">
+            <button type="button" class="btn btn-secondary" id="closeViewModal">Close</button>
+        </div>
+    </div>
+</div>
 
+<!-- Edit Course Modal -->
+<div id="editModal" class="modal-overlay">
+    <div class="modal-panel">
+        <h2>Edit Course</h2>
+        <form id="editCourseForm">
+            <input type="hidden" id="editCourseId" name="id">
+            <div class="form-grid">
+                <div class="form-group">
+                    <label for="editCourseTitle">Course Title</label>
+                    <input type="text" id="editCourseTitle" name="courseTitle" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCourseCode">Course Code</label>
+                    <input type="text" id="editCourseCode" name="courseCode" required>
+                </div>
+                <div class="form-group">
+                    <label for="editCredits">Credits</label>
+                    <input type="number" id="editCredits" name="credits" min="0" max="10">
+                </div>
+                <div class="form-group">
+                    <label for="editSemester">Semester</label>
+                    <input type="text" id="editSemester" name="semester">
+                </div>
+                <div class="form-group">
+                    <label for="editStartDate">Start Date</label>
+                    <input type="date" id="editStartDate" name="startDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editEndDate">End Date</label>
+                    <input type="date" id="editEndDate" name="endDate" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="editCourseDescription">Description</label>
+                <textarea id="editCourseDescription" name="courseDescription" rows="3"></textarea>
+            </div>
+            <div class="card-actions">
+                <button type="submit" class="btn btn-primary">Save Changes</button>
+                <button type="button" class="btn btn-secondary" id="closeEditForm">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
 
-  </div>
-
-
-  <script src="./js/course.js"></script>
-
-
-
-</body>
-
-</html>
+<?php
+include_once "php/footer.php";
+?>

@@ -8,11 +8,6 @@
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-body {
-    background-color: #001;
-    display: flex;
-}
-
 .container {
     display: flex;
 }

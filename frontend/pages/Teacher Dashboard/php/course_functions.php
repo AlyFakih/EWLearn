@@ -1,7 +1,12 @@
 <?php
-session_start();
-require_once "dbcontroller.php";
+// Server-side authorization gate: instructor only. Runs before any other
+// logic so nothing is emitted to an unauthenticated or wrong-role caller.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('instructor');
+
+require_once "../../../core/DBController.php";
 require_once "../../common/notifications.php";
+require_once "../../common/calendar.php";
 
 // Check if user is logged in and is a teacher (role = 1)
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
@@ -11,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
 }
 
 $db_handle = new DBController();
-$notification_manager = new NotificationManager();
+$notification_manager = new NotificationManager($db_handle);
 $user_id = $_SESSION['user_id'];
 
 // Create a new course
@@ -45,49 +50,82 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
             if (!empty($existing)) {
                 $response = array('success' => false, 'message' => 'A course with this code already exists');
             } else {
+                // Look up the teacher's name; instructorcourse links
+                // teachers to courses by users.fullName, not by ID
+                $teacher_lookup = $db_handle->executeSelectPrepared(
+                    "SELECT fullName FROM users WHERE id = ?", "i", [$user_id]
+                );
+
+                if (empty($teacher_lookup)) {
+                    $response = array('success' => false, 'message' => 'Teacher account not found');
+                    header('Content-Type: application/json');
+                    echo json_encode($response);
+                    exit();
+                }
+
+                $teacher_full_name = $teacher_lookup[0]['fullName'];
+
                 // Current date for lastUpdated
                 $lastUpdated = date('Y-m-d H:i:s');
-                
-                // Insert the course
-                $insert_query = "INSERT INTO courses (courseTitle, courseCode, courseDescription, 
-                                credits, semester, startDate, endDate, teacher_id, lastUpdated) 
-                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-                
-                $result = $db_handle->executeUpdatePrepared($insert_query, "sssisssss", 
-                    [$courseTitle, $courseCode, $courseDescription, $credits, $semester, 
-                     $startDate, $endDate, $user_id, $lastUpdated]);
-                
+
+                // Insert the course. image/price/category/calendar/courseSeats
+                // are legacy public-catalog columns unrelated to the teacher
+                // course-management feature; they are NOT NULL with no
+                // default, so placeholders are supplied here.
+                $insert_query = "INSERT INTO courses (courseTitle, courseCode, courseDescription,
+                                credits, semester, startDate, endDate, lastUpdated,
+                                image, price, category, calendar, courseSeats)
+                                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                $result = $db_handle->executeUpdatePrepared($insert_query, "sssisssssissi",
+                    [$courseTitle, $courseCode, $courseDescription, $credits, $semester,
+                     $startDate, $endDate, $lastUpdated,
+                     '', 0, 'General', date('Y-m-d'), 30]);
+
                 if ($result) {
                     // Get the new course ID
                     $course_id = $db_handle->getLastInsertId();
-                    
+
+                    // Record the teacher as the course's instructor
+                    $db_handle->executeUpdatePrepared(
+                        "INSERT INTO instructorcourse (name, userInstructorID, courseID) VALUES (?, ?, ?)",
+                        "sss",
+                        [$courseTitle, $teacher_full_name, $courseTitle]
+                    );
+
                     // Create academic calendar events for the course start and end
-                    $calendar_manager = new CalendarManager();
-                    
+                    $calendar_manager = new CalendarManager($db_handle);
+
                     // Add course start event
                     $calendar_manager->createEvent(
-                        "$courseTitle Start", 
-                        "First day of $courseTitle ($courseCode)", 
-                        $startDate, 
+                        "$courseTitle Start",
+                        "First day of $courseTitle ($courseCode)",
                         $startDate,
+                        $startDate,
+                        false,
                         'course',
-                        $course_id
+                        $course_id,
+                        null,
+                        $user_id
                     );
-                    
+
                     // Add course end event
                     $calendar_manager->createEvent(
-                        "$courseTitle End", 
-                        "Last day of $courseTitle ($courseCode)", 
-                        $endDate, 
+                        "$courseTitle End",
+                        "Last day of $courseTitle ($courseCode)",
                         $endDate,
+                        $endDate,
+                        false,
                         'course',
-                        $course_id
+                        $course_id,
+                        null,
+                        $user_id
                     );
-                    
+
                     // Get teacher information
-                    $teacher_query = "SELECT full_name FROM users WHERE id = ?";
+                    $teacher_query = "SELECT fullName FROM users WHERE id = ?";
                     $teacher = $db_handle->executeSelectPrepared($teacher_query, "i", [$user_id]);
-                    $teacher_name = !empty($teacher) ? $teacher[0]['full_name'] : 'Teacher';
+                    $teacher_name = !empty($teacher) ? $teacher[0]['fullName'] : 'Teacher';
                     
                     // Prepare the course card HTML to be inserted in the UI
                     $html = '<div class="course-card" data-id="' . $course_id . '">';
@@ -118,10 +156,11 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                     // Create system notification for course creation
                     $notification_manager->createSystemNotification(
                         "New Course Created: $courseTitle",
-                        "A new course '$courseTitle' ($courseCode) has been created by $teacher_name, starting on " . 
+                        "A new course '$courseTitle' ($courseCode) has been created by $teacher_name, starting on " .
                         date('Y-m-d', strtotime($startDate)) . ".",
                         'course',
-                        $course_id
+                        $course_id,
+                        $user_id
                     );
                     
                     $response = array(
@@ -145,21 +184,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // Get course details
 else if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'view' && isset($_GET['id'])) {
     $course_id = (int)$db_handle->cleanData($_GET['id']);
-    
-    // Verify this course is taught by this teacher
-    $verify_query = "SELECT * FROM courses WHERE id = ? AND teacher_id = ?";
-    $course = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-    
+
+    // Verify this course is taught by this teacher (ownership is recorded in
+    // instructorcourse, keyed by users.fullName / courses.courseTitle)
+    if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
+        $course = [];
+    } else {
+        $verify_query = "SELECT * FROM courses WHERE id = ?";
+        $course = $db_handle->executeSelectPrepared($verify_query, "i", [$course_id]);
+    }
+
     if (empty($course)) {
         $response = array('success' => false, 'message' => 'Course not found or you do not have permission to view it');
     } else {
         $course_data = $course[0];
-        
+
         // Get enrolled students
-        $students_query = "SELECT u.id, u.full_name, sc.enrollment_date 
-                          FROM studentcourse sc 
-                          JOIN users u ON sc.student_id = u.id 
-                          WHERE sc.course_id = ?";
+        $students_query = "SELECT u.id, u.fullName AS full_name, sc.enrollment_date
+                          FROM studentcourse sc
+                          JOIN courses c ON c.courseTitle = sc.courseID
+                          JOIN users u ON u.fullName = sc.userStudentID
+                          WHERE c.id = ?";
         $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
         
         // Get course assignments
@@ -188,12 +233,11 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_P
     
     // Get course ID
     $course_id = (int)$db_handle->cleanData($_POST['id']);
-    
+
     // Verify this course is taught by this teacher
-    $verify_query = "SELECT id FROM courses WHERE id = ? AND teacher_id = ?";
-    $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-    
-    if (empty($result)) {
+    $is_owner = $db_handle->isCourseOwnedByTeacher($course_id, $user_id);
+
+    if (!$is_owner) {
         $response = array('success' => false, 'message' => 'Course not found or you do not have permission to update it');
     } else {
         // Validate required fields
@@ -238,41 +282,51 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_P
                                     lastUpdated = ? 
                                     WHERE id = ?";
                     
-                    $result = $db_handle->executeUpdatePrepared($update_query, "sssississi", 
-                        [$courseTitle, $courseCode, $courseDescription, $credits, $semester, 
+                    $result = $db_handle->executeUpdatePrepared($update_query, "sssissssi",
+                        [$courseTitle, $courseCode, $courseDescription, $credits, $semester,
                          $startDate, $endDate, $lastUpdated, $course_id]);
                     
                     if ($result) {
                         // Update academic calendar events for the course
-                        $calendar_manager = new CalendarManager();
-                        
+                        $calendar_manager = new CalendarManager($db_handle);
+
                         // Delete existing events for this course
                         $calendar_manager->deleteEventsByReference('course', $course_id);
-                        
+
                         // Add course start event
                         $calendar_manager->createEvent(
-                            "$courseTitle Start", 
-                            "First day of $courseTitle ($courseCode)", 
-                            $startDate, 
+                            "$courseTitle Start",
+                            "First day of $courseTitle ($courseCode)",
                             $startDate,
+                            $startDate,
+                            false,
                             'course',
-                            $course_id
+                            $course_id,
+                            null,
+                            $user_id
                         );
-                        
+
                         // Add course end event
                         $calendar_manager->createEvent(
-                            "$courseTitle End", 
-                            "Last day of $courseTitle ($courseCode)", 
-                            $endDate, 
+                            "$courseTitle End",
+                            "Last day of $courseTitle ($courseCode)",
                             $endDate,
+                            $endDate,
+                            false,
                             'course',
-                            $course_id
+                            $course_id,
+                            null,
+                            $user_id
                         );
-                        
+
                         // Get enrolled students
-                        $students_query = "SELECT student_id FROM studentcourse WHERE course_id = ?";
+                        $students_query = "SELECT u.id AS student_id
+                                          FROM studentcourse sc
+                                          JOIN courses c ON c.courseTitle = sc.courseID
+                                          JOIN users u ON u.fullName = sc.userStudentID
+                                          WHERE c.id = ?";
                         $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
-                        
+
                         // Notify enrolled students of course updates
                         if (!empty($students)) {
                             foreach ($students as $student) {
@@ -320,45 +374,59 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_P
     
     // Get course ID
     $course_id = (int)$db_handle->cleanData($_POST['id']);
-    
+
     // Verify this course is taught by this teacher
-    $verify_query = "SELECT courseTitle, courseCode FROM courses WHERE id = ? AND teacher_id = ?";
-    $course = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-    
+    if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
+        $course = [];
+    } else {
+        $verify_query = "SELECT courseTitle, courseCode FROM courses WHERE id = ?";
+        $course = $db_handle->executeSelectPrepared($verify_query, "i", [$course_id]);
+    }
+
     if (empty($course)) {
         $response = array('success' => false, 'message' => 'Course not found or you do not have permission to delete it');
     } else {
         $courseTitle = $course[0]['courseTitle'];
         $courseCode = $course[0]['courseCode'];
-        
+        $courseTitleForFk = $courseTitle;
+
         // Start transaction
         $db_handle->beginTransaction();
-        
+
         try {
             // Delete course assignments
             $delete_assignments_query = "DELETE FROM assignment WHERE course_id = ?";
             $db_handle->executeUpdatePrepared($delete_assignments_query, "i", [$course_id]);
-            
+
             // Get student IDs enrolled in this course for notifications
-            $students_query = "SELECT student_id FROM studentcourse WHERE course_id = ?";
-            $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
-            
-            // Delete course enrollments
-            $delete_enrollments_query = "DELETE FROM studentcourse WHERE course_id = ?";
-            $db_handle->executeUpdatePrepared($delete_enrollments_query, "i", [$course_id]);
-            
+            $students_query = "SELECT u.id AS student_id
+                              FROM studentcourse sc
+                              JOIN users u ON u.fullName = sc.userStudentID
+                              WHERE sc.courseID = ?";
+            $students = $db_handle->executeSelectPrepared($students_query, "s", [$courseTitleForFk]);
+
+            // Delete course enrollments (legacy table keyed by courseTitle;
+            // also cascades automatically via FK, this is explicit for clarity)
+            $delete_enrollments_query = "DELETE FROM studentcourse WHERE courseID = ?";
+            $db_handle->executeUpdatePrepared($delete_enrollments_query, "s", [$courseTitleForFk]);
+
             // Delete grades for this course
             $delete_grades_query = "DELETE FROM course_grades WHERE course_id = ?";
             $db_handle->executeUpdatePrepared($delete_grades_query, "i", [$course_id]);
-            
+
             // Delete related attendance records
-            $delete_attendance_query = "DELETE FROM attendance WHERE course_id = ?";
+            $delete_attendance_query = "DELETE FROM attendance WHERE courseID = ?";
             $db_handle->executeUpdatePrepared($delete_attendance_query, "i", [$course_id]);
-            
+
             // Delete calendar events related to this course
-            $calendar_manager = new CalendarManager();
+            $calendar_manager = new CalendarManager($db_handle);
             $calendar_manager->deleteEventsByReference('course', $course_id);
-            
+            $calendar_manager->deleteEventsByReference('exam', $course_id);
+
+            // Delete instructor assignment for this course
+            $delete_instructorcourse_query = "DELETE FROM instructorcourse WHERE courseID = ?";
+            $db_handle->executeUpdatePrepared($delete_instructorcourse_query, "s", [$courseTitleForFk]);
+
             // Delete the course itself
             $delete_course_query = "DELETE FROM courses WHERE id = ?";
             $result = $db_handle->executeUpdatePrepared($delete_course_query, "i", [$course_id]);
@@ -400,28 +468,4 @@ else {
     exit();
 }
 
-// Calendar Manager Class
-class CalendarManager {
-    private $db_handle;
-    
-    public function __construct() {
-        $this->db_handle = new DBController();
-    }
-    
-    public function createEvent($title, $description, $start_date, $end_date, $reference_type, $reference_id) {
-        $insert_query = "INSERT INTO academic_calendar (title, description, start_date, end_date, reference_type, reference_id) 
-                        VALUES (?, ?, ?, ?, ?, ?)";
-        
-        return $this->db_handle->executeUpdatePrepared(
-            $insert_query, 
-            "sssssi", 
-            [$title, $description, $start_date, $end_date, $reference_type, $reference_id]
-        );
-    }
-    
-    public function deleteEventsByReference($reference_type, $reference_id) {
-        $delete_query = "DELETE FROM academic_calendar WHERE reference_type = ? AND reference_id = ?";
-        return $this->db_handle->executeUpdatePrepared($delete_query, "si", [$reference_type, $reference_id]);
-    }
-}
 ?>

@@ -1,6 +1,10 @@
 <?php
-session_start();
-require_once "dbcontroller.php";
+// Server-side authorization gate: instructor only. Runs before any other
+// logic so nothing is emitted to an unauthenticated or wrong-role caller.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('instructor');
+
+require_once "../../../core/DBController.php";
 
 // Check if user is logged in and is a teacher (role = 1)
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
@@ -22,32 +26,45 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $submission_id = $db_handle->cleanData($_POST['id']);
         
         // Verify that this submission is for a course the teacher owns
-        $verify_query = "SELECT s.id, s.file_path 
+        $verify_query = "SELECT s.id, s.file_path, a.course_id
                          FROM assignment_submissions s
                          JOIN assignment a ON s.assignment_id = a.id
-                         JOIN courses c ON a.course_id = c.id 
-                         WHERE s.id = ? AND c.teacher_id = ?";
-        $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$submission_id, $user_id]);
-        
+                         JOIN courses c ON a.course_id = c.id
+                         WHERE s.id = ?";
+        $result = $db_handle->executeSelectPrepared($verify_query, "i", [$submission_id]);
+
+        if (!empty($result) && !$db_handle->isCourseOwnedByTeacher($result[0]['course_id'], $user_id)) {
+            $result = [];
+        }
+
         if (empty($result)) {
             $response = array('success' => false, 'message' => 'You do not have permission to delete this submission');
         } else {
             $submission = $result[0];
-            
+
             // Begin transaction to ensure all related data is deleted
             $db_handle->beginTransaction();
-            
+
             try {
-                // Delete grade if exists
-                $db_handle->executeUpdatePrepared("DELETE FROM grades WHERE submission_id = ?", "i", [$submission_id]);
-                
-                // Delete submission
+                // Delete submission (grade data lives on the submission row
+                // itself - score/feedback - there is no separate `grades` table)
                 $result = $db_handle->executeUpdatePrepared("DELETE FROM assignment_submissions WHERE id = ?", "i", [$submission_id]);
                 
                 if ($result) {
-                    // Delete the file if it exists
-                    if (!empty($submission['file_path']) && file_exists($_SERVER['DOCUMENT_ROOT'] . $submission['file_path'])) {
-                        unlink($_SERVER['DOCUMENT_ROOT'] . $submission['file_path']);
+                    // Delete the file if it exists. file_path is stored relative to the
+                    // uploads/ directory (e.g. "assignments/foo.pdf"), so resolve it from
+                    // there rather than DOCUMENT_ROOT (which never actually matched - on
+                    // this Windows/XAMPP setup DOCUMENT_ROOT uses forward slashes while
+                    // the real filesystem path uses backslashes, so file_exists() always
+                    // returned false and submission files were never actually cleaned up).
+                    if (!empty($submission['file_path'])) {
+                        $uploadsDir = realpath(__DIR__ . '/../../../../uploads/');
+                        if ($uploadsDir !== false) {
+                            $fullPath = $uploadsDir . DIRECTORY_SEPARATOR . str_replace('/', DIRECTORY_SEPARATOR, $submission['file_path']);
+                            if (file_exists($fullPath)) {
+                                unlink($fullPath);
+                            }
+                        }
                     }
                     
                     $db_handle->commitTransaction();

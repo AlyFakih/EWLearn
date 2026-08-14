@@ -5,6 +5,24 @@
   --black-color: #111111;
   --less-black: #1d1919;
   --dark-red: #810000;
+
+  /* Structural tokens added for admin-enhance.css. No new hues - every color
+     below is either an existing value renamed for clarity, or a tint/shade
+     derived from the existing brand red/black, so the identity is unchanged. */
+  --dark-red-light: #a3302f;
+  --surface: var(--less-black);
+  --surface-2: #262222;
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.4);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --space-1: 6px;
+  --space-2: 10px;
+  --space-3: 16px;
+  --space-4: 22px;
+  --space-5: 30px;
 }
 * {
   padding: 0;
@@ -47,9 +65,12 @@ body {
   width: 60px;
   height: 100vh;
   padding: 20px !important;
-  overflow: hidden;
+  overflow-x: hidden; /* still hides the label text while collapsed */
+  overflow-y: auto; /* was overflow:hidden, which clipped the bottom nav
+                        items (Messages, Logout) off-screen on shorter
+                        viewports instead of letting the sidebar scroll */
   transition: 0.5s;
- 
+
 }
 .menu:hover {
   width: 260px;
@@ -58,6 +79,8 @@ ul {
   list-style: none;
   position: relative;
   height: 95%;
+  display: flex;
+  flex-direction: column;
 }
 ul li a {
   display: block;
@@ -81,9 +104,15 @@ ul li a:hover,
   background-color: #000000;
 }
 
+.logout-item {
+  /* Pinned to the bottom of the flex column instead of position:absolute
+     with a fixed offset - the old absolute positioning didn't reserve any
+     space for itself, so adding a menu item shifted every item below it
+     downward while the logout link stayed put, overlapping "Messages". */
+  margin-top: auto;
+}
+
 .logout {
-  position: absolute;
-  bottom: 0;
   width: 85%;
   background-color: #ff0000;
 }
@@ -97,6 +126,16 @@ ul li a i {
   width: 100%;
   transition: 0.5s;
  margin-left: 105px;
+  /* `body` is a flex container (see above), which makes .bodydash a flex item.
+     Flex items default to `min-width: auto`, i.e. they refuse to shrink below
+     the intrinsic width of their content - an unconstrained table, a Bootstrap
+     grid row, a Chart.js canvas - so any one wide element on any section
+     balloons this column, and with it the whole page, into horizontal scroll.
+     min-width: 0 lets it shrink to the viewport as CSS intends; overflow-x is
+     a safety net so if something still needs to scroll, it scrolls inside the
+     content area instead of taking the whole page with it. */
+  min-width: 0;
+  overflow-x: auto;
 }
 .title-info {
   background-color: var(--dark-red);
@@ -164,6 +203,15 @@ ul li a i {
   border-radius: 10px;
   box-shadow: 0 7px 25px rgba(0, 0, 0, 0.08);
   /* width:100%; */
+  /* Same grid-item min-width:auto issue as .bodydash above, one level down:
+     a grid track won't shrink past its content's intrinsic width either, and
+     Chart.js sizes its <canvas> in pixels at render time - so the canvas's
+     width becomes a floor the chart card (and everything around it) can't
+     shrink below without this. */
+  min-width: 0;
+}
+.chart canvas {
+  max-width: 100%;
 }
 .chart h2 {
   margin-bottom: 8px;
@@ -177,6 +225,19 @@ ul li a i {
     .menu{
        position: fixed;
     }
+  /* The desktop sidebar expands on :hover, which has no equivalent on a
+     touchscreen - and where mobile browsers DO simulate ":hover" on tap, it
+     typically sticks until the user taps elsewhere, so a single tap on any
+     nav link could leave the sidebar pinned open at 260px/305px margin,
+     squeezing the content column down to a sliver. Below this breakpoint the
+     rail stays a stable, always-tappable icon-only column instead - desktop's
+     hover-to-expand is untouched above 880px. */
+  .menu:hover {
+    width: 60px;
+  }
+  .menu:hover + .bodydash {
+    margin-left: 105px;
+  }
   .charts {
     grid-template-columns: 1fr;
     margin: 20px 10px 10px 0;

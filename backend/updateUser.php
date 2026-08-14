@@ -1,4 +1,9 @@
 <?php
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 require './config.php';
 
 // Fetch data from the POST request
@@ -33,21 +38,34 @@ $country = $_POST['country'];
 //     exit;
 // }
 
-// Perform the update operation
-$query = "UPDATE users 
-          SET fullName = '$fullName', 
-              blood = '$bloodType', 
-              email = '$email', 
-              mobile = '$phoneNumber', 
-              role = '$role', 
-              country = '$country'
-                 
-          WHERE email = '$email'";
+// Only these roles may ever be written; without this an admin-supplied (or
+// tampered) value could set an arbitrary role string on the account.
+$allowedRoles = ['admin', 'instructor', 'student'];
+if (!in_array($role, $allowedRoles, true)) {
+    echo json_encode(["status" => "error", "message" => "Invalid role"]);
+    exit;
+}
 
-$result = mysqli_query($conn, $query);
+// Perform the update operation. Parameterised - every one of these values comes
+// straight from the request and was previously interpolated into the SQL.
+$query = "UPDATE users
+          SET fullName = ?,
+              blood = ?,
+              email = ?,
+              mobile = ?,
+              role = ?,
+              country = ?
+          WHERE email = ?";
+
+$stmt = $conn->prepare($query);
+$stmt->bind_param("sssssss", $fullName, $bloodType, $email, $phoneNumber, $role, $country, $email);
+$result = $stmt->execute();
+
 if ($result) {
-    echo json_encode(["status" => "success", "message" => "User updated successfully", "affected_rows" => mysqli_affected_rows($conn)]);
+    echo json_encode(["status" => "success", "message" => "User updated successfully", "affected_rows" => $stmt->affected_rows]);
 } else {
-    echo json_encode(["status" => "error", "message" => "Error updating user: " . mysqli_error($conn)]);
+    // Do not echo mysqli_error() to the client: it leaks schema and query text.
+    error_log("updateUser.php failed: " . $stmt->error);
+    echo json_encode(["status" => "error", "message" => "Error updating user"]);
 }
 ?>

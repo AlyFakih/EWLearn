@@ -1,363 +1,201 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+$page_title = "Profile";
+$current_page = "profile";
+$page_css = "profile-dashboard";
+$page_js = "profile";
 
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "student_management";
+include_once "php/header.php";
+// $db_handle, $user_id, $teacher (row from users) are now provided by header.php
 
-// Create connection
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Set the instructor ID based on your application logic
-$instructorID = 1; // Replace with the actual instructor ID
-
-// CRUD Operations
-
-
-// Create (Add) Operation
+// Create (Add) skill
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'add') {
     $subjectIcon = $_POST['subjectIcon'];
-    $instructorID = isset($_POST['instructorID']) ? intval($_POST['instructorID']) : null; // Validate as integer
     $subjectName = $_POST['subjectName'];
     $progressPercentage = $_POST['progressPercentage'];
     $experience = $_POST['experience'];
 
-    $sqlInsert = "INSERT INTO instructor_skills (instructorID, subjectIcon, subjectName, progressPercentage, experience) VALUES (?, ?, ?, ?, ?)";
-    $stmtInsert = $conn->prepare($sqlInsert);
-    $stmtInsert->bind_param("issis", $instructorID, $subjectIcon, $subjectName, $progressPercentage, $experience);
-
-    if ($stmtInsert->execute()) {
-        header("Location: profile-dashboard.php");
-        exit();
-    } else {
-        die("Error in SQL query execution: " . $stmtInsert->error);
-    }
+    $db_handle->executeUpdatePrepared(
+        "INSERT INTO instructor_skills (instructorID, subjectIcon, subjectName, progressPercentage, experience) VALUES (?, ?, ?, ?, ?)",
+        "issis",
+        [$user_id, $subjectIcon, $subjectName, $progressPercentage, $experience]
+    );
+    header("Location: profile-dashboard.php");
+    exit();
 }
 
-// Ensure $stmtInsert is always defined before trying to close it
-if (isset($stmtInsert)) {
-    $stmtInsert->close();  // Close the statement outside the conditional block
-}
-
-
-
-
-// Read Operation
-$sqlSkills = "SELECT  `id`, `subjectIcon`, `subjectName`, `progressPercentage`, `experience` FROM `instructor_skills`;";
-$stmtSkills = $conn->prepare($sqlSkills);
-
-if ($stmtSkills === false) {
-    die("Error in SQL query preparation: " . $conn->error);
-}
-
-$resultSkills = $stmtSkills->execute();
-
-if ($resultSkills === false) {
-    die("Error in SQL query execution: " . $stmtSkills->error);
-}
-
-$resultSkills = $stmtSkills->get_result();
-
-$skillsData = array();
-while ($rowSkills = $resultSkills->fetch_assoc()) {
-    $skillsData[] = $rowSkills;
-}
-
-$stmtSkills->close();
-
-// Update Operation
+// Update skill
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'update') {
     $subjectIcon = $_POST['subjectIcon'];
     $subjectName = $_POST['subjectName'];
     $progressPercentage = $_POST['progressPercentage'];
     $experience = $_POST['experience'];
+    $skill_id = (int)$_POST['id'];
 
-    $sqlUpdate = "UPDATE instructor_skills SET subjectIcon=?, subjectName=?, progressPercentage=?, experience=? WHERE id=?";
-    $stmtUpdate = $conn->prepare($sqlUpdate);
-    $stmtUpdate->bind_param("ssisi", $subjectIcon, $subjectName, $progressPercentage, $experience, $_POST['id']);
-
-    if ($stmtUpdate->execute()) {
-        echo "Update card success"; // Send a success message to the client
-    } else {
-        echo "Failed to update the current card: "; // Send an error message to the client
-    }
-
-    $stmtUpdate->close();
+    $affected = $db_handle->executeUpdatePrepared(
+        "UPDATE instructor_skills SET subjectIcon=?, subjectName=?, progressPercentage=?, experience=? WHERE id=? AND instructorID=?",
+        "ssisii",
+        [$subjectIcon, $subjectName, $progressPercentage, $experience, $skill_id, $user_id]
+    );
+    echo $affected > 0 ? "Update card success" : "Failed to update the current card";
+    exit();
 }
 
-// Delete Operation
+// Delete skill
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action']) && $_POST['action'] == 'delete') {
-    $sqlDelete = "DELETE FROM instructor_skills WHERE id=?";
-    $stmtDelete = $conn->prepare($sqlDelete);
-    $stmtDelete->bind_param("i", $_POST['id']);
-
-    if ($stmtDelete->execute()) {
-        echo "delete the card success"; // Send a success message to the client
-    } else {
-        echo "Failed to delete the card: "; // Send an error message to the client
-    }
-
-    $stmtDelete->close();
+    $skill_id = (int)$_POST['id'];
+    $affected = $db_handle->executeUpdatePrepared(
+        "DELETE FROM instructor_skills WHERE id=? AND instructorID=?",
+        "ii",
+        [$skill_id, $user_id]
+    );
+    echo $affected > 0 ? "delete the card success" : "Failed to delete the card";
+    exit();
 }
 
-// Fetch user data based on the provided user ID (in this case, 4)
-$userID = 3;
-$sql = "SELECT `fullName`, `image`, `country`, `email`, `mobile` FROM `users` WHERE id = $userID";
-$result = $conn->query($sql);
+// Read skills for this instructor
+$skillsData = $db_handle->executeSelectPrepared(
+    "SELECT id, subjectIcon, subjectName, progressPercentage, experience FROM instructor_skills WHERE instructorID = ?",
+    "i",
+    [$user_id]
+);
 
-// Initialize variables with defaults
-$fullName = "User";
-$image = "./images/logo.jpg";
-$country = "Not specified";
-$email = "No email";
-$mobile = "No mobile";
-
-if ($result->num_rows > 0) {
-    // Output data of each row
-    $row = $result->fetch_assoc();
-    
-    // Only override defaults if values are set
-    if (isset($row["fullName"])) $fullName = $row["fullName"];
-    if (isset($row["image"])) $image = $row["image"];
-    if (isset($row["country"])) $country = $row["country"];
-    if (isset($row["email"])) $email = $row["email"];
-    if (isset($row["mobile"])) $mobile = $row["mobile"];
-} else {
-    echo "<div class='alert alert-warning'>User data not found. Displaying defaults.</div>";
-}
-
-
-// Close the database connection
-$conn->close();
+$fullName = $teacher['fullName'] ?: 'User';
+// users.image is stored relative to frontend/images/ (matches the Student
+// Dashboard's equivalent), not this page's own directory
+$image = !empty($teacher['image']) ? '../../images/' . $teacher['image'] : './images/logo.jpg';
+$country = $teacher['country'] ?: 'Not specified';
+$email = $teacher['email'] ?: 'No email';
+$mobile = $teacher['mobile'] ?: 'No mobile';
 ?>
 
+<div class="profile-grid">
+    <div class="card profile-card">
+        <div class="profile-photo">
+            <img id="profileImage" src="<?php echo htmlspecialchars($image); ?>" alt="<?php echo htmlspecialchars($fullName); ?>">
+            <label for="profileImageInput" class="photo-edit-btn" title="Change profile photo">
+                <i class="fas fa-pencil-alt"></i>
+            </label>
+            <input type="file" id="profileImageInput" accept="image/jpeg,image/png,image/gif,image/webp" hidden>
+        </div>
+        <div class="about">
+            <h5>Name</h5>
+            <p data-field="fullName"><span class="field-value"><?php echo htmlspecialchars($fullName); ?></span> <i class="fas fa-pencil-alt"></i></p>
 
+            <h5>Contact</h5>
+            <p data-field="mobile"><span class="field-value"><?php echo htmlspecialchars($mobile); ?></span> <i class="fas fa-pencil-alt"></i></p>
 
-<!DOCTYPE html>
-<html lang="en">
+            <h5>Email</h5>
+            <p data-field="email"><span class="field-value"><?php echo htmlspecialchars($email); ?></span> <i class="fas fa-pencil-alt"></i></p>
 
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/dashboard-menu.css">
-    <link rel="stylesheet" href="./css/profile-dashboard.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Sharp" rel="stylesheet">
-    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
-    <title>Profile</title>
-</head>
-
-<body>
-    <div class="menu">
-        <ul>
-
-            <li class="profile">
-                <div class="img-box">
-                    <img src="./images/logo.jpg" alt="logo image">
-                </div>
-                <h2>Ali Fakih</h2>
-            </li>
-            <li>
-                <a class="active" href="./profile-dashboard.php">
-                    <i class="fas fa-home"></i>
-                    <p>Profile</p>
-                </a>
-            </li>
-
-            <li>
-                <a href="./course-dashboard.php">
-                    <i class="fas fa-book"></i>
-                    <p>Courses</p>
-                </a>
-            </li>
-
-            <li>
-                <a href="./student-dashboard.php">
-                    <i class="fas fa-user-group"></i>
-                    <p>Students</p>
-                </a>
-            </li>
-            <li>
-                <a href="./exam-dashboard.php">
-                    <i class="fas fa-pencil-alt"></i>
-                    <p>Exams</p>
-                </a>
-            </li>
-            <li>
-                <a href="./grades-dashboard.php">
-                    <i class="fas fa-graduation-cap"></i>
-                    <p>Grades</p>
-                </a>
-            </li>
-            <li>
-                <a href="./assignment-dashboard.php">
-                    <i class="fas fa-tasks"></i>
-                    <p>Assignemts</p>
-                </a>
-            </li>
-            <li>
-                <a href="./attendence-dashboard.php">
-                    <i class="fas fa-user-check"></i>
-                    <p>Attendance</p>
-                </a>
-            </li>
-            <li class="log-out">
-                <a href="#">
-                    <i class="fas fa-sign-out"></i>
-                    <p>Log Out</p>
-                </a>
-            </li>
-        </ul>
+            <h5>Country</h5>
+            <p data-field="country"><span class="field-value"><?php echo htmlspecialchars($country); ?></span> <i class="fas fa-pencil-alt"></i></p>
+        </div>
     </div>
 
-    <div class="container">
-        <div class="cont-skill">
-            <aside>
-
-                <!-----------------------   Profle Section starts    -------------------------------------------------------------------------------->
-                <div class="profiles">
-                    <div class="top">
-                        <div class="profiles-photo">
-                            <img src="<?php echo $image; ?>" alt="<?php echo $fullName; ?>">
-                            <i class="fas fa-pencil-alt"></i>
-                        </div>
-                    </div>
-
-                    <div class="about">
-                        <h5>Name</h5>
-                        <p><?php echo $fullName; ?> <i class="fas fa-pencil-alt"></i></p>
-
-                        <h5>Contact</h5>
-                        <p><?php echo $mobile; ?> <i class="fas fa-pencil-alt"></i></p>
-                        <h5>Email</h5>
-                        <p><?php echo $email; ?> <i class="fas fa-pencil-alt"></i></p>
-                        <h5>Country</h5>
-                        <p><?php echo $country; ?> <i class="fas fa-pencil-alt"></i></p>
-                    </div>
-                </div>
-            </aside>
-
-            <main>
-                <div class="title">
-                    <h2 id="#skill">Skills</h2>
-                    <div>
-                        <button onclick="showPopup()">Add</button>
-                        <button onclick="showUpdateForm()">Update</button>
-                        <button type="button" id="deleteButton" onclick="deleteSelectedCard()">Delete</button>
-                    </div>
-                </div>
-
-                <div class="subjects" id="subjectContainer">
-                    <?php
-                    // Loop through the fetched data and display subjects dynamically
-                    if (!empty($skillsData)) {
-                        foreach ($skillsData as $rowSkills) {
-                            echo "<div class='eg' data-id='" . $rowSkills['id'] . "' onclick='selectCard(this)'>";
-                            echo "<span class='material-icons-sharp'>" . $rowSkills['subjectIcon'] . "</span>";
-                            echo "<h3>" . $rowSkills['subjectName'] . "</h3>";
-                            echo "<div class='progress'>";
-                            echo "<svg><circle cx='38' cy='38' r='36'></circle></svg>";
-                            echo "<div class='number'><p>" . $rowSkills['progressPercentage'] . "%</p></div>";
-                            echo "</div>";
-                            echo "<small class='text-muted'>" . $rowSkills['experience'] . "</small>";
-                            echo "</div>";
-                        }
-                    } else {
-                        echo "<p>No results found</p>";
-                    }
-                    ?>
-                </div>
-
-
-
-
-
-                <div id="popup" class="popup">
-                    <span class="close" onclick="closePopup()">&times;</span>
-                    <h3>Add New Card</h3>
-                    <form id="cardForm">
-                        <label for="subjectIcon">Subject Icon:</label>
-                        <select id="subjectIcon" required>
-                            <option value="code"><i class="fas fa-code"></i> Programming</option>
-                            <option value="database"><i class="fas fa-database"></i> Database</option>
-                            <option value="laptop"><i class="fas fa-laptop-code"></i> IT</option>
-                            <option value="computer"><i class="fas fa-desktop"></i> Computer Science</option>
-                            <option value="network"><i class="fas fa-network-wired"></i> Networking</option>
-                            <option value="drawing"><i class="fas fa-pen"></i> Drawing</option>
-                            <option value="security"><i class="fas fa-shield-alt"></i> Security</option>
-                        </select>
-
-                        <!-- Hidden input for instructorID (manually enterable) -->
-                        <label for="instructorID">Instructor ID:</label>
-                        <input type="text" id="instructorID" name="instructorID" required>
-
-                        <label for="subjectName">Title :</label>
-                        <input type="text" id="subjectName" required>
-
-                        <label for="progressPercentage">Strength %:</label>
-                        <input type="text" id="progressPercentage" required>
-
-                        <label for="experience">Experience:</label>
-                        <input type="text" id="experience" required>
-
-                        <button type="button" onclick="addCard()">Add Card</button>
-                    </form>
-
-                </div>
-
-                <div class="card-form" id="updateForm">
-                    <h3>Update Card</h3>
-                    <div class="form-design">
-                        <label for="updatedIcon">Icon:</label>
-                        <select id="updatedIcon">
-                            <option value="code"><i class="fas fa-code"></i> Programming</option>
-                            <option value="database"><i class="fas fa-database"></i> Database</option>
-                            <option value="laptop"><i class="fas fa-laptop-code"></i> IT</option>
-                            <option value="computer"><i class="fas fa-desktop"></i> Computer Science</option>
-                            <option value="network"><i class="fas fa-network-wired"></i> Networking</option>
-                            <option value="drawing"><i class="fas fa-pen"></i> Drawing</option>
-                            <option value="security"><i class="fas fa-shield-alt"></i> Security</option>
-                        </select>
-
-
-                    </div>
-
-                    <div class="form-design">
-                        <label for="updatedTitle"> Title:</label>
-                        <input type="text" id="updatedTitle">
-                    </div>
-                    <div class="form-design">
-                        <label for="updatedProgress"> Strenght %:</label>
-                        <input type="number" id="updatedProgress" min="0" max="100">
-                    </div>
-                    <div class="form-design">
-                        <label for="updatedDuration">Experience:</label>
-                        <input type="text" id="updatedDuration">
-                    </div>
-                    <div class="button-container">
-                        <button onclick="updateCard()">Update</button>
-                        <button onclick="hideUpdateForm()">Cancel</button>
-                    </div>
-                </div>
-
-
-
-            </main>
-
-
+    <div class="card">
+        <div class="card-header">
+            <h2>Skills &amp; Subjects</h2>
+            <div class="card-actions">
+                <button type="button" class="btn btn-primary" onclick="showPopup()"><i class="fas fa-plus"></i> Add</button>
+                <button type="button" class="btn btn-secondary" onclick="showUpdateForm()"><i class="fas fa-edit"></i> Update</button>
+                <button type="button" class="btn btn-danger" id="deleteButton" onclick="deleteSelectedCard()"><i class="fas fa-trash"></i> Delete</button>
+            </div>
         </div>
 
+        <div class="skills-grid" id="subjectContainer">
+            <?php if (!empty($skillsData)): ?>
+                <?php foreach ($skillsData as $rowSkills): ?>
+                    <div class="eg" data-id="<?php echo (int)$rowSkills['id']; ?>" onclick="selectCard(this)">
+                        <span class="material-icons-sharp"><?php echo htmlspecialchars($rowSkills['subjectIcon']); ?></span>
+                        <h3><?php echo htmlspecialchars($rowSkills['subjectName']); ?></h3>
+                        <div class="progress">
+                            <svg><circle cx="38" cy="38" r="36" style="--pct: <?php echo (int)$rowSkills['progressPercentage']; ?>;"></circle></svg>
+                            <div class="number"><p><?php echo (int)$rowSkills['progressPercentage']; ?>%</p></div>
+                        </div>
+                        <small class="text-muted"><?php echo htmlspecialchars($rowSkills['experience']); ?></small>
+                    </div>
+                <?php endforeach; ?>
+            <?php else: ?>
+                <div class="empty-state">
+                    <i class="fas fa-graduation-cap empty-icon"></i>
+                    <h3>No skills added yet</h3>
+                    <p>Showcase what you teach by adding a skill card.</p>
+                </div>
+            <?php endif; ?>
+        </div>
+
+        <div id="popup" class="modal-overlay">
+            <div class="modal-panel">
+                <span class="close" onclick="closePopup()">&times;</span>
+                <h3>Add New Skill</h3>
+                <form id="cardForm">
+                    <div class="form-group">
+                        <label for="subjectIcon">Subject Icon</label>
+                        <select id="subjectIcon" required>
+                            <option value="code">Programming</option>
+                            <option value="database">Database</option>
+                            <option value="laptop">IT</option>
+                            <option value="computer">Computer Science</option>
+                            <option value="network">Networking</option>
+                            <option value="drawing">Drawing</option>
+                            <option value="security">Security</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="subjectName">Title</label>
+                        <input type="text" id="subjectName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="progressPercentage">Strength %</label>
+                        <input type="number" id="progressPercentage" min="0" max="100" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="experience">Experience</label>
+                        <input type="text" id="experience" required>
+                    </div>
+                    <div class="card-actions">
+                        <button type="button" class="btn btn-primary" onclick="addCard()">Add Card</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <div class="modal-overlay" id="updateForm">
+            <div class="modal-panel">
+                <h3>Update Skill</h3>
+                <div class="form-group">
+                    <label for="updatedIcon">Icon</label>
+                    <select id="updatedIcon">
+                        <option value="code">Programming</option>
+                        <option value="database">Database</option>
+                        <option value="laptop">IT</option>
+                        <option value="computer">Computer Science</option>
+                        <option value="network">Networking</option>
+                        <option value="drawing">Drawing</option>
+                        <option value="security">Security</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="updatedTitle">Title</label>
+                    <input type="text" id="updatedTitle">
+                </div>
+                <div class="form-group">
+                    <label for="updatedProgress">Strength %</label>
+                    <input type="number" id="updatedProgress" min="0" max="100">
+                </div>
+                <div class="form-group">
+                    <label for="updatedDuration">Experience</label>
+                    <input type="text" id="updatedDuration">
+                </div>
+                <div class="card-actions">
+                    <button type="button" class="btn btn-primary" onclick="updateCard()">Update</button>
+                    <button type="button" class="btn btn-secondary" onclick="hideUpdateForm()">Cancel</button>
+                </div>
+            </div>
+        </div>
     </div>
+</div>
 
-    <script src="./js/profile.js"></script>
-
-</body>
-
-</html>
+<?php
+include_once "php/footer.php";
+?>

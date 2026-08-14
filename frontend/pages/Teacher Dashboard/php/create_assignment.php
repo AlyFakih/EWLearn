@@ -1,6 +1,10 @@
 <?php
-session_start();
-require_once "dbcontroller.php";
+// Server-side authorization gate: instructor only. Runs before any other
+// logic so nothing is emitted to an unauthenticated or wrong-role caller.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('instructor');
+
+require_once "../../../core/DBController.php";
 require_once "../../common/notifications.php";
 require_once "../../common/calendar.php";
 
@@ -12,8 +16,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
 }
 
 $db_handle = new DBController();
-$notification_manager = new NotificationManager();
-$calendar_manager = new CalendarManager();
+$notification_manager = new NotificationManager($db_handle);
+$calendar_manager = new CalendarManager($db_handle);
 $user_id = $_SESSION['user_id'];
 
 // Process form submission
@@ -30,42 +34,46 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $description = $db_handle->cleanData($_POST['description']);
         $deadline = $db_handle->cleanData($_POST['deadline']);
         $max_points = isset($_POST['max_points']) ? $db_handle->cleanData($_POST['max_points']) : 100;
-        
+
         // Verify that the teacher owns this course
-        $verify_query = "SELECT id FROM courses WHERE id = ? AND teacher_id = ?";
-        $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-        
-        if (empty($result)) {
+        if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
             $response = array('success' => false, 'message' => 'You do not have permission to create assignments for this course');
         } else {
-            // Insert the assignment
-            $insert_query = "INSERT INTO assignment (title, description, course_id, deadline, max_points, created_at) 
+            // Insert the assignment (due_date/max_score are the actual
+            // column names; studentID/studentName/courseName/date/status are
+            // legacy per-student fields that don't apply to a course-wide
+            // assignment and are nullable)
+            $insert_query = "INSERT INTO assignment (title, description, course_id, due_date, max_score, created_at)
                            VALUES (?, ?, ?, ?, ?, NOW())";
-            $result = $db_handle->executeUpdatePrepared($insert_query, "ssisd", 
+            $result = $db_handle->executeUpdatePrepared($insert_query, "ssisd",
                 [$title, $description, $course_id, $deadline, $max_points]);
-            
+
             if ($result) {
                 // Get the new assignment ID
                 $assignment_id = $db_handle->getLastInsertId();
-                
+
                 // Add calendar event for this assignment
-                $calendar_event = array(
-                    'title' => 'Assignment Due: ' . $title,
-                    'description' => $description,
-                    'start_date' => $deadline,
-                    'end_date' => $deadline, // Same as deadline for a due date
-                    'type' => 'assignment',
-                    'course_id' => $course_id,
-                    'color' => '#e74c3c', // Red for assignments
-                    'created_by' => $user_id
+                $calendar_manager->createEvent(
+                    'Assignment Due: ' . $title,
+                    $description,
+                    $deadline,
+                    $deadline,
+                    false,
+                    'assignment',
+                    $course_id,
+                    '#e74c3c',
+                    $user_id
                 );
-                
-                $event_id = $calendar_manager->createEvent($calendar_event);
-                
-                // Get all students enrolled in this course
-                $students_query = "SELECT student_id FROM studentcourse WHERE course_id = ?";
+
+                // Get all students enrolled in this course (studentcourse is
+                // keyed by users.fullName / courses.courseTitle)
+                $students_query = "SELECT u.id AS student_id
+                                  FROM studentcourse sc
+                                  JOIN courses c ON c.courseTitle = sc.courseID
+                                  JOIN users u ON u.fullName = sc.userStudentID
+                                  WHERE c.id = ?";
                 $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
-                
+
                 // Get course name for notifications
                 $course_query = "SELECT courseTitle FROM courses WHERE id = ?";
                 $course_result = $db_handle->executeSelectPrepared($course_query, "i", [$course_id]);

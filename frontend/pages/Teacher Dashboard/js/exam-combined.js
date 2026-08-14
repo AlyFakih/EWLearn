@@ -19,27 +19,20 @@ $(document).ready(function() {
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listMonth'
             },
             events: function(fetchInfo, successCallback, failureCallback) {
-                // Get exam events from database
+                // Get calendar events (calendar_api.php already returns
+                // FullCalendar-ready objects: start/end/title/color)
                 $.ajax({
-                    url: '../common/get_calendar_events.php',
+                    url: '../common/calendar_api.php',
                     type: 'GET',
                     data: {
+                        action: 'get_events',
                         start: fetchInfo.startStr,
-                        end: fetchInfo.endStr,
-                        type: 'exam'
+                        end: fetchInfo.endStr
                     },
                     success: function(result) {
                         try {
-                            const events = JSON.parse(result);
-                            successCallback(events.map(event => ({
-                                id: event.id,
-                                title: event.title,
-                                start: event.start_date,
-                                end: event.end_date,
-                                allDay: false,
-                                backgroundColor: '#810000',
-                                borderColor: '#810000'
-                            })));
+                            const events = typeof result === 'string' ? JSON.parse(result) : result;
+                            successCallback(events);
                         } catch (e) {
                             console.error('Error parsing calendar events:', e);
                             failureCallback(e);
@@ -72,7 +65,11 @@ $(document).ready(function() {
                     center: 'title',
                     right: ''
                 },
-                events: '../common/get_calendar_events.php',
+                events: {
+                    url: '../common/calendar_api.php',
+                    method: 'GET',
+                    extraParams: { action: 'get_events' }
+                },
                 contentHeight: 'auto'
             });
             miniCalendar.render();
@@ -115,7 +112,7 @@ $(document).ready(function() {
                 data: formData + '&action=add',
                 success: function(response) {
                     try {
-                        const result = JSON.parse(response);
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
                         if (result.success) {
                             // Add new row to table
                             if ($('#exams-table tbody .no-data').length) {
@@ -163,7 +160,7 @@ $(document).ready(function() {
                 data: formData + '&action=update',
                 success: function(response) {
                     try {
-                        const result = JSON.parse(response);
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
                         if (result.success) {
                             // Update the row in the table
                             const exam = result.exam;
@@ -244,7 +241,7 @@ $(document).ready(function() {
                 },
                 success: function(response) {
                     try {
-                        const result = JSON.parse(response);
+                        const result = typeof response === 'string' ? JSON.parse(response) : response;
                         
                         if (result.success) {
                             const exam = result.exam;
@@ -289,7 +286,7 @@ $(document).ready(function() {
                     },
                     success: function(response) {
                         try {
-                            const result = JSON.parse(response);
+                            const result = typeof response === 'string' ? JSON.parse(response) : response;
                             
                             if (result.success) {
                                 // Remove the row with animation
@@ -339,7 +336,7 @@ $(document).ready(function() {
             },
             success: function(response) {
                 try {
-                    const result = JSON.parse(response);
+                    const result = typeof response === 'string' ? JSON.parse(response) : response;
                     
                     if (result.success) {
                         const exam = result.exam;
@@ -385,17 +382,19 @@ $(document).ready(function() {
     
     // Initialize notifications
     function initNotifications() {
-        // Initial check for notifications
+        // Initial check for notifications. No polling interval here: this
+        // page also loads the shared notifications.js widget (via
+        // header_includes.php), which already polls the same
+        // notification_api.php?action=count endpoint every 30s and updates
+        // the same #notification-badge element - a second interval here was
+        // a duplicate, redundant poll of the same endpoint/element.
         updateNotificationCount();
-        
-        // Poll for new notifications every 60 seconds
-        setInterval(updateNotificationCount, 60000);
     }
     
     // Update notification count
     function updateNotificationCount() {
         $.ajax({
-            url: '../common/get_notifications_count.php',
+            url: '../common/notification_api.php?action=count',
             type: 'GET',
             success: function(response) {
                 try {

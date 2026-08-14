@@ -489,7 +489,7 @@ h3 {
   height: 80vh;
   padding: 20px;
 
-  background: url("../../assets/images/coverImg.png") left center/cover
+  background: url("../../assets/images/coverImg.webp") left center/cover
     no-repeat; /* Adjusted background position */
   /* filter: brightness(80%); */
 

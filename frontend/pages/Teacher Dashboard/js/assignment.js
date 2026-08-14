@@ -83,7 +83,7 @@ function showGradeModal(submissionId) {
 
 // Hide modal when Cancel/Close buttons are clicked
 $('#closeForm, #closeViewModal, #closeGradeModal').on('click', function() {
-  $('.modal').fadeOut();
+  $('.modal-overlay').fadeOut();
 });
 
 $(document).ready(function() {
@@ -125,64 +125,6 @@ $(document).ready(function() {
         $('#addModal').fadeOut();
       }
     });
-  });
-
-  // update
-  $(document).on('click', '#table1 .edit', function () {
-    $('#table1').find('.save, .cancel').hide();
-    $('#table1').find('.edit').show();
-    $(this).hide().siblings('.save, .cancel').show();
-
-    $(this).closest('tr').find('td[data-id]').each(function () {
-      if (!$(this).is(':last-child')) { // Exclude the last child (buttons)
-        var inp = $(this).find('input');
-        if (inp.length) {
-          $(this).text(inp.val());
-        } else {
-          $(this).attr('contenteditable', 'true');
-        }
-      }
-    });
-  });
-
-  // cancel
-  $(document).on('click', '#table1 .cancel', function () {
-    $('#table1').find('.save, .cancel').hide();
-    $(this).hide().siblings('.edit').show();
-    $(this).closest('tr').find('td[data-id]').each(function () {
-      $(this).attr('contenteditable', 'false');
-    });
-  });
-
-  // insertion function (SAVE button)
-  $(document).on('click', '#table1 .save', function () {
-    var $btn = $(this);
-    $('#table1').find('.save, .cancel').hide();
-    $btn.hide().siblings('.edit').show();
-    params = "";
-
-    var id = $btn.data('id');
-
-    $btn.closest('tr').find('td[data-id]').each(function () {
-      $(this).attr('contenteditable', 'false');
-      if (params != "") {
-        params += "&";
-      }
-      params += $(this).data('id') + "=" + $(this).text();
-    });
-
-    params += "&id=" + id;
-
-    if (params != "") {
-      $.ajax({
-        url: "php/function.php",
-        type: "POST",
-        data: params,
-        success: function (response) {
-          $("#ajax-response").html(response);
-        }
-      });
-    }
   });
 
   // delete
@@ -269,11 +211,11 @@ $(document).ready(function() {
 
   // Hide modals when clicking outside the form
   $(document).on('click', function (e) {
-    if (!$(e.target).closest('.modal').length && 
-        !$(e.target).is('#showForm') && 
-        !$(e.target).closest('.view-btn').length && 
+    if (!$(e.target).closest('.modal-overlay').length &&
+        !$(e.target).is('#showForm') &&
+        !$(e.target).closest('.view-btn').length &&
         !$(e.target).closest('.grade-btn').length) {
-      $('.modal').fadeOut();
+      $('.modal-overlay').fadeOut();
     }
   });
 
@@ -288,7 +230,7 @@ $(document).ready(function() {
         center: 'title',
         right: ''
       },
-      events: '../../common/calendar_api.php?action=get_events',
+      events: '../common/calendar_api.php?action=get_events',
       eventClick: function (info) {
         window.location.href = '#calendar';
       }

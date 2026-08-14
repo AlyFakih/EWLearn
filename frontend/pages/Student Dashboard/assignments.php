@@ -1,12 +1,16 @@
 <?php
-session_start();
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
   header("Location: ../loginRegister.html");
   exit();
 }
 
-require_once "php/dbcontroller.php";
+require_once "../../core/DBController.php";
 $db_handle = new DBController();
 
 $user_id = $_SESSION['user_id'];

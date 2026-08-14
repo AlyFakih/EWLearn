@@ -22,7 +22,7 @@ function initCalendar() {
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
             },
-            events: 'php/get_calendar_events.php',
+            events: { url: '../common/calendar_api.php', method: 'GET', extraParams: { action: 'get_events' } },
             eventClick: function(info) {
                 // Handle event click - show details in a modal or navigate
                 if (info.event.url) {
@@ -32,6 +32,7 @@ function initCalendar() {
             }
         });
         
+        window.calendar = calendar;
         calendar.render();
     }
 }
@@ -49,26 +50,28 @@ function initMiniCalendar() {
                 right: ''
             },
             height: 'auto',
-            events: 'php/get_calendar_events.php'
+            events: { url: '../common/calendar_api.php', method: 'GET', extraParams: { action: 'get_events' } }
         });
-        
+
+        window.miniCalendar = miniCalendar;
         miniCalendar.render();
     }
 }
 
 // Initialize notification handling
 function initNotifications() {
-    // Check for notification badge updates
+    // Check for notification badge updates. No polling interval here: this
+    // page also loads the shared notifications.js widget (via
+    // header_includes.php), which already polls notification_api.php?action=count
+    // every 30s and updates the same #notification-badge element - a second
+    // interval here was a duplicate, redundant poll of the same endpoint/element.
     updateNotificationBadge();
-    
-    // Set interval to check for new notifications
-    setInterval(updateNotificationBadge, 60000); // Check every minute
 }
 
 // Update the notification badge count
 function updateNotificationBadge() {
     $.ajax({
-        url: '../../common/get_notifications_count.php',
+        url: '../common/notification_api.php?action=count',
         type: 'GET',
         dataType: 'json',
         success: function(response) {
@@ -328,6 +331,34 @@ $(document).ready(function() {
         showAddModal();
     });
 
+    // Course tabs: show only the selected course's attendance panel
+    $('.course-tab').on('click', function() {
+        var courseId = $(this).data('course-id');
+
+        $('.course-tab').removeClass('active').attr('aria-selected', 'false');
+        $(this).addClass('active').attr('aria-selected', 'true');
+
+        $('#table1 tbody.course-panel').hide().removeClass('active');
+        $('#table1 tbody.course-panel[data-course-id="' + courseId + '"]').show().addClass('active');
+
+        // Clear any active search when switching courses
+        $('#searchAttendance').val('');
+    });
+
+    // Search functionality - scoped to the currently visible course panel only
+    $('#searchAttendance').on('input', function() {
+        var searchText = $(this).val().toLowerCase();
+        var $rows = $('#table1 tbody.course-panel.active tr');
+        if (searchText === '') {
+            $rows.show();
+            return;
+        }
+        $rows.each(function() {
+            var rowData = $(this).text().toLowerCase();
+            $(this).toggle(rowData.indexOf(searchText) > -1);
+        });
+    });
+
     // insertion function (Add button)
     $("#adddata").on("click", function(e) {
         e.preventDefault(); // Prevent the default form submission
@@ -344,13 +375,21 @@ $(document).ready(function() {
                 if (response.success) {
                     // Show success notification
                     showNotification('Success', response.message, 'success');
-                    
-                    // Append the new row to the existing table
-                    $('#table1 tbody').append(response.html);
-                    
+
+                    // Append the new row to the correct course's panel, and
+                    // switch to that tab so the teacher sees it immediately
+                    var $panel = $('#table1 tbody.course-panel[data-course-id="' + response.course_id + '"]');
+                    $panel.find('tr.no-data-row').remove();
+                    $panel.append(response.html);
+
+                    $('.course-tab').removeClass('active').attr('aria-selected', 'false');
+                    $('.course-tab[data-course-id="' + response.course_id + '"]').addClass('active').attr('aria-selected', 'true');
+                    $('#table1 tbody.course-panel').hide().removeClass('active');
+                    $panel.show().addClass('active');
+
                     // Clear the input fields
                     $("#addForm")[0].reset();
-                    
+
                     // Hide the add form after successful addition
                     $('#addModal').fadeOut();
                 } else {
@@ -364,9 +403,9 @@ $(document).ready(function() {
             complete: function() {
                 // Scroll to the bottom of the table to show the newly added row
                 $('#table1').animate({
-                    scrollTop: $('#table1 tbody').height()
+                    scrollTop: $('#table1 tbody.course-panel.active').height()
                 }, 1000);
-                
+
                 // Refresh calendars to show new attendance events
                 refreshCalendars();
             }

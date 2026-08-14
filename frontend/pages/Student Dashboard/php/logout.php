@@ -1,14 +1,11 @@
 <?php
-// Start the session
-session_start();
+// Full server-side session teardown (data + cookie), shared with every other
+// logout endpoint so they cannot drift apart. Deliberately does NOT require a
+// live session: logging out must always succeed, even from an expired one.
+require_once __DIR__ . "/../../../core/auth_guard.php";
 
-// Unset all of the session variables
-$_SESSION = array();
+auth_destroy_session();
 
-// Destroy the session
-session_destroy();
-
-// Redirect to login page
+// Resolved by the browser against the requested URL (.../Student Dashboard/php/logout.php)
 header("Location: ../../loginRegister.html");
 exit();
-?>

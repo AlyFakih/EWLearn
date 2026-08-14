@@ -1,9 +1,3 @@
-body {
-    display: flex;
-    /* justify-content: center; */
-    /* align-items: center; */
-  }
-
 .main .table__header {
     width: 100%;
     height: 7%;

@@ -1,5 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 header("Content-Type: application/json; charset=UTF-8");
 
 // Import PHPMailer classes into the global namespace
@@ -9,6 +13,16 @@ use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
 
 require './vendor/autoload.php';
+require_once __DIR__ . '/load_env.php';
+$env = load_env(__DIR__ . '/.env');
+
+$smtpUsername = $env['SMTP_USERNAME'] ?? null;
+$smtpPassword = $env['SMTP_PASSWORD'] ?? null;
+
+if (!$smtpUsername || !$smtpPassword) {
+    echo json_encode(['success' => false, 'message' => 'Email is not configured on the server.']);
+    exit;
+}
 
 // Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer(true);
@@ -18,8 +32,8 @@ try {
     $mail->isSMTP();                         // Send using SMTP
     $mail->Host       = 'smtp.gmail.com';   // Set the SMTP server to send through
     $mail->SMTPAuth   = true;                // Enable SMTP authentication
-    $mail->Username   = 'alyfakeeh@gmail.com'; // SMTP username
-    $mail->Password   = 'YOUR_SMTP_PASSWORD'; // SMTP password
+    $mail->Username   = $smtpUsername; // SMTP username
+    $mail->Password   = $smtpPassword; // SMTP password
     $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS; // Enable implicit TLS encryption
     $mail->Port       = 465;                 // TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
 

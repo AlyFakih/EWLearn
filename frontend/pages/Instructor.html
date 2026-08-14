@@ -3,28 +3,26 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Also served at the clean URL /instructors via an .htaccess internal
+         rewrite - see the note in loginRegister.html for why this is
+         needed. Must stay before every relative href/src below. -->
+    <base href="/frontend/pages/" />
     <title>EWlearn</title>
     <!-- Include Bootstrap CSS link -->
     <link
       rel="stylesheet"
       href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-      integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T"
-      crossorigin="anonymous"
     />
     <!-- Include Font Awesome CSS link -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
-      integrity="sha512-xxx"
-      crossorigin="anonymous"
     />
 
     <!-- Include Animate.css link -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
-      integrity="sha512-xxx"
-      crossorigin="anonymous"
     />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="../styles/instructors/instructor.css" />
@@ -72,19 +70,7 @@
         </div>
         <ul id="list" class="dropdown-list">
           <li class="dropdown-list-item" data-value="Everything">Everything</li>
-          <li class="dropdown-list-item" data-value="Web Development">
-            Web Development
-          </li>
-          <li class="dropdown-list-item" data-value="Web Designer">
-            Web Designer
-          </li>
-          <li class="dropdown-list-item" data-value="CEO & Founder">
-            CEO & Founder
-          </li>
-          <li class="dropdown-list-item" data-value="UI/UX Designer">
-            PUI/UX Designer
-          </li>
-          <li class="dropdown-list-item" data-value="Software">Software</li>
+          <!-- Populated with the real course categories taught by real instructors. -->
         </ul>
       </div>
       <!-- Dropdown ends -->
@@ -104,146 +90,7 @@
         class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4"
         id="instructorCards"
       >
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member3.png" alt="Instructor profile image" />
-            <h1 class="namein">Dr. Lina Khalil</h1>
-            <p class="inf">Web Development</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 2 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p>
-              <a href="./instructorDetails.html"
-                ><button>View Profile</button></a
-              >
-            </p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member4.png" alt="Instructor profile image" />
-            <h1 class="namein">Prof. Omar Hassan</h1>
-            <p class="inf">Web Designer</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 6 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member1.jpg" alt="Instructor profile image" />
-            <h1 class="namein">Dr. Karim Abbas</h1>
-            <p class="inf">CEO & Founder</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 1 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member2.jpg" alt="Instructor profile image" />
-            <h1 class="namein">Dr. Rami Saleh</h1>
-            <p class="inf">UI/UX Designer</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 5 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member3.png" alt="Instructor profile image" />
-            <h1 class="namein">Ahmad Ray</h1>
-            <p class="inf">Software</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 0 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member3.png" alt="Instructor profile image" />
-            <h1 class="namein">Dr. Ahmad Hassan</h1>
-            <p class="inf">Enginnering</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 9 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member3.png" alt="Instructor profile image" />
-            <h1 class="namein">Ali Mallah</h1>
-            <p class="inf">CEO & Founder</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 10 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
-        <div class="col">
-          <div class="card">
-            <img src="../assets/images/member4.png" alt="Instructor profile image" />
-            <h1 class="namein">Dr. Zeinab Ali</h1>
-            <p class="inf">Web Designer</p>
-            <p class="infocourse">
-              <i class="fa-solid fa-chalkboard-user fa-2xl"></i> 6 Courses
-            </p>
-            <div class="shareinfo" style="margin: 24px 0">
-              <a href="#"><i class="fa-brands fa-linkedin"></i></a>
-              <a href="#"><i class="fa-brands fa-square-twitter"></i></a>
-              <a href="#"><i class="fa-brands fa-square-facebook"></i></a>
-              <a href="#"><i class="fa-brands fa-square-instagram"></i></a>
-            </div>
-            <p><button>View Profile</button></p>
-          </div>
-        </div>
+        <!-- Populated from real instructor data by instructor.js -->
       </div>
     </section>
 
@@ -269,8 +116,6 @@
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <script
       src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"
-      integrity="sha384-JjSmVgydDPzHIthvhm75L8/kjjgB4Yb6JnyRnHxMGnNQ9Il/5UJ4Jn5+5IdXJpuG"
-      crossorigin="anonymous"
     ></script>
     <script src="../javascript/instructor.js"></script>
   </body>

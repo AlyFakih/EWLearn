@@ -1,8 +1,11 @@
 <?php
-$servername = "localhost"; // localhost for XAMPP
-$username = "root"; // default XAMPP username
-$password = ""; // default XAMPP password is empty
-$dbname = "student_management"; 
+require_once __DIR__ . '/load_env.php';
+$env = load_env(__DIR__ . '/.env');
+
+$servername = $env['DB_HOST'] ?? '';
+$username = $env['DB_USERNAME'] ?? '';
+$password = $env['DB_PASSWORD'] ?? '';
+$dbname = $env['DB_NAME'] ?? '';
 
 // create connection
 $conn = mysqli_connect($servername, $username, $password,$dbname) ;

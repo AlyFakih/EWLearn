@@ -26,22 +26,25 @@ function confirmDelete() {
 }
 // ! search and message ==================================
 const searchInput = document.getElementById("searchinstructor");
-const rows = document.querySelectorAll("tbody tr");
-const noResultsMessage = document.getElementById("no-cards-message"); // Assuming you have an element with the id "noResultsMessage"
+const noResultsMessage = document.getElementById("no-cards-message");
 
 searchInput.addEventListener("keyup", function (event) {
   const q = event.target.value.toLowerCase();
   let found = false;
 
+  // Query fresh on every keystroke, not once at script load: the table rows
+  // are added later, asynchronously, once window.fetchstudentData()'s AJAX
+  // call resolves - capturing them once up front meant this NodeList was
+  // always empty (0 rows), so search silently matched nothing no matter what
+  // you typed.
+  const rows = document.querySelectorAll("#studentTableBody tr");
+
   rows.forEach((row) => {
-    const nameMatch = row
-      .querySelector(".namein")
-      .textContent.toLowerCase()
-      .startsWith(q);
-    const emailMatch = row
-      .querySelector(".emailin")
-      .textContent.toLowerCase()
-      .startsWith(q);
+    const nameEl = row.querySelector(".namein");
+    const emailEl = row.querySelector(".emailin");
+    if (!nameEl || !emailEl) return;
+    const nameMatch = nameEl.textContent.toLowerCase().startsWith(q);
+    const emailMatch = emailEl.textContent.toLowerCase().startsWith(q);
 
     if (nameMatch || emailMatch) {
       row.style.display = "";
@@ -51,10 +54,8 @@ searchInput.addEventListener("keyup", function (event) {
     }
   });
 
-  if (found) {
-    noResultsMessage.style.display = "none";
-  } else {
-    noResultsMessage.style.display = ""; // Show the message when no results are found
+  if (noResultsMessage) {
+    noResultsMessage.style.display = found || rows.length === 0 ? "none" : "";
   }
 });
 // ! add studnts-----
@@ -76,6 +77,12 @@ $("#addstudentsForm").submit(function (event) {
 
         // You can perform additional actions after a successful insert
         if (response.status === "success") {
+          // Refresh the table so the new row actually appears - previously
+          // missing here (the equivalent Instructor form does call its
+          // refresh function on success), so a student was created
+          // successfully but the admin never saw it without manually
+          // switching away from and back to this section.
+          window.fetchstudentData();
           // For example, close the modal after a short delay
           setTimeout(function () {
             document.getElementById("id01").style.display = "none";
@@ -157,7 +164,7 @@ function displayStudents(students) {
 function confirmDelete(email) {
   if (
     confirm(
-      `Are you sure you want to delete the instructor with email "${email}"?`
+      `Are you sure you want to delete the student with email "${email}"?`
     )
   ) {
     // Make an AJAX request to delete the instructor
@@ -168,11 +175,16 @@ function confirmDelete(email) {
       dataType: "json",
       success: function (response) {
         if (response.status === "success") {
-          alert(`Instructor with email "${email}" deleted successfully!`);
-          // Refresh the instructor data after deletion
-          fetchInstructorData();
+          alert(`Student with email "${email}" deleted successfully!`);
+          // Refresh the student table after deletion - this called
+          // fetchInstructorData(), which doesn't exist in this file (a
+          // copy-paste leftover from the Instructor page's equivalent
+          // handler). The delete itself succeeded server-side regardless,
+          // but the reference error here meant the table was never
+          // refreshed, leaving the just-deleted row still showing.
+          window.fetchstudentData();
         } else {
-          alert(`Error deleting instructor: ${response.message}`);
+          alert(`Error deleting student: ${response.message}`);
         }
       },
       error: function (error) {

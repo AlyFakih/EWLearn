@@ -1,5 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Credentials: true");
@@ -16,9 +20,16 @@ if (!$email) {
     exit;
 }
 
-// Fetch user data from the database
-$query = "SELECT * FROM users WHERE email = '$email'";
-$result = mysqli_query($conn, $query);
+// Fetch user data from the database.
+// Parameterised, and the column list is now explicit: `SELECT *` returned the
+// bcrypt `password` hash to the browser on every call, handing an offline
+// cracking target to anyone who could reach this endpoint.
+$query = "SELECT id, role, fullName, country, email, mobile, blood, gender, image
+          FROM users WHERE email = ?";
+$stmt = $conn->prepare($query);
+$stmt->bind_param("s", $email);
+$stmt->execute();
+$result = $stmt->get_result();
 
 if ($result) {
     // Check if user with the provided email exists

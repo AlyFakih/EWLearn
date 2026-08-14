@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -10,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller
-require_once "php/dbcontroller.php";
+require_once "../../core/DBController.php";
 $db_handle = new DBController();
 
 // Get student information
@@ -240,7 +244,7 @@ $months = [
     
     <!-- Attendance Records -->
     <div class="attendance-records">
-      <h2>Attendance Records - <?php echo $months[$month_filter] . ' ' . $year_filter; ?></h2>
+      <h2>Attendance Records - <?php echo (isset($months[$month_filter]) ? $months[$month_filter] : $month_filter) . ' ' . $year_filter; ?></h2>
       
       <?php if (!empty($grouped_attendance)): ?>
         <?php foreach ($grouped_attendance as $date => $records): ?>

@@ -1,23 +1,33 @@
 <?php
+// Server-side gate. These pages compose components/ directly instead of
+// going through php/header.php, so they must load the guard themselves -
+// otherwise they would run with only an inline session check and no
+// database re-validation of the account.
+require_once __DIR__ . "/../../core/auth_guard.php";
+auth_require_role("instructor", "page", "../loginRegister.html");
+
 // Start session and include required files
-session_start();
-require_once "php/dbcontroller.php";
+require_once "../../core/DBController.php";
 require_once "../common/header_includes.php";
 
 // Check if user is logged in and is a teacher
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
-    header("Location: ../../login.php");
+    header("Location: ../loginRegister.html");
     exit();
 }
 
 $db_handle = new DBController();
 $user_id = $_SESSION['user_id'];
 
-// Get exams with course details using prepared statements
-$sql = "SELECT e.id, e.date, e.time, e.course_id, c.courseTitle, c.courseCode, e.subject, e.room 
-        FROM exam e 
+// Get exams with course details using prepared statements. Teacher-course
+// ownership is recorded in instructorcourse (users.fullName <-> courses.courseTitle),
+// there is no courses.teacher_id column.
+$sql = "SELECT e.id, e.date, e.time, e.course_id, c.courseTitle, c.courseCode, e.subject, e.room
+        FROM exam e
         JOIN courses c ON e.course_id = c.id
-        WHERE c.teacher_id = ?
+        JOIN instructorcourse ic ON ic.courseID = c.courseTitle
+        JOIN users tu ON tu.fullName = ic.userInstructorID
+        WHERE tu.id = ?
         ORDER BY e.date ASC";
 $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
 ?>
@@ -30,137 +40,37 @@ $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Teacher Dashboard - Exams</title>
     
-    <!-- Include common CSS -->
+    <!-- Shared design system -->
+    <link rel="stylesheet" href="./css/dashboard-theme.css">
+
+    <!-- Include common CSS (jQuery, notifications, FullCalendar) -->
     <?php include_once "../common/header_includes.php"; ?>
-    
-    <!-- Page specific stylesheets -->
+
+    <!-- Page specific stylesheet -->
     <link rel="stylesheet" href="./css/exam-dashboard.css">
-    <link rel="stylesheet" href="./css/dashboard-menu.css">
-    
-    <!-- Include FullCalendar for events -->
-    <link href='https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.css' rel='stylesheet' />
-    
+
     <style>
-        #calendar {
-            max-width: 1100px;
-            margin: 20px auto;
-            padding: 0 10px;
-        }
-        
-        #mini-calendar {
-            height: 250px;
-            margin-bottom: 20px;
-        }
-        
-        .course-title {
-            color: #810000;
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-        
-        .table-container {
-            margin-top: 25px;
-        }
-        
-        /* Modal styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.7);
-            z-index: 1000;
-        }
-        
-        .modal-content {
-            position: relative;
-            margin: 10% auto;
-            width: 60%;
-            max-width: 600px;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        
-        .modal h2 {
-            color: #810000;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-close {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            font-size: 24px;
-            cursor: pointer;
-            color: #810000;
-        }
-        
-        .form-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-        }
-        
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: 600;
-        }
-        
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: 8px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-        }
-        
-        .form-buttons {
-            margin-top: 20px;
-            text-align: center;
-        }
-        
-        .form-buttons button {
-            margin: 0 10px;
-            padding: 10px 15px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-        
-        .btn-primary {
-            background-color: #810000;
-            color: white;
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-            color: white;
-        }
+        #calendar { max-width: 1100px; margin: var(--space-5) auto; }
+        #mini-calendar { height: 250px; margin-bottom: var(--space-4); }
+        .table-container { margin-top: var(--space-5); }
+        .modal.open { display: flex !important; }
     </style>
 </head>
 
 <body>
-    <!-- Include the common header with notification bell -->
-    <?php include_once "components/header.php"; ?>
-    
-    <div class="dashboard-container">
-        <!-- Include the sidebar with mini calendar -->
+    <div class="app-shell">
         <?php include_once "components/sidebar.php"; ?>
-        
-        <div class="dashboard-content">
+        <div class="main-col">
+            <?php include_once "components/header.php"; ?>
+            <main class="page-content">
+
             <div class="content-header">
                 <h1><i class="fas fa-pencil-alt"></i> Exam Management</h1>
-                <button id="add-exam-btn" class="btn-primary"><i class="fas fa-plus"></i> Add New Exam</button>
+                <button id="add-exam-btn" class="btn btn-primary"><i class="fas fa-plus"></i> Add New Exam</button>
             </div>
-            
-            <div class="table-container">
-                <div class="table-header">
+
+            <div class="table-container card">
+                <div class="table-header card-header">
                     <h2>Scheduled Exams</h2>
                     <div class="search-container">
                         <input type="text" id="search-exams" placeholder="Search exams...">
@@ -168,6 +78,7 @@ $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
                     </div>
                 </div>
                 
+                <div class="table-wrap">
                 <table id="exams-table" class="data-table">
                     <thead>
                         <tr>
@@ -210,16 +121,18 @@ $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
                         <?php endif; ?>
                     </tbody>
                 </table>
+                </div>
             </div>
-            
+
             <!-- Calendar Section -->
-            <div class="calendar-section">
+            <div class="calendar-section card" style="margin-top: var(--space-5);">
                 <h2 class="section-title">Exam Calendar</h2>
                 <div id="calendar"></div>
             </div>
+            </main>
         </div>
     </div>
-    
+
     <!-- Add Exam Modal -->
     <div id="add-exam-modal" class="modal">
         <div class="modal-content">
@@ -233,7 +146,10 @@ $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
                             <option value="">Select Course</option>
                             <?php
                             // Get courses taught by this teacher
-                            $courses_query = "SELECT id, courseTitle, courseCode FROM courses WHERE teacher_id = ?";
+                            $courses_query = "SELECT c.id, c.courseTitle, c.courseCode FROM courses c
+                                             JOIN instructorcourse ic ON ic.courseID = c.courseTitle
+                                             JOIN users tu ON tu.fullName = ic.userInstructorID
+                                             WHERE tu.id = ?";
                             $courses = $db_handle->executeSelectPrepared($courses_query, "i", [$user_id]);
                             
                             if (!empty($courses)) {
@@ -347,10 +263,10 @@ $exams = $db_handle->executeSelectPrepared($sql, "i", [$user_id]);
         </div>
     </div>
     
-    <!-- Include common JS -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <!-- jQuery already loaded via header_includes.php -->
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.10.1/main.min.js"></script>
-    
+    <script src="js/sidebar-toggle.js"></script>
+
     <!-- Page specific scripts -->
     <script src="js/exam-combined.js"></script>
     

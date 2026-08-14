@@ -48,12 +48,14 @@
 
 
 
-// Get all the testimonials-item cards
-const testimonialsItems = document.querySelectorAll(".testimonial-item");
+// Get all the testimonials-item cards. querySelectorAll() returns a NodeList,
+// which has no .slice() - convert to a real Array so the .slice(3) below
+// (and the rest of this file) works.
+const testimonialsItems = Array.from(document.querySelectorAll(".testimonial-item"));
 
 // Create a new Swiper instance
 const swiper = new Swiper(".testimonial-slider", {
-  slidesPerView: 3,
+  slidesPerView: 1,
   spaceBetween: 10,
   loop: true,
   autoplay: {
@@ -62,6 +64,14 @@ const swiper = new Swiper(".testimonial-slider", {
   navigation: {
     nextEl: ".swiper-button-next",
     prevEl: ".swiper-button-prev",
+  },
+  // The fixed slidesPerView: 3 (no breakpoints) forced 3 columns at any
+  // viewport width, including mobile, causing horizontal page overflow -
+  // the old OwlCarousel config this replaced had responsive breakpoints,
+  // but they were dropped in the migration to Swiper.
+  breakpoints: {
+    768: { slidesPerView: 2 },
+    992: { slidesPerView: 3 },
   },
 });
 

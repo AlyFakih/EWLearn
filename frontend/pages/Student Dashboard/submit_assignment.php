@@ -1,12 +1,16 @@
 <?php
-session_start();
-require_once "php/dbcontroller.php";
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student');
+
+require_once "../../core/DBController.php";
 require_once "../common/file_handler.php";
 require_once "../common/notifications.php";
 
 // Check if user is logged in and is a student
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
-    header("Location: ../../login.php");
+    header("Location: ../loginRegister.html");
     exit;
 }
 
@@ -30,7 +34,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $response = array('success' => false, 'message' => 'Assignment not found');
         } else {
             $assignment = $assignments[0];
-            $deadline = strtotime($assignment['deadline']);
+            $deadline = strtotime($assignment['due_date']);
             $now = time();
             
             // Check if deadline has passed
@@ -65,8 +69,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     
                     if (!empty($existing)) {
                         // Update existing submission
-                        $updateQuery = "UPDATE assignment_submissions 
-                                       SET content = ?, file_path = ?, submitted_at = NOW(), status = ? 
+                        $updateQuery = "UPDATE assignment_submissions
+                                       SET submission_text = ?, file_path = ?, submitted_at = NOW(), status = ?
                                        WHERE student_id = ? AND assignment_id = ?";
                         $status = $lateSubmission ? 'late' : 'submitted';
                         $result = $db_handle->executeUpdatePrepared($updateQuery, "sssii", 
@@ -79,7 +83,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         }
                     } else {
                         // Insert new submission
-                        $insertQuery = "INSERT INTO assignment_submissions (student_id, assignment_id, content, file_path, submitted_at, status) 
+                        $insertQuery = "INSERT INTO assignment_submissions (student_id, assignment_id, submission_text, file_path, submitted_at, status)
                                        VALUES (?, ?, ?, ?, NOW(), ?)";
                         $status = $lateSubmission ? 'late' : 'submitted';
                         $result = $db_handle->executeUpdatePrepared($insertQuery, "iisss", 
@@ -89,15 +93,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                             $response = array('success' => true, 'message' => 'Assignment submitted successfully');
                             
                             // Create notification for the teacher
-                            $notificationManager = new NotificationManager();
-                            $studentQuery = "SELECT full_name FROM users WHERE id = ?";
+                            $notificationManager = new NotificationManager($db_handle);
+                            $studentQuery = "SELECT fullName FROM users WHERE id = ?";
                             $studentData = $db_handle->executeSelectPrepared($studentQuery, "i", [$user_id]);
-                            $studentName = $studentData[0]['full_name'];
-                            
-                            $courseQuery = "SELECT c.id, c.courseTitle, t.id as teacher_id 
-                                          FROM assignment a 
-                                          JOIN courses c ON a.course_id = c.id 
-                                          JOIN users t ON c.teacher_id = t.id 
+                            $studentName = $studentData[0]['fullName'];
+
+                            // Teacher-course ownership is recorded in
+                            // instructorcourse (users.fullName <-> courses.courseTitle)
+                            $courseQuery = "SELECT c.id, c.courseTitle, t.id as teacher_id
+                                          FROM assignment a
+                                          JOIN courses c ON a.course_id = c.id
+                                          JOIN instructorcourse ic ON ic.courseID = c.courseTitle
+                                          JOIN users t ON t.fullName = ic.userInstructorID
                                           WHERE a.id = ?";
                             $courseData = $db_handle->executeSelectPrepared($courseQuery, "i", [$assignment_id]);
                             
@@ -129,8 +136,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 
                 if (!empty($existing)) {
                     // Update existing submission
-                    $updateQuery = "UPDATE assignment_submissions 
-                                   SET content = ?, submitted_at = NOW(), status = ? 
+                    $updateQuery = "UPDATE assignment_submissions
+                                   SET submission_text = ?, submitted_at = NOW(), status = ?
                                    WHERE student_id = ? AND assignment_id = ?";
                     $status = $lateSubmission ? 'late' : 'submitted';
                     $result = $db_handle->executeUpdatePrepared($updateQuery, "ssii", 
@@ -143,7 +150,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     }
                 } else {
                     // Insert new submission
-                    $insertQuery = "INSERT INTO assignment_submissions (student_id, assignment_id, content, submitted_at, status) 
+                    $insertQuery = "INSERT INTO assignment_submissions (student_id, assignment_id, submission_text, submitted_at, status)
                                    VALUES (?, ?, ?, NOW(), ?)";
                     $status = $lateSubmission ? 'late' : 'submitted';
                     $result = $db_handle->executeUpdatePrepared($insertQuery, "iiss", 
@@ -153,15 +160,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $response = array('success' => true, 'message' => 'Assignment submitted successfully');
                         
                         // Notification logic (same as above)
-                        $notificationManager = new NotificationManager();
-                        $studentQuery = "SELECT full_name FROM users WHERE id = ?";
+                        $notificationManager = new NotificationManager($db_handle);
+                        $studentQuery = "SELECT fullName FROM users WHERE id = ?";
                         $studentData = $db_handle->executeSelectPrepared($studentQuery, "i", [$user_id]);
-                        $studentName = $studentData[0]['full_name'];
-                        
-                        $courseQuery = "SELECT c.id, c.courseTitle, t.id as teacher_id 
-                                      FROM assignment a 
-                                      JOIN courses c ON a.course_id = c.id 
-                                      JOIN users t ON c.teacher_id = t.id 
+                        $studentName = $studentData[0]['fullName'];
+
+                        // Teacher-course ownership is recorded in
+                        // instructorcourse (users.fullName <-> courses.courseTitle)
+                        $courseQuery = "SELECT c.id, c.courseTitle, t.id as teacher_id
+                                      FROM assignment a
+                                      JOIN courses c ON a.course_id = c.id
+                                      JOIN instructorcourse ic ON ic.courseID = c.courseTitle
+                                      JOIN users t ON t.fullName = ic.userInstructorID
                                       WHERE a.id = ?";
                         $courseData = $db_handle->executeSelectPrepared($courseQuery, "i", [$assignment_id]);
                         

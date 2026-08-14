@@ -1,11 +1,11 @@
 <?php
-require_once "../Student Dashboard/php/dbcontroller.php";
+require_once __DIR__ . "/../../core/DBController.php";
 
 class NotificationManager {
     private $db_handle;
     
-    public function __construct() {
-        $this->db_handle = new DBController();
+    public function __construct($db_handle = null) {
+        $this->db_handle = $db_handle ?: new DBController();
     }
     
     /**
@@ -110,8 +110,27 @@ class NotificationManager {
         $query = "DELETE FROM notifications WHERE id = ? AND user_id = ?";
         $types = "ii";
         $params = [$notification_id, $user_id];
-        
+
         return $this->db_handle->executeUpdatePrepared($query, $types, $params) > 0;
+    }
+
+    /**
+     * Broadcast a system-wide announcement (e.g. course created/updated/deleted)
+     * rather than a single-user notification. Stored in `announcements`.
+     *
+     * @param string $title
+     * @param string $message
+     * @param string $target_type 'all', 'course', or 'student'
+     * @param int|null $target_id Related course/student ID
+     * @param int|null $created_by User ID the announcement is attributed to
+     * @return int|bool ID of created announcement or false on failure
+     */
+    public function createSystemNotification($title, $message, $target_type, $target_id = null, $created_by = null) {
+        $query = "INSERT INTO announcements (title, content, target_type, target_id, created_by) VALUES (?, ?, ?, ?, ?)";
+        $types = "sssii";
+        $params = [$title, $message, $target_type, $target_id, $created_by];
+
+        return $this->db_handle->executeUpdatePrepared($query, $types, $params);
     }
 }
 ?>

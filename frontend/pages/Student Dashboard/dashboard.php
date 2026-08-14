@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -10,13 +14,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller and notifications
-require_once "php/dbcontroller.php";
+require_once "../../core/DBController.php";
 require_once "../common/notifications.php";
 require_once "../common/calendar.php";
 
 $db_handle = new DBController();
-$notification_manager = new NotificationManager();
-$calendar_manager = new CalendarManager();
+$notification_manager = new NotificationManager($db_handle);
+$calendar_manager = new CalendarManager($db_handle);
 
 // Get student information
 $user_id = $_SESSION['user_id'];
@@ -25,11 +29,12 @@ $result = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 $student = $result[0];
 
 // Get enrolled courses
-$query = "SELECT c.id, c.courseTitle as name, c.description, c.image, u.fullName as instructor_name 
-        FROM courses c 
-        JOIN studentcourse sc ON c.id = sc.courseID 
-        JOIN users u ON sc.userInstructorID = u.id
-        WHERE sc.userStudentID = ?";
+$query = "SELECT c.id, c.courseTitle as name, c.description, CONCAT('../../assets/images/', c.image) as image_path,
+        sc.userInstructorID as instructor_name
+        FROM courses c
+        JOIN studentcourse sc ON c.courseTitle = sc.courseID
+        JOIN users u ON sc.userStudentID = u.fullName
+        WHERE u.id = ?";
 $courses = $db_handle->executeSelectPrepared($query, "i", [$user_id]);
 
 // Get upcoming events from calendar
@@ -183,7 +188,7 @@ $unread_count = $notification_manager->countUnreadNotifications($user_id);
           <?php foreach($courses as $course): ?>
             <div class="course-card">
               <div class="course-image">
-                <img src="<?php echo $course['image_path'] ? $course['image_path'] : '../../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
+                <img src="<?php echo $course['image_path'] ? $course['image_path'] : '../../assets/images/course-default.jpg'; ?>" alt="<?php echo $course['name']; ?>">
               </div>
               <div class="course-info">
                 <h3><?php echo $course['name']; ?></h3>
@@ -196,7 +201,7 @@ $unread_count = $notification_manager->countUnreadNotifications($user_id);
         <?php else: ?>
           <div class="no-courses">
             <p>You are not enrolled in any courses yet.</p>
-            <a href="../courses.html" class="btn">Browse Courses</a>
+            <a href="../courses.php" class="btn">Browse Courses</a>
           </div>
         <?php endif; ?>
       </div>

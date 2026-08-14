@@ -1,4 +1,87 @@
 # Block direct access to sensitive/non-web file types anywhere in the project
-<FilesMatch "\.(sql|sqlite|db|log|env|bak|backup|old|py|txt|md|gitignore)$">
+<FilesMatch "\.(sql|sqlite|db|log|env|bak|backup|old|py|txt|md|gitignore|ini)$">
     Require all denied
 </FilesMatch>
+
+# Block source files that carry an extra suffix, e.g. login.php.backup,
+# courses.php.before_cleanup, loginRegister.html.backup_before_rebuild,
+# login.css.bak. Apache does not treat these as PHP, so without this rule it
+# serves them as PLAIN TEXT - handing out application source, SQL and
+# credentials-handling logic to anyone who guesses the filename.
+<FilesMatch "\.(php|phtml|inc|html?|css|js)\.[A-Za-z0-9_.-]+$">
+    Require all denied
+</FilesMatch>
+
+# Dependency manifests: reveal exact library versions, which makes it trivial
+# to look up known CVEs for the installed stack.
+<FilesMatch "^composer\.(json|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Never render PHP warnings/errors into the HTTP response. Uncaught errors were
+# printing absolute filesystem paths, SQL and stack traces straight to the
+# browser (e.g. on any DB hiccup), which hands an attacker a map of the server.
+# Errors still go to the Apache/PHP error log for developers.
+php_flag display_errors off
+php_flag display_startup_errors off
+php_flag log_errors on
+
+# Browser caching for genuinely static binary assets only (images/fonts) -
+# these are never hand-edited-and-refreshed during development the way
+# CSS/JS are (see README: "No build step. Edit PHP/JS/CSS directly and
+# refresh the browser"), and this project has no cache-busting filename/query
+# scheme for CSS/JS, so caching those here would risk developers/users
+# seeing stale styles or scripts after an edit. Wrapped in <IfModule> so this
+# degrades gracefully if a deployment target doesn't have mod_headers.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(png|jpe?g|gif|svg|ico|webp|woff2?|ttf|eot)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+</IfModule>
+
+# Block direct access to PHP config files
+<FilesMatch "^(config|database)\.php$">
+    Require all denied
+</FilesMatch>
+
+# Clean URL for the login/register page. The real file stays exactly where
+# it is (frontend/pages/loginRegister.html) - nothing here moves it, so
+# every existing relative-path CSS/JS/image reference inside that file, and
+# every existing link elsewhere in the site that points at the long path,
+# keeps working unchanged. mod_rewrite confirmed enabled on this host before
+# adding these.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+
+    # Visiting the old long URL directly (an existing bookmark, a stray
+    # link) redirects out to the clean one - browser address bar updates,
+    # any query string (e.g. ?i=1 on a failed-login redirect) is preserved
+    # automatically since the target below has no "?" of its own.
+    #
+    # RewriteCond against THE_REQUEST (the browser's original, unmodified
+    # request line), not the current URI: the rewrite rule below produces
+    # this same path as an internal intermediate value for every /login
+    # request, and in .htaccess context each internal rewrite re-runs
+    # through all the rules again - matching against the current URI here
+    # instead would redirect that intermediate value right back to /login,
+    # which the internal rewrite turns back into this path, forever.
+    # THE_REQUEST always reflects what the browser actually asked for, so
+    # this only fires for a genuine direct hit on the long URL.
+    RewriteCond %{THE_REQUEST} \s/frontend/pages/loginRegister\.html[\s?]
+    RewriteRule ^frontend/pages/loginRegister\.html$ /login [R=301,L]
+
+    # The clean URL itself is served by rewriting internally to the real
+    # file - address bar stays on /login, no further redirect.
+    RewriteRule ^login$ /frontend/pages/loginRegister.html [L]
+
+    # Same pattern, extended to the other main public pages. Each target
+    # file has a matching <base href="/frontend/pages/"> tag in its <head>
+    # for the same reason loginRegister.html needed one - without it, an
+    # internally-rewritten request breaks every relative CSS/JS/image
+    # reference in that file.
+    RewriteRule ^courses$ /frontend/pages/courses.php [L]
+    RewriteRule ^instructors$ /frontend/pages/Instructor.html [L]
+    RewriteRule ^events$ /frontend/pages/Events.html [L]
+    RewriteRule ^contact$ /frontend/pages/contact.html [L]
+    RewriteRule ^about$ /frontend/pages/aboutUs.html [L]
+</IfModule>

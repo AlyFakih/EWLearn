@@ -1,0 +1,332 @@
+<?php
+// Server-side admin gate. Must be the first thing on the page so no markup or
+// data is emitted before the caller is proven to be a logged-in admin.
+// Login lives at ../loginRegister.html: the browser resolves this Location
+// against the REQUESTED URL, not this file, so the depth is one level up.
+require_once __DIR__ . "/../../core/auth_guard.php";
+auth_require_role("admin", "page", "../loginRegister.html");
+?>
+<link rel="stylesheet" href="../../styles/DashBoards/course.css" />
+<div id="boxNotifi"></div>
+<script>
+  $("#boxNotifi").load("./NotifiAdmin.php");
+</script>
+<h5 style="color: aliceblue; font-size: 100px; text-align: center"></h5>
+<!-- ! course update ================ -->
+<div id="id02" class="modal">
+  <form
+    id="updateCourseForm"
+    class="modal-content animate"
+    action=""
+    method="post"
+  >
+    <div class="imgcontainer">
+      <h1 style="color: white">Update Course</h1>
+      <span
+        onclick="document.getElementById('id02').style.display='none'"
+        class="close"
+        title="Close Modal"
+        >&times;</span
+      >
+    </div>
+    <div class="addcardinfo">
+      <div class="form-row">
+        <input
+          type="text"
+          name="pathImage"
+          id="updatePathImage"
+          placeholder="Full Name"
+        />
+        <input
+          type="number"
+          name="price"
+          id="updatePrice"
+          placeholder="Price"
+          required
+        />
+        <input
+          type="text"
+          name="category"
+          id="updateCategory"
+          placeholder="Category"
+          required
+        />
+        <input
+          type="date"
+          name="calendar"
+          id="updateCalendar"
+          placeholder="Calendar"
+        />
+
+        <input
+          type="text"
+          name="title"
+          id="updateCourseTitle"
+          placeholder="Course-Title"
+        />
+        <input
+          type="text"
+          name="description"
+          id="updateDescription"
+          placeholder="Description"
+        />
+        <input
+          type="number"
+          name="seats"
+          id="updateSeats"
+          placeholder="Course-Seats"
+        />
+        <div class="sub-button">
+          <input type="submit" value="Update Course" />
+          <div
+            id="updateMessage"
+            style="color: red; margin-top: 10px"
+          ></div>
+        </div>
+      </div>
+      <div class="cardAdd">
+        <div class="course-img">
+          <img src="../../assets/images/backChoose.jpg" alt="" />
+          <span class="course-price">$50</span>
+          <div class="course-toolbar">
+            <h4 class="course-category"><a href="#">Science</a></h4>
+            <div class="course-date">
+              <i class="fa fa-calendar"></i> 28-06-2017
+            </div>
+            <div class="course-duration">
+              <i class="fa fa-clock-o"></i> 4 year
+            </div>
+          </div>
+        </div>
+        <div class="course-body">
+          <div class="course-desc">
+            <h4 class="course-title">
+              <a href="../pages/courseDetails.php">Computer Engineering</a>
+            </h4>
+            <p style="font-size: 20px">
+              Cras ultricies lacus consectetur, consectetur scelerisque
+              arcu.Curabitur Aenean egestas a Nullam augue augue.
+            </p>
+          </div>
+        </div>
+        <div class="course-footer">
+          <div class="course-seats">
+            <i class="fa fa-users"></i> 70 SEATS
+          </div>
+          <div class="course-button">
+            <a href="../pages/courseDetails.php">APPLY NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<!-- !end  course update ================ -->
+<!-- ! the add form  -->
+<div id="id01" class="modal">
+  <form id="addCourseForm" class="modal-content animate" method="post">
+    <div class="imgcontainer">
+      <h1 style="color: white">ADD Course</h1>
+      <span
+        onclick="document.getElementById('id01').style.display='none'"
+        class="close"
+        title="Close Modal"
+        >&times;</span
+      >
+    </div>
+    <div class="addcardinfo">
+      <div class="form-row">
+        <input
+          type="text"
+          name="pathImage"
+          placeholder="Path Image"
+          required
+        />
+        <input type="number" name="price" placeholder="Price" required />
+        <input
+          type="text"
+          name="category"
+          placeholder="Category"
+          required
+        />
+        <input
+          type="date"
+          name="calendar"
+          placeholder="Calendar"
+          required
+        />
+
+        <input
+          type="text"
+          name="title"
+          placeholder="Course-Title"
+          required
+        />
+        <input
+          type="text"
+          name="description"
+          placeholder="Description"
+          required
+        />
+        <input
+          type="number"
+          name="seats"
+          placeholder="Course-Seats"
+          required
+        />
+        <div class="sub-button">
+          <input type="submit" id="btnAddCourse" value="Add Course" />
+        </div>
+        <div style="text-align: center">
+          <h3 id="messageResult" style="color: red"></h3>
+        </div>
+      </div>
+      <div class="cardAdd">
+        <div class="course-img">
+          <img src="../../assets/images/backChoose.jpg" alt="" />
+          <span class="course-price">$50</span>
+          <div class="course-toolbar">
+            <h4 class="course-category"><a href="#">Science</a></h4>
+            <div class="course-date">
+              <i class="fa fa-calendar"></i> 28-06-2017
+            </div>
+            <div class="course-duration">
+              <i class="fa fa-clock-o"></i> 4 year
+            </div>
+          </div>
+        </div>
+        <div class="course-body">
+          <div class="course-desc">
+            <h4 class="course-title">
+              <a href="../pages/courseDetails.php">Computer Engineering</a>
+            </h4>
+            <p style="font-size: 20px">
+              Cras ultricies lacus consectetur, consectetur scelerisque
+              arcu.Curabitur Aenean egestas a Nullam augue augue.
+            </p>
+          </div>
+        </div>
+        <div class="course-footer">
+          <div class="course-seats">
+            <i class="fa fa-users"></i> 70 SEATS
+          </div>
+          <div class="course-button">
+            <a href="../pages/courseDetails.php">APPLY NOW</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
+</div>
+<!-- ! end the add form  -->
+<section class="table__header">
+  <h1>Courses</h1>
+  <div class="input-group">
+    <input type="search" id="searchcourse" placeholder="Search Data..." />
+    <i
+      class="fa-solid fa-magnifying-glass fa-lg"
+      style="color: #000000"
+    ></i>
+  </div>
+  <button
+    class="log"
+    onclick="document.getElementById('id01').style.display='block'"
+  >
+    ADD
+  </button>
+</section>
+<div class="container-fluid" id="container-fluid">
+  <div class="card">
+    <div class="divImage">
+      <img src="../../assets/images/course1.png" alt="Course Image" />
+    </div>
+
+    <div class="info">
+      <h2 class="coursename">Computer Network</h2>
+      <p>
+        <i class="fa-solid fa-person-chalkboard" style="color: #fafafa"></i
+        >2 Instructors
+      </p>
+      <div class="card-buttons">
+        <button
+          onclick="document.getElementById('id02').style.display='block'"
+        >
+          Update
+        </button>
+        <button onclick="confirmDelete()">Delete</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="no-cards-message" style="display: none">No courses found</div>
+</div>
+<!--  ! Choose Ins Course -->
+<section class="container InsCourse">
+  <h1 style="text-align: center; margin-bottom: 20px">
+    ADD Details To The Course
+  </h1>
+  <form id="addCourseDetails" class="addEvent">
+    <div class="formChoose">
+      <textarea
+        name="description"
+        id="description"
+        cols="30"
+        rows="4"
+        placeholder="Description"
+        autocomplete="off"
+      ></textarea>
+      <div class="col-sm-2">
+        <input
+          type="number"
+          class="form-control"
+          name="subjectsNum"
+          id="subjectsNum"
+          placeholder="Number of Chapter"
+          min="1"
+          required
+        />
+      </div>
+
+      <div class="col-sm-4">
+        <button type="button" id="enterDetails">Enter details</button>
+      </div>
+    </div>
+    <div class="row">
+      <div class="col-sm-12" id="details"></div>
+    </div>
+    <div class="formChoose">
+      <select id="courseNameC" name="courseNameC"></select>
+      <input
+        type="text"
+        id="credit"
+        name="credit"
+        placeholder="Credit Number"
+        required
+      />
+      <input
+        type="text"
+        id="price"
+        name="price"
+        placeholder="Price"
+        required
+      />
+      <button type="button" onclick="submitCourseDetails()">
+        Choose
+      </button>
+    </div>
+
+    <div class="formChoose">
+      <select id="courseDetailsSelect" name="courseDetailsSelect">
+      </select>
+      <div>
+        <button type="button" onclick="updatecourseDetails()">
+          Update
+        </button>
+        <button type="button" onclick="deletecourseDetails()">
+          Delete
+        </button>
+      </div>
+    </div>
+  </form>
+  <div id="MessageCoursesD"></div>
+</section>

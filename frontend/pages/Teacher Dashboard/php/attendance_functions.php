@@ -1,6 +1,10 @@
 <?php
-session_start();
-require_once "dbcontroller.php";
+// Server-side authorization gate: instructor only. Runs before any other
+// logic so nothing is emitted to an unauthenticated or wrong-role caller.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('instructor');
+
+require_once "../../../core/DBController.php";
 require_once "../../common/notifications.php";
 
 // Check if user is logged in and is a teacher (role = 1)
@@ -11,7 +15,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
 }
 
 $db_handle = new DBController();
-$notification_manager = new NotificationManager();
+$notification_manager = new NotificationManager($db_handle);
 $user_id = $_SESSION['user_id'];
 
 // Create a new attendance record
@@ -29,47 +33,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $status = $db_handle->cleanData($_POST['status']);
         $notes = isset($_POST['notes']) ? $db_handle->cleanData($_POST['notes']) : '';
         
-        // Verify the student is enrolled in this course and the course is taught by this teacher
-        $verify_query = "SELECT sc.id 
-                        FROM studentcourse sc
-                        JOIN courses c ON sc.course_id = c.id 
-                        WHERE sc.student_id = ? 
-                        AND sc.course_id = ? 
-                        AND c.teacher_id = ?";
-        
-        $result = $db_handle->executeSelectPrepared($verify_query, "iii", [$student_id, $course_id, $user_id]);
-        
+        // Verify the course is taught by this teacher, and that the student
+        // is enrolled in it (studentcourse is keyed by users.fullName /
+        // courses.courseTitle, not by numeric IDs)
+        if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
+            $result = [];
+        } else {
+            $verify_query = "SELECT sc.id
+                            FROM studentcourse sc
+                            JOIN courses c ON c.courseTitle = sc.courseID
+                            JOIN users u ON u.fullName = sc.userStudentID
+                            WHERE u.id = ? AND c.id = ?";
+            $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$student_id, $course_id]);
+        }
+
         if (empty($result)) {
             $response = array('success' => false, 'message' => 'Student is not enrolled in this course or you do not teach this course');
         } else {
             // Check if an attendance record already exists for this student on this date for this course
-            $check_query = "SELECT id FROM attendance 
-                          WHERE student_id = ? AND course_id = ? AND date = ?";
+            $check_query = "SELECT id FROM attendance
+                          WHERE studentID = ? AND courseID = ? AND date = ?";
             $existing = $db_handle->executeSelectPrepared($check_query, "iis", [$student_id, $course_id, $date]);
-            
+
             if (!empty($existing)) {
                 $response = array('success' => false, 'message' => 'An attendance record already exists for this student, course and date');
             } else {
-                // Insert the attendance record
-                $insert_query = "INSERT INTO attendance (student_id, course_id, date, status, notes) 
-                              VALUES (?, ?, ?, ?, ?)";
-                
-                $result = $db_handle->executeUpdatePrepared($insert_query, "iisss", 
-                    [$student_id, $course_id, $date, $status, $notes]);
-                
-                if ($result) {
-                    // Get the new attendance record ID
-                    $attendance_id = $db_handle->getLastInsertId();
-                    
-                    // Get student and course information
-                    $info_query = "SELECT u.full_name, c.courseTitle 
-                                 FROM users u, courses c 
-                                 WHERE u.id = ? AND c.id = ?";
-                    $info = $db_handle->executeSelectPrepared($info_query, "ii", [$student_id, $course_id]);
-                    
-                    if (!empty($info)) {
-                        $student_name = $info[0]['full_name'];
-                        $course_name = $info[0]['courseTitle'];
+                // Get student and course information (attendance stores a
+                // denormalized name/image snapshot; the schema has no
+                // year/major fields anywhere, so those are left blank)
+                $info_query = "SELECT u.fullName, u.image, c.courseTitle
+                             FROM users u, courses c
+                             WHERE u.id = ? AND c.id = ?";
+                $info = $db_handle->executeSelectPrepared($info_query, "ii", [$student_id, $course_id]);
+
+                if (empty($info)) {
+                    $response = array('success' => false, 'message' => 'Failed to retrieve student and course details');
+                } else {
+                    $student_name = $info[0]['fullName'];
+                    $student_image = $info[0]['image'];
+                    $course_name = $info[0]['courseTitle'];
+
+                    // Insert the attendance record
+                    $insert_query = "INSERT INTO attendance (studentID, studentName, studentURLImage, year, courseID, major, date, status, notes)
+                                  VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+
+                    $result = $db_handle->executeUpdatePrepared($insert_query, "isssissss",
+                        [$student_id, $student_name, $student_image, '', $course_id, '', $date, $status, $notes]);
+
+                    if ($result) {
+                        // Get the new attendance record ID
+                        $attendance_id = $db_handle->getLastInsertId();
                         
                         // Create a notification for the student if they were marked absent or late
                         if ($status === 'Absent' || $status === 'Late') {
@@ -83,28 +96,25 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                             );
                         }
                         
-                        // Prepare the HTML for the new row to be inserted in the table
+                        // Prepare the HTML for the new row to be inserted in the table.
+                        // Course is implicit (the attendance page groups rows by
+                        // course into per-course tabs), so it isn't its own column
+                        // here - matching the initial server-rendered table layout.
                         $html = '<tr>';
-                        $html .= '<td data-id="id">' . $attendance_id . '</td>';
+                        $html .= '<td data-id="student_id">' . $student_id . '</td>';
                         $html .= '<td data-id="student_name">' . $student_name . '</td>';
-                        $html .= '<td data-id="course_name">' . $course_name . '</td>';
                         $html .= '<td data-id="date">' . date('Y-m-d', strtotime($date)) . '</td>';
-                        $html .= '<td data-id="status"><span class="status-badge status-' . strtolower($status) . '">' . $status . '</span></td>';
+                        $html .= '<td data-id="status"><span class="badge badge-' . ($status === 'Present' ? 'success' : ($status === 'Absent' ? 'danger' : 'warning')) . '">' . $status . '</span></td>';
                         $html .= '<td data-id="notes">' . $notes . '</td>';
                         $html .= '<td>';
-                        $html .= '<button class="edit"><i class="fas fa-pencil" aria-hidden="true"></i></button>';
-                        $html .= '<button class="save" style="display:none;" data-id="' . $attendance_id . '"><i class="fas fa-check" aria-hidden="true"></i></button>';
-                        $html .= '<button class="cancel" style="display:none;"><i class="fas fa-times" aria-hidden="true"></i></button>';
-                        $html .= '<button class="del" data-id="' . $attendance_id . '"><i class="fas fa-trash" aria-hidden="true"></i></button>';
+                        $html .= '<button class="btn btn-icon del" data-id="' . $attendance_id . '" title="Delete"><i class="fas fa-trash" aria-hidden="true"></i></button>';
                         $html .= '</td>';
                         $html .= '</tr>';
-                        
-                        $response = array('success' => true, 'message' => 'Attendance record added successfully', 'html' => $html);
+
+                        $response = array('success' => true, 'message' => 'Attendance record added successfully', 'html' => $html, 'course_id' => $course_id);
                     } else {
-                        $response = array('success' => false, 'message' => 'Failed to retrieve student and course details');
+                        $response = array('success' => false, 'message' => 'Failed to add attendance record');
                     }
-                } else {
-                    $response = array('success' => false, 'message' => 'Failed to add attendance record');
                 }
             }
         }
@@ -115,27 +125,33 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit();
 }
 
-// Update an existing attendance record
-else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id'])) {
+// Update an existing attendance record. Must exclude action=delete, which
+// also submits `id` via POST - this branch was previously catching delete
+// requests before they could reach the delete branch below.
+else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['id']) && (!isset($_POST['action']) || $_POST['action'] !== 'delete')) {
     $response = array();
     
     // Get the attendance ID
     $attendance_id = $db_handle->cleanData($_POST['id']);
     
     // Verify this attendance record belongs to a course taught by this teacher
-    $verify_query = "SELECT a.id, a.student_id, a.course_id 
+    $verify_query = "SELECT a.id, a.studentID, a.courseID
                     FROM attendance a
-                    JOIN courses c ON a.course_id = c.id 
-                    WHERE a.id = ? AND c.teacher_id = ?";
-    
-    $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$attendance_id, $user_id]);
-    
+                    JOIN courses c ON a.courseID = c.id
+                    WHERE a.id = ?";
+
+    $result = $db_handle->executeSelectPrepared($verify_query, "i", [$attendance_id]);
+
+    if (!empty($result) && !$db_handle->isCourseOwnedByTeacher($result[0]['courseID'], $user_id)) {
+        $result = [];
+    }
+
     if (empty($result)) {
         $response = array('success' => false, 'message' => 'You do not have permission to update this attendance record');
     } else {
         $attendance = $result[0];
-        $student_id = $attendance['student_id'];
-        $course_id = $attendance['course_id'];
+        $student_id = $attendance['studentID'];
+        $course_id = $attendance['courseID'];
         
         // Build the update query based on which fields were provided
         $fields = array();
@@ -242,13 +258,17 @@ else if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_P
         $attendance_id = $db_handle->cleanData($_POST['id']);
         
         // Verify this attendance record belongs to a course taught by this teacher
-        $verify_query = "SELECT a.id 
+        $verify_query = "SELECT a.id, a.courseID
                         FROM attendance a
-                        JOIN courses c ON a.course_id = c.id 
-                        WHERE a.id = ? AND c.teacher_id = ?";
-        
-        $result = $db_handle->executeSelectPrepared($verify_query, "ii", [$attendance_id, $user_id]);
-        
+                        JOIN courses c ON a.courseID = c.id
+                        WHERE a.id = ?";
+
+        $result = $db_handle->executeSelectPrepared($verify_query, "i", [$attendance_id]);
+
+        if (!empty($result) && !$db_handle->isCourseOwnedByTeacher($result[0]['courseID'], $user_id)) {
+            $result = [];
+        }
+
         if (empty($result)) {
             $response = array('success' => false, 'message' => 'You do not have permission to delete this attendance record');
         } else {

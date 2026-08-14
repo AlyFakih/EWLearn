@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -10,7 +14,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller
-require_once "php/dbcontroller.php";
+require_once "../../core/DBController.php";
 $db_handle = new DBController();
 
 // Get student information
@@ -28,10 +32,9 @@ if (!isset($_GET['id'])) {
 $assignment_id = intval($_GET['id']);
 
 // Get assignment details
-$assignment_sql = "SELECT a.*, c.courseTitle as course_name, u.fullName as instructor_name 
+$assignment_sql = "SELECT a.*, c.courseTitle as course_name
                   FROM assignment a
                   JOIN courses c ON a.course_id = c.id
-                  JOIN users u ON c.instructorID = u.id
                   WHERE a.id = $assignment_id";
 $assignment_result = $db_handle->readData($assignment_sql);
 
@@ -43,9 +46,11 @@ if (empty($assignment_result)) {
 $assignment = $assignment_result[0];
 
 // Check if student is enrolled in the course
-$enrollment_check = "SELECT * FROM studentcourse 
-                    WHERE studentID = $user_id 
-                    AND course_id = {$assignment['course_id']}";
+$enrollment_check = "SELECT sc.*
+                    FROM studentcourse sc
+                    JOIN users u ON sc.userStudentID = u.fullName
+                    WHERE u.id = $user_id
+                    AND sc.courseID = '{$assignment['course_name']}'";
 $enrollment_result = $db_handle->readData($enrollment_check);
 
 if (empty($enrollment_result)) {
@@ -67,19 +72,41 @@ $submission_success = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
   $submission_text = trim($_POST['submission_text']);
-  $file_url = ''; // In a real implementation, you would handle file upload here
-  
-  if (!empty($submission_text)) {
+  $file_path = '';
+
+  // Same upload pattern as submit_assignment.php: FileHandler saves into
+  // uploads/assignments/, relative path is identical since this file lives
+  // at the same directory depth (frontend/pages/Student Dashboard/).
+  if (isset($_FILES['submission_file']) && $_FILES['submission_file']['error'] !== UPLOAD_ERR_NO_FILE) {
+    require_once "../common/file_handler.php";
+    $fileHandler = new FileHandler(
+      ['pdf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'zip', 'rar', 'txt', 'jpg', 'jpeg', 'png'],
+      10485760, // 10MB max size
+      '../../../uploads/'
+    );
+    $newFilename = "assignment_{$assignment_id}_student_{$user_id}_" . time();
+    $uploadResult = $fileHandler->uploadFile($_FILES['submission_file'], 'assignments/', $newFilename);
+
+    if (!$uploadResult['success']) {
+      $submission_message = 'File upload failed: ' . $uploadResult['message'];
+    } else {
+      $file_path = $uploadResult['file_path'];
+    }
+  }
+
+  if ($submission_message === '' && (!empty($submission_text) || !empty($file_path))) {
     $submission_date = date('Y-m-d H:i:s');
-    
-    $insert_sql = "INSERT INTO assignment_submissions 
-                  (student_id, assignment_id, content, attachment_url, submitted_at, status) 
-                  VALUES ($user_id, $assignment_id, '$submission_text', '$file_url', '$submission_date', 'submitted')";
-                  
-    if ($db_handle->executeQuery($insert_sql)) {
+
+    // Parameterised - the previous version interpolated $submission_text
+    // straight into the SQL string.
+    $insert_sql = "INSERT INTO assignment_submissions
+                  (student_id, assignment_id, submission_text, file_path, submitted_at, status)
+                  VALUES (?, ?, ?, ?, ?, 'submitted')";
+
+    if ($db_handle->executeUpdatePrepared($insert_sql, "iisss", [$user_id, $assignment_id, $submission_text, $file_path, $submission_date])) {
       $submission_success = true;
       $submission_message = "Assignment submitted successfully!";
-      
+
       // Refresh the submission data
       $submission_result = $db_handle->readData($submission_sql);
       $is_submitted = true;
@@ -87,8 +114,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
     } else {
       $submission_message = "Error submitting assignment. Please try again.";
     }
-  } else {
-    $submission_message = "Please provide a submission text.";
+  } elseif ($submission_message === '') {
+    $submission_message = "Please provide a submission text or attach a file.";
   }
 }
 ?>
@@ -182,7 +209,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
             $current_date = time();
             $is_overdue = $due_date < $current_date && !$is_submitted;
             
-            if ($is_submitted && $submission['grade'] !== null) {
+            if ($is_submitted && ($submission['grade'] ?? $submission['score'] ?? 'N/A') !== null) {
               $status_class = 'graded';
               $status_text = 'Graded';
             } elseif ($is_submitted) {
@@ -198,7 +225,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
           ?>
           <div class="meta-item">
             <i class="fas fa-user-tie"></i>
-            <span>Instructor: <?php echo $assignment['instructor_name']; ?></span>
+            <span>Instructor: <?php echo ($assignment['instructor_name'] ?? 'N/A'); ?></span>
           </div>
           <div class="meta-item">
             <i class="fas fa-calendar"></i>
@@ -293,14 +320,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && !$is_submitted) {
               <div class="submission-text">
                 <h4>Your Answer</h4>
                 <div class="text-content">
-                  <?php echo nl2br($submission['content']); ?>
+                  <?php echo nl2br(($submission['content'] ?? $submission['submission_text'] ?? '')); ?>
                 </div>
               </div>
               
-              <?php if ($submission['attachment_url']): ?>
+              <?php if (($submission['attachment_url'] ?? $submission['file_path'] ?? '')): ?>
               <div class="submission-files">
                 <h4>Your Attachments</h4>
-                <a href="<?php echo $submission['attachment_url']; ?>" class="file-link" download>
+                <a href="<?php echo ($submission['attachment_url'] ?? $submission['file_path'] ?? ''); ?>" class="file-link" download>
                   <i class="fas fa-file-alt"></i>
                   <span>View/Download Attachment</span>
                 </a>

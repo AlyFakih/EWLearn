@@ -18,6 +18,10 @@ if ($result) {
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Also served at the clean URL /courses via an .htaccess internal
+         rewrite - see the note in loginRegister.html for why this is
+         needed. Must stay before every relative href/src below. -->
+    <base href="/frontend/pages/" />
     <title>EWlearn</title>
     <link
       rel="stylesheet"
@@ -35,7 +39,6 @@ if ($result) {
       href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
       crossorigin="anonymous"
     />
-    <link rel="stylesheet" href="../styles/instructors/welcomeImage.css" />
     <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
     <link rel="stylesheet" href="../styles/welcomeImage.css" />
     <link rel="stylesheet" href="../styles/courses/courses.css" />
@@ -52,7 +55,7 @@ if ($result) {
             <h1 class="display-3 text-white animated aboutus">Welcome</h1>
             <a href="../pages/Home.html" class="h4 text-white word"> Home </a>
             <i class="far fa-circle text-white px-2"></i>
-            <a href="../pages/courses.html" class="h4 text-white word">
+            <a href="../pages/courses.php" class="h4 text-white word">
               Courses
             </a>
           </div>
@@ -133,6 +136,7 @@ if ($result) {
                   <img
                     src="<?php echo htmlspecialchars($course['image']); ?>"
                     alt="<?php echo htmlspecialchars($course['courseTitle']); ?>"
+                    loading="lazy"
                   />
                   <span class="course-price">$<?php echo htmlspecialchars($course['price']); ?></span>
                   <div class="course-toolbar">

@@ -1,5 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: GET");
 header("Access-Control-Allow-Credentials: true");
