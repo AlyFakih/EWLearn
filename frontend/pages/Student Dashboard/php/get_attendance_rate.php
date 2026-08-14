@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('student');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -9,8 +13,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller
-require_once "dbcontroller.php";
-$db_handle = new StudentDBController();
+require_once "../../../core/DBController.php";
+$db_handle = new DBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];

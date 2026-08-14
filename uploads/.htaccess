@@ -1,0 +1,15 @@
+# Defense-in-depth: deny execution of any .php file in this directory, even
+# though the app's own FileHandler class never allows a .php upload through.
+<FilesMatch "\.php$">
+    Require all denied
+</FilesMatch>
+
+# The root .htaccess blocks source/config file types (.env, .log, .sql, etc.)
+# from being served anywhere in the project, but that blocklist also includes
+# .txt and .md - both of which are legitimate, explicitly-allowed assignment
+# submission file types (see FileHandler usage in submit_assignment.php).
+# Re-allow direct download of the actual upload file types within this
+# directory only; every other extension stays blocked project-wide.
+<FilesMatch "\.(pdf|doc|docx|xls|xlsx|ppt|pptx|zip|rar|txt|jpg|jpeg|png|gif|webp)$">
+    Require all granted
+</FilesMatch>

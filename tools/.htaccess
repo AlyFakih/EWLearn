@@ -1,0 +1,4 @@
+# Developer utilities (DB seeders, one-off fix scripts). These are not part of
+# the application's HTTP surface and must never be executable by a web request -
+# seed_users.php in particular creates accounts with known passwords.
+Require all denied

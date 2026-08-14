@@ -1,11 +1,21 @@
 <?php
 
+require_once __DIR__ . '/../../backend/load_env.php';
+
 class Database {
 
-    private $host = "localhost";
-    private $username = "root";
-    private $password = "";
-    private $database = "student_management";
+    private $host;
+    private $username;
+    private $password;
+    private $database;
+
+    public function __construct() {
+        $env = load_env(__DIR__ . '/../../backend/.env');
+        $this->host = $env['DB_HOST'] ?? '';
+        $this->username = $env['DB_USERNAME'] ?? '';
+        $this->password = $env['DB_PASSWORD'] ?? '';
+        $this->database = $env['DB_NAME'] ?? '';
+    }
 
     public function connect(){
 

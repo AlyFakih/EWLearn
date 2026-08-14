@@ -1,11 +1,11 @@
 <?php
-require_once "../Student Dashboard/php/dbcontroller.php";
+require_once __DIR__ . "/../../core/DBController.php";
 
 class CalendarManager {
     private $db_handle;
     
-    public function __construct() {
-        $this->db_handle = new StudentDBController();
+    public function __construct($db_handle = null) {
+        $this->db_handle = $db_handle ?: new DBController();
     }
     
     /**
@@ -156,20 +156,36 @@ class CalendarManager {
      * @return array|null Event data or null if not found
      */
     public function getEventById($id) {
-        $query = "SELECT ac.*, c.courseTitle 
+        $query = "SELECT ac.*, c.courseTitle
                   FROM academic_calendar ac
                   LEFT JOIN courses c ON ac.course_id = c.id
                   WHERE ac.id = ?";
         $types = "i";
         $params = [$id];
-        
+
         $result = $this->db_handle->executeSelectPrepared($query, $types, $params);
-        
+
         if (!empty($result)) {
             return $result[0];
         }
-        
+
         return null;
+    }
+
+    /**
+     * Delete all calendar events tied to a given event_type/course_id pair
+     * (e.g. all 'exam' events for a course, or all 'course' events for a course).
+     *
+     * @param string $event_type
+     * @param int $course_id
+     * @return bool Success status
+     */
+    public function deleteEventsByReference($event_type, $course_id) {
+        $query = "DELETE FROM academic_calendar WHERE event_type = ? AND course_id = ?";
+        $types = "si";
+        $params = [$event_type, $course_id];
+
+        return $this->db_handle->executeUpdatePrepared($query, $types, $params) > 0;
     }
 }
 ?>

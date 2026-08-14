@@ -25,7 +25,7 @@ function initCalendar() {
                 center: 'title',
                 right: 'dayGridMonth,timeGridWeek,timeGridDay,listWeek'
             },
-            events: 'php/get_calendar_events.php',
+            events: { url: '../common/calendar_api.php', method: 'GET', extraParams: { action: 'get_events' } },
             eventClick: function(info) {
                 // Handle event click - show details in a modal or navigate
                 if (info.event.url) {
@@ -53,7 +53,7 @@ function initMiniCalendar() {
                 right: ''
             },
             height: 'auto',
-            events: 'php/get_calendar_events.php'
+            events: { url: '../common/calendar_api.php', method: 'GET', extraParams: { action: 'get_events' } }
         });
         
         window.miniCalendar = miniCalendar;
@@ -63,17 +63,18 @@ function initMiniCalendar() {
 
 // Initialize notification handling
 function initNotifications() {
-    // Check for notification badge updates
+    // Check for notification badge updates. No polling interval here: this
+    // page also loads the shared notifications.js widget (via
+    // header_includes.php), which already polls notification_api.php?action=count
+    // every 30s and updates the same #notification-badge element - a second
+    // interval here was a duplicate, redundant poll of the same endpoint/element.
     updateNotificationBadge();
-    
-    // Set interval to check for new notifications
-    setInterval(updateNotificationBadge, 60000); // Check every minute
 }
 
 // Update the notification badge count
 function updateNotificationBadge() {
     $.ajax({
-        url: '../../common/notification_api.php?action=count',
+        url: '../common/notification_api.php?action=count',
         type: 'GET',
         dataType: 'json',
         success: function(response) {

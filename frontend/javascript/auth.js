@@ -22,7 +22,7 @@ function checkLoginState() {
   if (isLoggedIn) {
     // User is logged in, display the logout link and dashboard link
     document.getElementById("loginLink").innerHTML =
-      '<a id="logoutButton" onClick="removeLoginState()" href="#">LOGOUT</a> | <a href="../pages/dashboardAdmin/AdminDash.html">DASHBOARD</a>';
+      '<a id="logoutButton" onClick="removeLoginState()" href="#">LOGOUT</a> | <a href="../pages/dashboardAdmin/AdminDash.php">DASHBOARD</a>';
   } else {
     // User is not logged in, display the login link
     document.getElementById("loginLink").innerHTML =

@@ -30,6 +30,27 @@ composer.lock
 *.log
 
 # ======================
+# Real user-uploaded content (runtime data, not source) - static
+# placeholder avatars (instructor01.jpg etc.) are intentionally still
+# tracked; only the dynamic, timestamp-named uploads a real user's photo
+# upload produces (e.g. instructor_2_1786223181.png) are excluded.
+# ======================
+frontend/images/users/*/*_*_*.jpg
+frontend/images/users/*/*_*_*.jpeg
+frontend/images/users/*/*_*_*.png
+frontend/images/users/*/*_*_*.gif
+frontend/images/users/*/*_*_*.webp
+uploads/*
+!uploads/.htaccess
+
+# ======================
+# Local-only dev scripts (never deploy, never commit - this is exactly
+# where a plaintext-credential seeder script lived before an audit found
+# and removed it)
+# ======================
+tools/dev-scripts/
+
+# ======================
 # Backups
 # ======================
 *.backup

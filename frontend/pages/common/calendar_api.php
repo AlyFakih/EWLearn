@@ -234,8 +234,8 @@ function getColorForEventType($eventType) {
  */
 function createAssignmentNotifications($courseId, $title, $dueDate, $eventId) {
     require_once "notifications.php";
-    $notificationManager = new NotificationManager();
     $db = new DBController();
+    $notificationManager = new NotificationManager($db);
     
     // Get all students enrolled in the course
     $query = "SELECT sc.student_id 
@@ -267,8 +267,8 @@ function createAssignmentNotifications($courseId, $title, $dueDate, $eventId) {
  */
 function updateAssignmentNotifications($courseId, $eventId, $title, $dueDate) {
     require_once "notifications.php";
-    $notificationManager = new NotificationManager();
     $db = new DBController();
+    $notificationManager = new NotificationManager($db);
     
     // Get all students enrolled in the course
     $query = "SELECT sc.student_id 

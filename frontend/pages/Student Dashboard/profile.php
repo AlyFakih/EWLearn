@@ -1,6 +1,10 @@
 <?php
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 // Start the session to maintain user login state
-session_start();
 
 // Check if the user is logged in and is a student (role = 'student')
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
@@ -10,8 +14,8 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
 }
 
 // Include database controller
-require_once "php/dbcontroller.php";
-$db_handle = new StudentDBController();
+require_once "../../core/DBController.php";
+$db_handle = new DBController();
 
 // Get student information
 $user_id = $_SESSION['user_id'];
@@ -156,14 +160,14 @@ if (!empty($student['image'])) {
               <div class="form-group">
                 <label for="bloodType">Blood Type</label>
                 <select id="bloodType" name="bloodType">
-                  <option value="A+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'A+') ? 'selected' : ''; ?>>A+</option>
-                  <option value="A-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'A-') ? 'selected' : ''; ?>>A-</option>
-                  <option value="B+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'B+') ? 'selected' : ''; ?>>B+</option>
-                  <option value="B-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'B-') ? 'selected' : ''; ?>>B-</option>
-                  <option value="AB+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'AB+') ? 'selected' : ''; ?>>AB+</option>
-                  <option value="AB-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'AB-') ? 'selected' : ''; ?>>AB-</option>
-                  <option value="O+" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'O+') ? 'selected' : ''; ?>>O+</option>
-                  <option value="O-" <?php echo (($student['bloodType'] ?? $student['blood_type'] ?? '') == 'O-') ? 'selected' : ''; ?>>O-</option>
+                  <option value="A+" <?php echo (($student['blood'] ?? '') == 'A+') ? 'selected' : ''; ?>>A+</option>
+                  <option value="A-" <?php echo (($student['blood'] ?? '') == 'A-') ? 'selected' : ''; ?>>A-</option>
+                  <option value="B+" <?php echo (($student['blood'] ?? '') == 'B+') ? 'selected' : ''; ?>>B+</option>
+                  <option value="B-" <?php echo (($student['blood'] ?? '') == 'B-') ? 'selected' : ''; ?>>B-</option>
+                  <option value="AB+" <?php echo (($student['blood'] ?? '') == 'AB+') ? 'selected' : ''; ?>>AB+</option>
+                  <option value="AB-" <?php echo (($student['blood'] ?? '') == 'AB-') ? 'selected' : ''; ?>>AB-</option>
+                  <option value="O+" <?php echo (($student['blood'] ?? '') == 'O+') ? 'selected' : ''; ?>>O+</option>
+                  <option value="O-" <?php echo (($student['blood'] ?? '') == 'O-') ? 'selected' : ''; ?>>O-</option>
                 </select>
               </div>
             </div>

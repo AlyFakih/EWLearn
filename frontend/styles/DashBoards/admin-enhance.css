@@ -1,0 +1,306 @@
+/* Admin Dashboard — premium visual layer. Loaded last; #dashboard-content
+   prefix bumps guarantee wins over async-loaded per-section CSS. Same brand
+   palette (black / less-black / dark-red / white) — richer execution: real
+   gradients, glow, depth, and a proper type scale (Sora display + Inter body). */
+
+* { font-family: 'Inter', -apple-system, Segoe UI, sans-serif; }
+h1, h2, h3, .datainfo .box .data span, .title-info p {
+  font-family: 'Sora', 'Inter', sans-serif !important;
+}
+
+body {
+  background:
+    radial-gradient(1200px 600px at 10% -10%, rgba(163,48,47,0.25), transparent 60%),
+    radial-gradient(900px 500px at 100% 0%, rgba(129,0,0,0.18), transparent 55%),
+    var(--black-color);
+}
+
+.bodydash { padding: 0 var(--space-4) var(--space-5); }
+
+/* ---------- Sidebar ---------- */
+.menu {
+  background: linear-gradient(180deg, #1d1919 0%, #120e0e 100%);
+  box-shadow: var(--shadow-md);
+  display: flex;
+  flex-direction: column;
+  border-right: 1px solid rgba(255,255,255,0.06);
+}
+.menu .profile {
+  padding-bottom: var(--space-3);
+  margin-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border-subtle);
+}
+.menu .img-pro {
+  box-shadow: 0 0 0 3px rgba(163,48,47,0.5), var(--shadow-md);
+}
+ul li a {
+  gap: 18px;
+  padding: 14px 16px;
+  border-radius: var(--radius-md);
+  transition: all 0.25s ease;
+  position: relative;
+}
+ul li a p { font-size: 15px; font-weight: 600; white-space: nowrap; }
+ul li a i {
+  font-size: 18px; width: 34px; height: 34px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 10px; background: rgba(255,255,255,0.06);
+  transition: all 0.25s ease;
+}
+ul li a:hover { background-color: rgba(255,255,255,0.08); transform: translateX(2px); }
+ul li a:hover i { background: rgba(255,255,255,0.14); }
+ul li a:focus-visible { outline: 2px solid var(--dark-red-light); outline-offset: 2px; }
+ul li a.active {
+  background: linear-gradient(90deg, var(--dark-red), var(--dark-red-light));
+  box-shadow: 0 4px 18px rgba(163,48,47,0.5), inset 3px 0 0 #fff;
+}
+ul li a.active i { background: rgba(255,255,255,0.22); }
+.logout { border-radius: var(--radius-md); background: linear-gradient(90deg, var(--red-color), #c40000) !important; box-shadow: 0 4px 16px rgba(255,0,0,0.35); transition: filter .2s; }
+.logout:hover { filter: brightness(1.15); }
+
+/* ---------- Topbar ---------- */
+.title-info {
+  background: linear-gradient(90deg, var(--dark-red) 0%, #a3302f 100%) !important;
+  box-shadow: 0 6px 24px rgba(129,0,0,0.4);
+  gap: var(--space-3);
+  border-bottom: 2px solid rgba(255,255,255,0.15);
+}
+.title-info p { font-size: 24px; font-weight: 800; margin: 0; letter-spacing: 0.01em; }
+.title-info .icon i { font-size: 22px; }
+.title-info .icon span {
+  font-size: 11px; font-weight: 700; box-shadow: 0 0 0 2px var(--dark-red), 0 0 10px rgba(255,255,255,0.6);
+}
+.notifi-box { max-width: calc(100vw - 20px); border-radius: var(--radius-lg); box-shadow: var(--shadow-md); backdrop-filter: blur(6px); }
+@media (max-width: 460px) { .notifi-box { right: 10px; width: calc(100vw - 20px); } }
+
+/* ---------- Stat cards ---------- */
+.datainfo .box {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(150deg, var(--dark-red) 0%, #5c0000 100%) !important;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.45), inset 0 1px 0 rgba(255,255,255,0.08);
+  gap: var(--space-3);
+  padding: 0 var(--space-4);
+  position: relative;
+  overflow: hidden;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+.datainfo .box::after {
+  content: ""; position: absolute; inset: 0;
+  background: radial-gradient(120px 80px at 90% 0%, rgba(255,255,255,0.15), transparent 70%);
+  pointer-events: none;
+}
+.datainfo .box:hover { transform: translateY(-4px) scale(1.01); box-shadow: 0 16px 40px rgba(0,0,0,0.55); }
+.datainfo .box i {
+  width: 58px; height: 58px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  border-radius: 50%; background: rgba(255,255,255,0.16); font-size: 26px !important;
+  box-shadow: inset 0 0 0 2px rgba(255,255,255,0.25);
+}
+.datainfo .box .data { font-size: 15px; font-weight: 600; letter-spacing: 0.03em; text-transform: uppercase; opacity: .92; }
+.datainfo .box .data span { display: block; font-size: 32px; font-weight: 800; line-height: 1.15; font-variant-numeric: tabular-nums; }
+
+/* ---------- Chart cards ---------- */
+.chart {
+  border: 1px solid rgba(255,255,255,0.08);
+  background: linear-gradient(160deg, var(--less-black), #141010) !important;
+  box-shadow: var(--shadow-md);
+  position: relative;
+}
+.chart::before { content:""; position:absolute; top:0; left:0; right:0; height:3px; border-radius: 10px 10px 0 0; background: linear-gradient(90deg, var(--dark-red), var(--dark-red-light)); }
+.chart h2 { font-size: 18px; font-weight: 700; letter-spacing: 0.01em; }
+
+/* ---------- Tables ---------- */
+#dashboard-content .table { border: 1px solid rgba(255,255,255,0.08); box-shadow: var(--shadow-md); }
+#dashboard-content thead th {
+  font-size: 12.5px; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase;
+  padding: var(--space-3); background: linear-gradient(90deg, rgba(129,0,0,0.55), rgba(0,0,0,0.55)) !important;
+  border-bottom: 2px solid var(--dark-red-light);
+}
+#dashboard-content tbody tr td, #dashboard-content tbody tr td p { font-size: 15px; letter-spacing: normal; }
+#dashboard-content tbody tr td { padding: 14px 1rem; }
+#dashboard-content tbody tr:hover { background: rgba(163,48,47,0.14) !important; }
+
+#dashboard-content .trash, #dashboard-content .edit, #dashboard-content .log {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 42px; height: 42px; padding: 0; border-radius: 50%;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.4);
+  transition: transform .18s ease, filter .18s ease, box-shadow .18s ease;
+}
+#dashboard-content .log { width: auto; height: auto; padding: 12px 24px; border-radius: 999px;
+  background: linear-gradient(90deg, var(--dark-red), var(--dark-red-light)) !important; }
+.trash:hover, .edit:hover, .log:hover { transform: translateY(-2px) scale(1.05); filter: brightness(1.2); box-shadow: 0 8px 20px rgba(0,0,0,0.5); }
+.trash:focus-visible, .edit:focus-visible, .log:focus-visible, button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible {
+  outline: 2px solid var(--dark-red-light); outline-offset: 2px;
+}
+
+/* ---------- Modals ---------- */
+.modal { backdrop-filter: blur(4px); }
+.modal-content {
+  width: min(92vw, 560px) !important; max-height: 86vh; overflow-y: auto; margin: 6vh auto !important;
+  background: linear-gradient(165deg, #1d1919, #0d0a0a) !important;
+  border: 1px solid rgba(255,255,255,0.08) !important;
+  box-shadow: 0 30px 80px rgba(0,0,0,0.6), 0 0 0 1px rgba(163,48,47,0.3);
+}
+.imgcontainer h1 { font-size: 21px; font-weight: 800; }
+.imgcontainer { border-bottom: 2px solid var(--dark-red); padding-bottom: var(--space-3); }
+
+/* ---------- Forms ---------- */
+input[type="text"], input[type="password"], input[type="email"], input[type="tel"],
+input[type="number"], input[type="date"], input[type="time"], .selectRole {
+  font-size: 15px; font-weight: 500; padding: 12px 16px; border-radius: var(--radius-md) !important;
+  transition: border-color .2s, box-shadow .2s;
+}
+input:focus, .selectRole:focus {
+  outline: none; border-color: var(--dark-red-light) !important;
+  box-shadow: 0 0 0 3px rgba(163,48,47,0.35);
+}
+.contadd .sub-button input[type="submit"], .formButtons button, .formChoose button {
+  font-size: 14px; font-weight: 700; letter-spacing: 0.02em; border-radius: 999px !important;
+  background: linear-gradient(90deg, var(--red-color), #c40000) !important;
+  box-shadow: 0 6px 20px rgba(255,0,0,0.3);
+  transition: transform .15s, filter .15s;
+}
+.contadd .sub-button input[type="submit"]:hover, .formButtons button:hover, .formChoose button:hover {
+  transform: translateY(-2px); filter: brightness(1.15);
+}
+
+/* ---------- Course cards ---------- */
+#dashboard-content .container-fluid { background: var(--surface); border: 1px solid rgba(255,255,255,0.08); border-radius: var(--radius-lg); }
+#dashboard-content .card {
+  border-radius: var(--radius-lg); overflow: hidden;
+  background: linear-gradient(165deg, #232020, #141010) !important;
+  box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.06) !important;
+  transition: transform .25s ease, box-shadow .25s ease;
+}
+#dashboard-content .card:hover { transform: translateY(-6px); box-shadow: 0 20px 45px rgba(0,0,0,0.55), 0 0 0 1px rgba(163,48,47,0.4); }
+#dashboard-content .card img { transition: transform .4s ease; }
+#dashboard-content .card:hover img { transform: scale(1.06); }
+.card .info h2.coursename { font-size: 17px; font-weight: 800; }
+#dashboard-content .card-buttons button { border-radius: 999px !important; font-weight: 700; box-shadow: var(--shadow-sm); transition: filter .15s, transform .15s; }
+.card-buttons button:hover { filter: brightness(1.15); transform: translateY(-2px); }
+.card-buttons button:first-of-type { background: linear-gradient(90deg, var(--dark-red), var(--dark-red-light)) !important; }
+.card-buttons button:last-of-type { background: linear-gradient(90deg, var(--red-color), #c40000) !important; }
+
+#dashboard-content .addEvent button[onclick^="delete" i], #dashboard-content .addEvent button[onclick^="confirmDelete" i] {
+  background: linear-gradient(90deg, var(--red-color), #c40000) !important;
+}
+#dashboard-content .addEvent button:not([onclick^="delete" i]):not([onclick^="confirmDelete" i]) {
+  background: linear-gradient(90deg, var(--dark-red), var(--dark-red-light)) !important;
+}
+
+/* ---------- InsCourse (Bootstrap-class fallback grid) ---------- */
+#dashboard-content .InsCourse { width: min(92%, 720px); max-width: 100%; background: var(--surface) !important; border-radius: var(--radius-lg); box-shadow: var(--shadow-md); }
+.InsCourse .row { display: flex; flex-wrap: wrap; gap: var(--space-3); margin: 0; }
+.InsCourse .col-sm-2, .InsCourse .col-sm-4, .InsCourse .col-sm-12 { flex: 1 1 200px; min-width: 0; }
+.InsCourse .col-sm-12 { flex-basis: 100%; }
+.InsCourse .form-control, .InsCourse textarea {
+  width: 100%; padding: 11px 16px; border-radius: var(--radius-md); border: 1px solid rgba(255,255,255,0.1);
+  background: var(--surface-2); color: var(--white-color); font-size: 15px; font-family: inherit;
+}
+.InsCourse .formChoose { flex-wrap: wrap; row-gap: var(--space-2); }
+@media (max-width: 480px) { .InsCourse { padding: var(--space-4) !important; } }
+
+/* ---------- Staff & Messages ---------- */
+.addEvent, .message-card {
+  border-radius: var(--radius-lg);
+  background: linear-gradient(165deg, #232020, #141010) !important;
+  box-shadow: var(--shadow-md); border: 1px solid rgba(255,255,255,0.06);
+}
+
+/* ---------- Focus + motion safety ---------- */
+a, button, input, select, textarea { scroll-margin-top: 90px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+
+/* ---------- Mobile/tablet: icon-only sidebar rail ---------- */
+@media (max-width: 880px) {
+  .menu ul li a p { display: none; }
+  .menu ul li a { justify-content: center; }
+  .menu ul li a i { width: auto; }
+}
+
+/* ---------- SHAPE PASS: distinctive silhouettes, zero layout/box changes ----------
+   Every rule below is border-radius / clip-path only - no width, height, margin,
+   padding, position or display changes - so nothing here can move, resize, hide
+   or disconnect a clickable element. Functionality is untouched. */
+
+/* Sidebar: rounded panel jutting from the edge instead of a flush rectangle. */
+.menu { border-radius: 0 32px 32px 0; overflow: hidden; }
+.menu .img-pro { border-radius: 40% 60% 60% 40% / 50% 40% 60% 50%; }
+
+/* Topbar: floating rounded bar. */
+.title-info { border-radius: 22px !important; }
+
+/* Stat cards: signature cut-corner shape (echoed on chart cards + course cards). */
+.datainfo .box { border-radius: 30px 10px 30px 10px !important; }
+.datainfo .box i { border-radius: 45% 55% 55% 45% / 55% 45% 55% 45%; }
+
+/* Chart cards + tables + modals + course cards + staff/messages: same cut-corner
+   motif, larger radius for bigger surfaces. */
+.chart { border-radius: 10px 30px 10px 30px !important; }
+#dashboard-content .table { border-radius: 24px !important; overflow: hidden; }
+#dashboard-content .card { border-radius: 28px 10px 28px 10px !important; }
+.modal-content { border-radius: 30px 10px 30px 10px !important; }
+.addEvent, .message-card { border-radius: 28px 10px 28px 10px !important; }
+#dashboard-content .container-fluid { border-radius: 24px !important; }
+#dashboard-content .InsCourse { border-radius: 24px !important; }
+
+/* Sidebar nav: active/hover become pill-shaped, not full-width rectangles. */
+ul li a { border-radius: 999px !important; }
+ul li a i { border-radius: 50% !important; }
+
+/* Icon action buttons: perfect pill/circle already - round the notification
+   dropdown and its items to match the new rounder language. */
+.notifi-box { border-radius: 26px !important; overflow: hidden; }
+.notifi-items:first-child { border-radius: 18px 18px 0 0; }
+
+/* Buttons + plain text-style inputs: pill. NOT date/number/time - those render
+   as several internal native segments (day/month/year spinners etc.), and a
+   999px pill radius applied to the whole control mis-shapes each segment into
+   broken-looking slivers instead of one smooth pill. Rounded-rect for those. */
+button, input[type="submit"], .selectRole,
+input[type="text"], input[type="email"], input[type="tel"], input[type="password"] {
+  border-radius: 999px !important;
+}
+input[type="number"], input[type="date"], input[type="time"] {
+  border-radius: var(--radius-md) !important;
+}
+textarea, .InsCourse .form-control { border-radius: 20px !important; }
+
+/* The empty course-picker <select> (#courseNameC) in "Add Details To The
+   Course" had no visible affordance - same pill radius as everything else but
+   no arrow/border contrast, so it read as a dead blank box rather than a
+   dropdown to choose which course you're editing. */
+#courseNameC, #deleteMemberSelect {
+  min-width: 220px;
+  border: 1px solid var(--dark-red-light) !important;
+  background: var(--surface-2) !important;
+  color: var(--white-color) !important;
+  padding: 10px 16px !important;
+}
+
+/* Update/Add Course modals: .addcardinfo lays the form + course-preview card
+   out as two rigid side-by-side flex columns with no wrap. That was tolerable
+   at the old 50%-of-viewport modal width, but this file already caps modals
+   at 560px for mobile safety - at that width the preview card claims most of
+   the space, squeezing every text input in .form-row down to a few px wide
+   (rendering as unusable slivers/circles). Stack them instead. */
+#dashboard-content .addcardinfo {
+  flex-wrap: wrap !important;
+  gap: var(--space-3);
+}
+#dashboard-content .form-row {
+  width: 100% !important;
+  display: flex !important;
+  flex-wrap: wrap !important;
+  gap: 10px;
+  margin: 0 !important;
+}
+#dashboard-content .form-row input,
+#dashboard-content .form-row .sub-button {
+  flex: 1 1 220px;
+  min-width: 0;
+}
+#dashboard-content .cardAdd {
+  flex: 1 1 100%;
+  max-width: 260px;
+  margin: 0 auto;
+}

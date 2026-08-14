@@ -57,7 +57,18 @@ class FileHandler {
                 'error_code' => 'invalid_type'
             ];
         }
-        
+
+        // Content-based check on top of the extension check above - a
+        // renamed non-image/executable file (e.g. shell.php saved as
+        // resume.pdf) would otherwise sail through on filename alone.
+        if (!$this->validateFileContent($file['tmp_name'], $extension)) {
+            return [
+                'success' => false,
+                'message' => 'File content does not match its declared type.',
+                'error_code' => 'content_mismatch'
+            ];
+        }
+
         // Make sure subdirectory ends with a slash
         if (!empty($subdirectory)) {
             $subdirectory = rtrim($subdirectory, '/') . '/';
@@ -149,6 +160,61 @@ class FileHandler {
         return $baseUrl . '/' . $filePath;
     }
     
+    /**
+     * Verify a file's actual content matches its declared extension.
+     *
+     * Images get a strict check via getimagesize() (same approach already
+     * used for the team-member/event photo uploads elsewhere in this app):
+     * it decodes real image data, so a non-image file with a faked
+     * extension is rejected even though the filename check already passed.
+     *
+     * Non-image types here are a mix of office documents and archives
+     * (pdf/doc/docx/xls/xlsx/ppt/pptx/zip/rar/txt) whose real content-sniffed
+     * MIME type varies by server/libmagic version - docx/xlsx/pptx in
+     * particular are just zip containers and often report as generic
+     * application/zip. Rather than a brittle per-extension allow-list that
+     * would false-positive-reject legitimate documents, this instead
+     * denies anything that content-sniffs as executable/script content
+     * regardless of what extension it claims to be - the actual attack this
+     * guards against (e.g. a PHP shell renamed to resume.pdf).
+     *
+     * @param string $tmpPath Path to the uploaded temp file
+     * @param string $extension Lowercased extension already validated above
+     * @return bool True if the content is acceptable
+     */
+    private function validateFileContent($tmpPath, $extension) {
+        $imageMimeMap = [
+            'jpg' => 'image/jpeg',
+            'jpeg' => 'image/jpeg',
+            'png' => 'image/png',
+            'gif' => 'image/gif',
+            'webp' => 'image/webp',
+        ];
+
+        if (isset($imageMimeMap[$extension])) {
+            $imageInfo = @getimagesize($tmpPath);
+            return $imageInfo !== false && $imageInfo['mime'] === $imageMimeMap[$extension];
+        }
+
+        if (!function_exists('finfo_open')) {
+            // No fileinfo extension available - fall back to the extension
+            // check that already ran rather than hard-failing every upload.
+            return true;
+        }
+
+        $finfo = finfo_open(FILEINFO_MIME_TYPE);
+        $actualMime = finfo_file($finfo, $tmpPath);
+        finfo_close($finfo);
+
+        $dangerousMimes = [
+            'text/x-php', 'application/x-httpd-php', 'application/x-php',
+            'application/x-executable', 'application/x-dosexec', 'application/x-msdownload',
+            'application/x-sh', 'text/x-shellscript', 'application/x-perl', 'text/x-python',
+        ];
+
+        return !in_array($actualMime, $dangerousMimes, true);
+    }
+
     /**
      * Sanitize filename to make it safe for storage
      * 

@@ -1,4 +1,9 @@
 <?php
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 require './config.php';
 
 // Fetch data from the POST request
@@ -21,15 +26,24 @@ if (empty($fullName) || empty($bloodType) || empty($email) || empty($phoneNumber
     // Hash the password before storing it in the database
     $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
-    // Perform the insert operation
-    $query = "INSERT INTO users (role, fullName, country, email, mobile, blood, gender, password)
-              VALUES ('$role','$fullName', '$country', '$email', '$phoneNumber', '$bloodType', '$gender', '$hashedPassword')";
+    // Only these roles may ever be created.
+    $allowedRoles = ['admin', 'instructor', 'student'];
+    if (!in_array($role, $allowedRoles, true)) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid role']);
+        exit;
+    }
 
-    // Execute the query using the same connection
-    $result = mysqli_query($conn, $query);
+    // Perform the insert operation. Parameterised - all of these came straight
+    // from the request and were previously interpolated into the SQL string.
+    $query = "INSERT INTO users (role, fullName, country, email, mobile, blood, gender, password)
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ssssssss", $role, $fullName, $country, $email, $phoneNumber, $bloodType, $gender, $hashedPassword);
+    $result = $stmt->execute();
 
     if ($result) {
-        $response = ['status' => 'success', 'message' => 'Instructor added successfully'];
+        $response = ['status' => 'success', 'message' => ucfirst($role) . ' added successfully'];
     } else {
         // Check if the error is due to a unique constraint violation
         if (mysqli_errno($conn) == 1062) {

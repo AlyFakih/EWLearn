@@ -13,7 +13,7 @@ $(document).ready(function() {
         
         // Close modal buttons
         $('.modal-close, .cancel-modal').click(function() {
-            $(this).closest('.modal').modal('hide');
+            $(this).closest('.modal-overlay').modal('hide');
         });
     }
     
@@ -77,7 +77,7 @@ $(document).ready(function() {
             // Show "no results" message if needed
             if ($('#table1 tbody tr:visible').length === 0) {
                 if ($('#table1 tbody tr.no-results').length === 0) {
-                    $('#table1 tbody').append('<tr class="no-results"><td colspan="4" class="text-center">No matching grades found</td></tr>');
+                    $('#table1 tbody').append('<tr class="no-results"><td colspan="5" class="text-center">No matching grades found</td></tr>');
                 }
             } else {
                 $('#table1 tbody tr.no-results').remove();
@@ -87,13 +87,15 @@ $(document).ready(function() {
         // View grade details
         $(document).on('click', '.view-grade', function() {
             const studentId = $(this).data('id');
-            
+            const courseId = $(this).data('course-id');
+
             $.ajax({
                 url: 'php/grade_functions.php',
                 type: 'GET',
                 data: {
                     action: 'view',
-                    id: studentId
+                    id: studentId,
+                    course_id: courseId
                 },
                 success: function(response) {
                     try {
@@ -106,10 +108,9 @@ $(document).ready(function() {
                             $('#view_student_id').text(grade.student_id);
                             $('#view_student_name').text(grade.student_name);
                             $('#view_student_email').text(grade.student_email);
-                            $('#view_course').text(`${grade.courseCode} - ${grade.courseTitle}`);
-                            $('#view_term').text(grade.term);
+                            $('#view_course').text(`${grade.courseCode || ''} - ${grade.courseTitle}`);
                             $('#view_date').text(grade.created_at);
-                            $('#view_grade').text(grade.grade);
+                            $('#view_grade').text(grade.overall_grade);
                             
                             // Show the modal
                             $('#viewModal').modal('show');
@@ -158,18 +159,20 @@ $(document).ready(function() {
             $btn.hide().siblings('.edit').show();
             
             const studentId = $btn.data('id');
+            const courseId = $btn.data('course-id');
             const grade = $btn.closest('tr').find('td[data-id="student_grade"]').text();
-            
+
             // Make all cells non-editable
             $btn.closest('tr').find('td[data-id]').each(function() {
                 $(this).attr('contenteditable', 'false');
             });
-            
+
             $.ajax({
                 url: 'php/grade_functions.php',
                 type: 'POST',
                 data: {
                     student_id: studentId,
+                    course_id: courseId,
                     student_grade: grade,
                     action: 'update'
                 },
@@ -204,13 +207,15 @@ $(document).ready(function() {
         $(document).on('click', '#table1 .del', function() {
             const ele = this;
             const deleteId = $(this).data('id');
-            
+            const deleteCourseId = $(this).data('course-id');
+
             if (confirm('Are you sure you want to delete this grade? This action cannot be undone.')) {
                 $.ajax({
                     url: 'php/grade_functions.php',
                     type: 'POST',
                     data: {
                         id: deleteId,
+                        course_id: deleteCourseId,
                         action: 'delete'
                     },
                     success: function(response) {
@@ -221,7 +226,7 @@ $(document).ready(function() {
                                 
                                 // Show empty state if no more rows
                                 if ($('#table1 tbody tr').length === 0) {
-                                    $('#table1 tbody').append('<tr><td colspan="4" class="text-center">No grades available</td></tr>');
+                                    $('#table1 tbody').append('<tr><td colspan="5" class="text-center">No grades available</td></tr>');
                                 }
                             });
                             
@@ -243,17 +248,21 @@ $(document).ready(function() {
     
     // Initialize notifications
     function initNotifications() {
-        // Initial check for notifications
+        // Initial check for notifications. No polling interval here: this
+        // page also loads the shared notifications.js widget (via
+        // header_includes.php), which already polls the same
+        // notification_api.php?action=count endpoint every 30s and updates
+        // this same badge element (id="notification-badge", which also
+        // carries the .notification-count class notifications.js targets) -
+        // a second interval here was a duplicate, redundant poll of the
+        // same endpoint/element.
         updateNotificationCount();
-        
-        // Poll for new notifications every 60 seconds
-        setInterval(updateNotificationCount, 60000);
     }
     
     // Update notification count
     function updateNotificationCount() {
         $.ajax({
-            url: '../../common/notification_api.php?action=count',
+            url: '../common/notification_api.php?action=count',
             type: 'GET',
             success: function(response) {
                 try {
@@ -274,34 +283,30 @@ $(document).ready(function() {
     
     // Show notification
     function showNotification(title, message, type) {
-        // Toast notification using Bootstrap's toast component
-        const toast = `
-            <div class="toast" role="alert" aria-live="assertive" aria-atomic="true" data-delay="5000">
-                <div class="toast-header bg-${type}">
-                    <strong class="mr-auto text-white">${title}</strong>
-                    <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
+        // Self-contained toast (no Bootstrap JS dependency - it was never
+        // actually loaded on this page, so $(...).toast() always threw).
+        const bg = type === 'danger' || type === 'error' ? 'var(--danger)'
+                 : type === 'success' ? 'var(--success)'
+                 : 'var(--info)';
+        const $toast = $(`
+            <div style="background: var(--surface); border-left: 4px solid ${bg}; border-radius: var(--radius-md); box-shadow: var(--shadow-md); padding: 12px 16px; margin-bottom: 10px; min-width: 260px; max-width: 360px; color: var(--text);">
+                <div style="display:flex; justify-content:space-between; align-items:center; gap: 12px;">
+                    <strong>${title}</strong>
+                    <span class="toast-close" style="cursor:pointer; opacity:0.7;">&times;</span>
                 </div>
-                <div class="toast-body">
-                    ${message}
-                </div>
+                <div style="font-size: 13px; color: var(--text-muted); margin-top: 4px;">${message}</div>
             </div>
-        `;
-        
-        // Add toast to container
-        const toastContainer = $('.toast-container');
-        if (toastContainer.length === 0) {
-            $('body').append('<div class="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+        `);
+
+        let $container = $('.toast-container');
+        if ($container.length === 0) {
+            $container = $('<div class="toast-container" style="position: fixed; top: 20px; right: 20px; z-index: 9999;"></div>');
+            $('body').append($container);
         }
-        $('.toast-container').append(toast);
-        
-        // Show the toast
-        $('.toast').toast('show');
-        
-        // Remove toast after it's hidden
-        $('.toast').on('hidden.bs.toast', function() {
-            $(this).remove();
-        });
+        $container.append($toast);
+
+        const remove = () => $toast.fadeOut(200, function () { $(this).remove(); });
+        $toast.find('.toast-close').on('click', remove);
+        setTimeout(remove, 5000);
     }
 });

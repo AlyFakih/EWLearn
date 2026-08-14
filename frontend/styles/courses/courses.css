@@ -4,7 +4,7 @@
 
 body {
   background: linear-gradient(rgba(36, 28, 28, 0.85), rgba(26, 18, 18, 0.85)),
-    url(../../assets/images/welcomeimage2.jp) center center/cover no-repeat !important;
+    url(../../assets/images/welcomeimage2.jpg) center center/cover no-repeat !important;
 }
 /* ! message not found */
 .no-cards-message {

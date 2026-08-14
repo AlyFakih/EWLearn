@@ -16,22 +16,25 @@ window.onclick = function (event) {
 // ! search input ------------------------
 
 const searchInput = document.getElementById("searchinstructor");
-const rows = document.querySelectorAll("tbody tr");
-const noResultsMessage = document.getElementById("no-cards-message"); // Assuming you have an element with the id "noResultsMessage"
+const noResultsMessage = document.getElementById("no-cards-message");
 
 searchInput.addEventListener("keyup", function (event) {
   const q = event.target.value.toLowerCase();
   let found = false;
 
+  // Query fresh on every keystroke, not once at script load: the table rows
+  // are added later, asynchronously, once window.fetchInstructorData()'s AJAX
+  // call resolves - capturing them once up front meant this NodeList was
+  // always empty (0 rows), so search silently matched nothing no matter what
+  // you typed.
+  const rows = document.querySelectorAll("#instructorTableBody tr");
+
   rows.forEach((row) => {
-    const nameMatch = row
-      .querySelector(".namein")
-      .textContent.toLowerCase()
-      .startsWith(q);
-    const emailMatch = row
-      .querySelector(".emailin")
-      .textContent.toLowerCase()
-      .startsWith(q);
+    const nameEl = row.querySelector(".namein");
+    const emailEl = row.querySelector(".emailin");
+    if (!nameEl || !emailEl) return;
+    const nameMatch = nameEl.textContent.toLowerCase().startsWith(q);
+    const emailMatch = emailEl.textContent.toLowerCase().startsWith(q);
 
     if (nameMatch || emailMatch) {
       row.style.display = "";
@@ -41,10 +44,8 @@ searchInput.addEventListener("keyup", function (event) {
     }
   });
 
-  if (found) {
-    noResultsMessage.style.display = "none";
-  } else {
-    noResultsMessage.style.display = ""; // Show the message when no results are found
+  if (noResultsMessage) {
+    noResultsMessage.style.display = found || rows.length === 0 ? "none" : "";
   }
 });
 // !-------------Inside teacher.js

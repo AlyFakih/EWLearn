@@ -1,13 +1,17 @@
 <?php
-session_start();
+// Server-side authorization gate: student only. Runs first so nothing is
+// emitted to an unauthenticated, wrong-role, expired or deleted account.
+require_once __DIR__ . '/../../core/auth_guard.php';
+auth_require_role('student', 'page', '../loginRegister.html');
+
 
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'student') {
   header("Location: ../loginRegister.html");
   exit();
 }
 
-require_once "php/dbcontroller.php";
-$db_handle = new StudentDBController();
+require_once "../../core/DBController.php";
+$db_handle = new DBController();
 
 $user_id = $_SESSION['user_id'];
 $sql = "SELECT * FROM users WHERE id = $user_id AND role = 'student'";
@@ -130,7 +134,7 @@ $courses = $db_handle->readData($sql);
           <img src="./images/no-courses.svg" alt="No courses">
           <h2>No Courses Found</h2>
           <p>You are not enrolled in any courses yet.</p>
-          <a href="../courses.html" class="btn">Browse Available Courses</a>
+          <a href="../courses.php" class="btn">Browse Available Courses</a>
         </div>
       <?php endif; ?>
     </div>

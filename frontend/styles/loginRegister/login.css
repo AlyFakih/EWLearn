@@ -14,7 +14,20 @@ body {
 }
 
 .container {
-  /* position: relative;  */
+  /* Restored: without this, .container is position:static, so it never
+     becomes the containing block for its position:absolute ::before (the
+     decorative circle). That circle's positioning then resolves against
+     the document root instead, which also means .container's own
+     overflow-x:hidden below never actually clips it (overflow clipping for
+     absolutely-positioned content only applies when the overflow-hidden
+     element IS that content's containing block). Harmless in the default
+     sign-in state, where the fallback containing block happens to be
+     nearly the same size as .container's own box - but in sign-up mode,
+     .container.sign-up-mode::before adds transform: translate(100%, -50%)
+     (a 2000px shift, 100% of the circle's own width) with nothing to clip
+     it, which was pushing document.documentElement.scrollWidth ~794px
+     past the viewport on desktop. */
+  position: relative;
 
   width: 100%;
 
@@ -559,4 +572,102 @@ form.sign-up-form {
 .container.sign-up-mode .signup-signup {
   pointer-events: all !important;
   z-index: 10 !important;
+}
+
+/* Mobile layout: this page had no responsive treatment below 768px (only a
+   300px-and-under tweak), so the desktop "sliding door" two-panel animation
+   (absolute positioning + percentage offsets + a 2000px decorative circle)
+   overflowed the viewport on every real phone. Below 768px this drops the
+   side-by-side sliding animation for a simple stacked layout: whichever
+   form is active fills the width in normal flow, the decorative circle and
+   panel artwork are hidden, and the same #sign-in-button/#sign-up-button
+   toggle (unchanged JS, just .sign-up-mode being added/removed on
+   .container) switches which block is shown. */
+@media (max-width: 768px) {
+  .container::before {
+    display: none !important;
+  }
+
+  .forms-container {
+    position: static !important;
+    height: auto !important;
+  }
+
+  .signin-signup,
+  .signup-signup {
+    position: static !important;
+    left: auto !important;
+    top: auto !important;
+    transform: none !important;
+    width: 100% !important;
+    max-width: 420px;
+    margin: 40px auto;
+    pointer-events: all !important;
+  }
+
+  .signup-signup {
+    display: none;
+  }
+
+  .container.sign-up-mode .signin-signup {
+    display: none !important;
+  }
+
+  .container.sign-up-mode .signup-signup {
+    display: block !important;
+  }
+
+  form.sign-in-form,
+  form.sign-up-form {
+    padding: 0 1.5rem !important;
+    width: 100%;
+    pointer-events: all !important;
+  }
+
+  .panels-container {
+    position: static !important;
+    height: auto !important;
+    width: 100%;
+  }
+
+  .panel {
+    position: static !important;
+    width: 100% !important;
+    padding: 1.5rem !important;
+    display: none;
+  }
+
+  .left-panel {
+    display: flex;
+  }
+
+  /* Sibling combinator, not descendant: .panels-container is a sibling of
+     .container in the actual DOM (a pre-existing markup bug closes
+     .container one </div> too early, right after .forms-container), not a
+     child of it - .container.sign-up-mode .left-panel can never match, so
+     every existing sign-up-mode/panel rule in this file employing that
+     descendant pattern has silently never worked, on desktop either. Fixing
+     the markup nesting was tried and reverted: it also reactivates other
+     dormant .container.sign-up-mode .panel transform rules that turned out
+     to have their own bugs (they pushed the desktop sign-up view into
+     horizontal overflow) - out of scope to chase on the live login page
+     right now, so this works around the sibling relationship instead of
+     depending on the nesting being fixed. */
+  .container.sign-up-mode ~ .panels-container .left-panel {
+    display: none !important;
+  }
+
+  .container.sign-up-mode ~ .panels-container .right-panel {
+    display: flex !important;
+  }
+
+  /* Decorative artwork and filler copy - drop them to keep the mobile
+     toggle prompt short instead of shrinking them to illegible sizes. */
+  .panel img.image {
+    display: none;
+  }
+
+  .panel .content p {
+    display: none;
+  }
 }

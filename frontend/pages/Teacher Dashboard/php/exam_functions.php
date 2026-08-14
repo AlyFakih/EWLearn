@@ -1,7 +1,12 @@
 <?php
-session_start();
-require_once "dbcontroller.php";
+// Server-side authorization gate: instructor only. Runs before any other
+// logic so nothing is emitted to an unauthenticated or wrong-role caller.
+require_once __DIR__ . '/../../../core/auth_guard.php';
+auth_require_role('instructor');
+
+require_once "../../../core/DBController.php";
 require_once "../../common/notifications.php";
+require_once "../../common/calendar.php";
 
 // Check if user is logged in and is a teacher (role = 1)
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
@@ -11,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] != 'instructor') {
 }
 
 $db_handle = new DBController();
-$notification_manager = new NotificationManager();
+$notification_manager = new NotificationManager($db_handle);
 $user_id = $_SESSION['user_id'];
 
 // Create a new exam
@@ -31,50 +36,55 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $room = $db_handle->cleanData($_POST['room']);
         $duration = isset($_POST['duration']) ? (int)$db_handle->cleanData($_POST['duration']) : 60;
         
-        // Verify this course is taught by this teacher
-        $verify_query = "SELECT id, courseTitle, courseCode FROM courses WHERE id = ? AND teacher_id = ?";
-        $course = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-        
+        // Verify this course is taught by this teacher (ownership lives in
+        // instructorcourse, keyed by users.fullName / courses.courseTitle)
+        if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
+            $course = [];
+        } else {
+            $verify_query = "SELECT id, courseTitle, courseCode FROM courses WHERE id = ?";
+            $course = $db_handle->executeSelectPrepared($verify_query, "i", [$course_id]);
+        }
+
         if (empty($course)) {
             $response = array('success' => false, 'message' => 'Course not found or you do not have permission to add an exam for this course');
         } else {
             // Insert the exam
-            $insert_query = "INSERT INTO exam (course_id, subject, date, time, room, duration) 
-                            VALUES (?, ?, ?, ?, ?, ?)";
-            
-            $result = $db_handle->executeUpdatePrepared($insert_query, "issssi", 
-                [$course_id, $subject, $exam_date, $exam_time, $room, $duration]);
-            
+            $insert_query = "INSERT INTO exam (course_id, subject, date, time, room, duration, created_by)
+                            VALUES (?, ?, ?, ?, ?, ?, ?)";
+
+            $result = $db_handle->executeUpdatePrepared($insert_query, "issssii",
+                [$course_id, $subject, $exam_date, $exam_time, $room, $duration, $user_id]);
+
             if ($result) {
                 $exam_id = $db_handle->getLastInsertId();
-                
+
                 // Create an event in the academic calendar
                 $courseTitle = $course[0]['courseTitle'];
                 $courseCode = $course[0]['courseCode'];
-                
+
                 // Format time for display
                 $formatted_time = date('g:i A', strtotime($exam_time));
-                
-                // Create calendar event for the exam
-                $calendar_query = "INSERT INTO academic_calendar (title, description, start_date, end_date, reference_type, reference_id) 
-                                  VALUES (?, ?, ?, ?, ?, ?)";
-                                  
+
                 $event_title = "Exam: " . $courseCode . " - " . $subject;
                 $event_description = "Exam for " . $courseTitle . " (" . $courseCode . ") on " . $subject . " in room " . $room;
-                
+
                 // Calculate end time using duration
                 $start_datetime = $exam_date . ' ' . $exam_time;
                 $end_datetime = date('Y-m-d H:i:s', strtotime($start_datetime . " +" . $duration . " minutes"));
                 $end_date = date('Y-m-d', strtotime($end_datetime));
-                
-                $db_handle->executeUpdatePrepared($calendar_query, "sssssi", 
-                    [$event_title, $event_description, $exam_date, $end_date, 'exam', $exam_id]);
-                
+
+                $calendar_manager = new CalendarManager($db_handle);
+                $calendar_manager->createEvent(
+                    $event_title, $event_description, $exam_date, $end_date,
+                    false, 'exam', $course_id, null, $user_id
+                );
+
                 // Get enrolled students for this course to notify them
-                $students_query = "SELECT sc.student_id, u.full_name 
-                                  FROM studentcourse sc 
-                                  JOIN users u ON sc.student_id = u.id 
-                                  WHERE sc.course_id = ?";
+                $students_query = "SELECT u.id AS student_id, u.fullName AS full_name
+                                  FROM studentcourse sc
+                                  JOIN courses c ON c.courseTitle = sc.courseID
+                                  JOIN users u ON u.fullName = sc.userStudentID
+                                  WHERE c.id = ?";
                 $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
                 
                 // Notify enrolled students about the new exam
@@ -141,27 +151,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['act
     $exam_id = (int)$db_handle->cleanData($_GET['id']);
     
     // Get exam details with JOIN to courses
-    $exam_query = "SELECT e.*, c.courseTitle, c.courseCode 
-                  FROM exam e 
-                  JOIN courses c ON e.course_id = c.id 
-                  WHERE e.id = ? AND c.teacher_id = ?";
-    $exam = $db_handle->executeSelectPrepared($exam_query, "ii", [$exam_id, $user_id]);
-    
+    $exam_query = "SELECT e.*, c.courseTitle, c.courseCode
+                  FROM exam e
+                  JOIN courses c ON e.course_id = c.id
+                  WHERE e.id = ?";
+    $exam = $db_handle->executeSelectPrepared($exam_query, "i", [$exam_id]);
+
+    if (!empty($exam) && !$db_handle->isCourseOwnedByTeacher($exam[0]['course_id'], $user_id)) {
+        $exam = [];
+    }
+
     if (empty($exam)) {
         $response = array('success' => false, 'message' => 'Exam not found or you do not have permission to view it');
     } else {
         $exam_data = $exam[0];
-        
+
         // Format date and time for display
         $exam_data['formatted_date'] = date('F j, Y', strtotime($exam_data['date']));
         $exam_data['formatted_time'] = date('g:i A', strtotime($exam_data['time']));
-        
+
         // Get enrolled students for this course
-        $students_query = "SELECT u.id, u.full_name, sc.enrollment_date 
-                          FROM studentcourse sc 
-                          JOIN users u ON sc.student_id = u.id 
-                          WHERE sc.course_id = ?
-                          ORDER BY u.full_name ASC";
+        $students_query = "SELECT u.id, u.fullName AS full_name, sc.enrollment_date
+                          FROM studentcourse sc
+                          JOIN courses c ON c.courseTitle = sc.courseID
+                          JOIN users u ON u.fullName = sc.userStudentID
+                          WHERE c.id = ?
+                          ORDER BY u.fullName ASC";
         $students = $db_handle->executeSelectPrepared($students_query, "i", [$exam_data['course_id']]);
         
         $response = array(
@@ -197,16 +212,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
         $duration = isset($_POST['duration']) ? (int)$db_handle->cleanData($_POST['duration']) : 60;
         
         // Verify this course is taught by this teacher
-        $verify_query = "SELECT id, courseTitle, courseCode FROM courses WHERE id = ? AND teacher_id = ?";
-        $course = $db_handle->executeSelectPrepared($verify_query, "ii", [$course_id, $user_id]);
-        
+        if (!$db_handle->isCourseOwnedByTeacher($course_id, $user_id)) {
+            $course = [];
+        } else {
+            $verify_query = "SELECT id, courseTitle, courseCode FROM courses WHERE id = ?";
+            $course = $db_handle->executeSelectPrepared($verify_query, "i", [$course_id]);
+        }
+
         if (empty($course)) {
             $response = array('success' => false, 'message' => 'Course not found or you do not have permission to update an exam for this course');
         } else {
             // Verify the exam exists and is associated with a course taught by this teacher
-            $exam_check_query = "SELECT e.id FROM exam e JOIN courses c ON e.course_id = c.id WHERE e.id = ? AND c.teacher_id = ?";
-            $exam_check = $db_handle->executeSelectPrepared($exam_check_query, "ii", [$exam_id, $user_id]);
-            
+            $exam_check_query = "SELECT e.id FROM exam e WHERE e.id = ? AND e.course_id = ?";
+            $exam_check = $db_handle->executeSelectPrepared($exam_check_query, "ii", [$exam_id, $course_id]);
+
             if (empty($exam_check)) {
                 $response = array('success' => false, 'message' => 'Exam not found or you do not have permission to update it');
             } else {
@@ -226,35 +245,34 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
                 if ($result) {
                     $courseTitle = $course[0]['courseTitle'];
                     $courseCode = $course[0]['courseCode'];
-                    
+
                     // Format time for display
                     $formatted_time = date('g:i A', strtotime($exam_time));
-                    
-                    // Update calendar event for the exam
-                    // First, delete existing event
-                    $delete_event_query = "DELETE FROM academic_calendar WHERE reference_type = 'exam' AND reference_id = ?";
-                    $db_handle->executeUpdatePrepared($delete_event_query, "i", [$exam_id]);
-                    
-                    // Create new calendar event
-                    $calendar_query = "INSERT INTO academic_calendar (title, description, start_date, end_date, reference_type, reference_id) 
-                                      VALUES (?, ?, ?, ?, ?, ?)";
-                                      
+
                     $event_title = "Exam: " . $courseCode . " - " . $subject;
                     $event_description = "Exam for " . $courseTitle . " (" . $courseCode . ") on " . $subject . " in room " . $room;
-                    
+
                     // Calculate end time using duration
                     $start_datetime = $exam_date . ' ' . $exam_time;
                     $end_datetime = date('Y-m-d H:i:s', strtotime($start_datetime . " +" . $duration . " minutes"));
                     $end_date = date('Y-m-d', strtotime($end_datetime));
-                    
-                    $db_handle->executeUpdatePrepared($calendar_query, "sssssi", 
-                        [$event_title, $event_description, $exam_date, $end_date, 'exam', $exam_id]);
-                    
+
+                    // Refresh the calendar event for this course's exams
+                    // (academic_calendar has no per-exam key, only course_id,
+                    // so all 'exam' events for the course are recreated)
+                    $calendar_manager = new CalendarManager($db_handle);
+                    $calendar_manager->deleteEventsByReference('exam', $course_id);
+                    $calendar_manager->createEvent(
+                        $event_title, $event_description, $exam_date, $end_date,
+                        false, 'exam', $course_id, null, $user_id
+                    );
+
                     // Get enrolled students for this course to notify them
-                    $students_query = "SELECT sc.student_id, u.full_name 
-                                      FROM studentcourse sc 
-                                      JOIN users u ON sc.student_id = u.id 
-                                      WHERE sc.course_id = ?";
+                    $students_query = "SELECT u.id AS student_id, u.fullName AS full_name
+                                      FROM studentcourse sc
+                                      JOIN courses c ON c.courseTitle = sc.courseID
+                                      JOIN users u ON u.fullName = sc.userStudentID
+                                      WHERE c.id = ?";
                     $students = $db_handle->executeSelectPrepared($students_query, "i", [$course_id]);
                     
                     // Notify enrolled students about the updated exam
@@ -309,35 +327,41 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     $exam_id = (int)$db_handle->cleanData($_POST['id']);
     
     // Verify the exam exists and is associated with a course taught by this teacher
-    $exam_check_query = "SELECT e.id, e.subject, e.course_id, c.courseTitle, c.courseCode 
-                        FROM exam e 
-                        JOIN courses c ON e.course_id = c.id 
-                        WHERE e.id = ? AND c.teacher_id = ?";
-    $exam_check = $db_handle->executeSelectPrepared($exam_check_query, "ii", [$exam_id, $user_id]);
-    
+    $exam_check_query = "SELECT e.id, e.subject, e.course_id, c.courseTitle, c.courseCode
+                        FROM exam e
+                        JOIN courses c ON e.course_id = c.id
+                        WHERE e.id = ?";
+    $exam_check = $db_handle->executeSelectPrepared($exam_check_query, "i", [$exam_id]);
+
+    if (!empty($exam_check) && !$db_handle->isCourseOwnedByTeacher($exam_check[0]['course_id'], $user_id)) {
+        $exam_check = [];
+    }
+
     if (empty($exam_check)) {
         $response = array('success' => false, 'message' => 'Exam not found or you do not have permission to delete it');
     } else {
         $exam_data = $exam_check[0];
-        
+
         // Start transaction
         $db_handle->beginTransaction();
-        
+
         try {
-            // Delete calendar events for this exam
-            $delete_event_query = "DELETE FROM academic_calendar WHERE reference_type = 'exam' AND reference_id = ?";
-            $db_handle->executeUpdatePrepared($delete_event_query, "i", [$exam_id]);
-            
             // Delete the exam
             $delete_query = "DELETE FROM exam WHERE id = ?";
             $result = $db_handle->executeUpdatePrepared($delete_query, "i", [$exam_id]);
-            
+
             if ($result) {
+                // Remove the calendar entry for this course's exams
+                // (academic_calendar has no per-exam key, only course_id)
+                $calendar_manager = new CalendarManager($db_handle);
+                $calendar_manager->deleteEventsByReference('exam', $exam_data['course_id']);
+
                 // Get enrolled students for this course to notify them
-                $students_query = "SELECT sc.student_id, u.full_name 
-                                  FROM studentcourse sc 
-                                  JOIN users u ON sc.student_id = u.id 
-                                  WHERE sc.course_id = ?";
+                $students_query = "SELECT u.id AS student_id, u.fullName AS full_name
+                                  FROM studentcourse sc
+                                  JOIN courses c ON c.courseTitle = sc.courseID
+                                  JOIN users u ON u.fullName = sc.userStudentID
+                                  WHERE c.id = ?";
                 $students = $db_handle->executeSelectPrepared($students_query, "i", [$exam_data['course_id']]);
                 
                 // Notify enrolled students about the deleted exam

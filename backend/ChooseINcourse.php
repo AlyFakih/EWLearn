@@ -1,5 +1,9 @@
 <?php
-header("Access-Control-Allow-Origin: *");
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Credentials: true");
@@ -17,29 +21,35 @@ if (!$username || !$coursename) {
     exit;
 }
 
-// Fetch user ID based on the provided username
-$queryUser = "SELECT id, fullName FROM users WHERE fullName = '$username'";
-$resultUser = mysqli_query($conn, $queryUser);
+// Fetch user ID based on the provided username. Parameterised - these
+// values come straight from the request and were previously interpolated
+// into the SQL.
+$stmtUser = $conn->prepare("SELECT id, fullName FROM users WHERE fullName = ?");
+$stmtUser->bind_param("s", $username);
+$stmtUser->execute();
+$resultUser = $stmtUser->get_result();
 
-if (!$resultUser || mysqli_num_rows($resultUser) === 0) {
+if (!$resultUser || $resultUser->num_rows === 0) {
     echo json_encode(['status' => 'error', 'message' => 'User not found']);
     exit;
 }
 
-$userData = mysqli_fetch_assoc($resultUser);
+$userData = $resultUser->fetch_assoc();
 $userID = $userData['id'];
 $userFullName = $userData['fullName'];
 
 // Fetch course ID based on the provided coursename
-$queryCourse = "SELECT id, courseTitle FROM courses WHERE courseTitle = '$coursename'";
-$resultCourse = mysqli_query($conn, $queryCourse);
+$stmtCourse = $conn->prepare("SELECT id, courseTitle FROM courses WHERE courseTitle = ?");
+$stmtCourse->bind_param("s", $coursename);
+$stmtCourse->execute();
+$resultCourse = $stmtCourse->get_result();
 
-if (!$resultCourse || mysqli_num_rows($resultCourse) === 0) {
+if (!$resultCourse || $resultCourse->num_rows === 0) {
     echo json_encode(['status' => 'error', 'message' => 'Course not found']);
     exit;
 }
 
-$courseData = mysqli_fetch_assoc($resultCourse);
+$courseData = $resultCourse->fetch_assoc();
 $courseID = $courseData['id'];
 $courseTitle = $courseData['courseTitle'];
 
@@ -47,15 +57,17 @@ $courseTitle = $courseData['courseTitle'];
 $instructorCourseName = $userFullName . ' - ' . $courseTitle;
 
 // Check if the combination of fullname and CourseTitle already exists in the database
-$queryCheckName = "SELECT COUNT(*) as nameCount FROM instructorcourse WHERE userInstructorID = '$userFullName' AND courseID = '$courseTitle'";
-$resultCheckName = mysqli_query($conn, $queryCheckName);
+$stmtCheckName = $conn->prepare("SELECT COUNT(*) as nameCount FROM instructorcourse WHERE userInstructorID = ? AND courseID = ?");
+$stmtCheckName->bind_param("ss", $userFullName, $courseTitle);
+$stmtCheckName->execute();
+$resultCheckName = $stmtCheckName->get_result();
 
 if (!$resultCheckName) {
     echo json_encode(['status' => 'error', 'message' => 'Error checking existing names']);
     exit;
 }
 
-$nameCount = mysqli_fetch_assoc($resultCheckName)['nameCount'];
+$nameCount = $resultCheckName->fetch_assoc()['nameCount'];
 
 if ($nameCount == 0) {
     // If the combination exists once, add 'A' before the name
@@ -70,8 +82,9 @@ if ($nameCount == 0) {
 }
 
 // Insert data into instructorcourse table with the adjusted name
-$queryInsert = "INSERT INTO instructorcourse (userInstructorID, courseID, name) VALUES ('$userFullName', '$courseTitle', '$adjustedName')";
-$resultInsert = mysqli_query($conn, $queryInsert);
+$stmtInsert = $conn->prepare("INSERT INTO instructorcourse (userInstructorID, courseID, name) VALUES (?, ?, ?)");
+$stmtInsert->bind_param("sss", $userFullName, $courseTitle, $adjustedName);
+$resultInsert = $stmtInsert->execute();
 
 if ($resultInsert) {
     echo json_encode(['status' => 'success', 'message' => 'Record inserted successfully']);

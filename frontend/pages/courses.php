@@ -52,7 +52,7 @@ if ($result) {
             <h1 class="display-3 text-white animated aboutus">Welcome</h1>
             <a href="../pages/Home.html" class="h4 text-white word"> Home </a>
             <i class="far fa-circle text-white px-2"></i>
-            <a href="../pages/courses.html" class="h4 text-white word">
+            <a href="../pages/courses.php" class="h4 text-white word">
               Courses
             </a>
           </div>
@@ -133,6 +133,7 @@ if ($result) {
                   <img
                     src="<?php echo htmlspecialchars($course['image']); ?>"
                     alt="<?php echo htmlspecialchars($course['courseTitle']); ?>"
+                    loading="lazy"
                   />
                   <span class="course-price">$<?php echo htmlspecialchars($course['price']); ?></span>
                   <div class="course-toolbar">

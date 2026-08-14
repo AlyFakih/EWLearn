@@ -1,4 +1,45 @@
 # Block direct access to sensitive/non-web file types anywhere in the project
-<FilesMatch "\.(sql|sqlite|db|log|env|bak|backup|old|py|txt|md|gitignore)$">
+<FilesMatch "\.(sql|sqlite|db|log|env|bak|backup|old|py|txt|md|gitignore|ini)$">
+    Require all denied
+</FilesMatch>
+
+# Block source files that carry an extra suffix, e.g. login.php.backup,
+# courses.php.before_cleanup, loginRegister.html.backup_before_rebuild,
+# login.css.bak. Apache does not treat these as PHP, so without this rule it
+# serves them as PLAIN TEXT - handing out application source, SQL and
+# credentials-handling logic to anyone who guesses the filename.
+<FilesMatch "\.(php|phtml|inc|html?|css|js)\.[A-Za-z0-9_.-]+$">
+    Require all denied
+</FilesMatch>
+
+# Dependency manifests: reveal exact library versions, which makes it trivial
+# to look up known CVEs for the installed stack.
+<FilesMatch "^composer\.(json|lock)$">
+    Require all denied
+</FilesMatch>
+
+# Never render PHP warnings/errors into the HTTP response. Uncaught errors were
+# printing absolute filesystem paths, SQL and stack traces straight to the
+# browser (e.g. on any DB hiccup), which hands an attacker a map of the server.
+# Errors still go to the Apache/PHP error log for developers.
+php_flag display_errors off
+php_flag display_startup_errors off
+php_flag log_errors on
+
+# Browser caching for genuinely static binary assets only (images/fonts) -
+# these are never hand-edited-and-refreshed during development the way
+# CSS/JS are (see README: "No build step. Edit PHP/JS/CSS directly and
+# refresh the browser"), and this project has no cache-busting filename/query
+# scheme for CSS/JS, so caching those here would risk developers/users
+# seeing stale styles or scripts after an edit. Wrapped in <IfModule> so this
+# degrades gracefully if a deployment target doesn't have mod_headers.
+<IfModule mod_headers.c>
+    <FilesMatch "\.(png|jpe?g|gif|svg|ico|webp|woff2?|ttf|eot)$">
+        Header set Cache-Control "public, max-age=604800"
+    </FilesMatch>
+</IfModule>
+
+# Block direct access to PHP config files
+<FilesMatch "^(config|database)\.php$">
     Require all denied
 </FilesMatch>

@@ -1,7 +1,11 @@
 <?php
+// Server-side authorization gate: admin only. Placed first so no data is
+// emitted before the caller is proven to be an authenticated admin.
+require_once __DIR__ . '/../frontend/core/auth_guard.php';
+auth_require_role('admin');
+
 
 // Enable CORS
-header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: access");
 header("Access-Control-Allow-Methods: POST");
 header("Access-Control-Allow-Credentials: true");
@@ -19,9 +23,12 @@ if (!$email) {
     exit;
 }
 
-// Perform the deletion in the database
-$deleteQuery = "DELETE FROM users WHERE email = '$email'";
-$deleteResult = mysqli_query($conn, $deleteQuery);
+// Perform the deletion in the database.
+// Parameterised: $email came straight from POST and was interpolated into the
+// SQL, so a value like  ' OR '1'='1  deleted the ENTIRE users table.
+$stmt = $conn->prepare("DELETE FROM users WHERE email = ?");
+$stmt->bind_param("s", $email);
+$deleteResult = $stmt->execute();
 
 if ($deleteResult) {
     // If deletion was successful, return a success response
