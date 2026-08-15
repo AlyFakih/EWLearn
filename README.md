@@ -7,7 +7,9 @@ exams, assignments, attendance, and academic calendar/notifications.
 ## Features
 
 - **Admin**: user management (add/edit/delete instructors, students, staff),
-  course management, staff directory, internal messaging (email).
+  course management, staff directory, internal messaging (email). Navigation
+  uses clean, bookmarkable URLs with browser back/forward support (e.g.
+  `/admin/students` instead of long file paths).
 - **Instructor/Teacher**: course roster, student management, grading, exam
   scheduling, assignment creation and submission grading, attendance
   tracking (per-course tabs), profile management, calendar and
@@ -15,7 +17,7 @@ exams, assignments, attendance, and academic calendar/notifications.
 - **Student**: enrolled courses, assignment submission, grades, attendance
   history, exam schedule, profile management.
 - Public marketing/catalogue pages (course listing, course details,
-  instructor bios, contact/about).
+  instructor bios, contact/about) with clean URLs.
 
 ## Technology stack
 
@@ -43,6 +45,18 @@ directory tree.
 
 See [docs/FILE_AUDIT.md](docs/FILE_AUDIT.md) for the cleanup audit trail —
 every file that was moved, archived, or reorganized, with evidence for why.
+
+### URL routing (clean URLs)
+
+- **Public pages** and **Admin Dashboard** use clean URLs via `.htaccess`
+  rewrite rules: e.g. `/login`, `/courses`, `/admin/students` instead of
+  long file paths. These are both human-readable and bookmarkable.
+- **Teacher and Student Dashboards** use their original multi-page URLs
+  (e.g. `/frontend/pages/Teacher Dashboard/course-dashboard.php`). The
+  infrastructure for clean URLs was prepared but not deployed due to a
+  hosting-level restriction on new `.htaccess` rewrite rules on the
+  production server (InfinityFree). Both dashboards are fully functional
+  and work correctly with their current URLs.
 
 ## Directory structure (top level)
 
