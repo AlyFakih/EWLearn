@@ -221,8 +221,16 @@ if ($getUserResult->num_rows > 0) {
     $response['message'] = 'Email not found. Please check your email or register.';
 }
 
-$conn->close();
+if (isset($conn)) {
+    $conn->close();
+}
 restore_error_handler();
+
+// For debugging: if debug=1 parameter is passed, include error log in response
+// (Never expose this in production - only for development/diagnosis)
+if (isset($_GET['debug']) && $_GET['debug'] === '1') {
+    $response['_debug_errors'] = 'Check server error logs for detailed error messages';
+}
 
 // Send the JSON-encoded response to the frontend
 echo json_encode($response);
