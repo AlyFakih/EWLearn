@@ -10,6 +10,10 @@ $response = array('status' => 'error', 'message' => 'An unexpected error occurre
 set_error_handler(function($errno, $errstr, $errfile, $errline) {
     global $response;
     error_log("PHP Error in login.php: [$errno] $errstr in $errfile:$errline");
+    // Log the full error details for debugging
+    if (strpos($errfile, 'auth_guard') !== false || strpos($errfile, 'config') !== false) {
+        error_log("Error details: $errstr in $errfile at line $errline");
+    }
     if (empty($response)) {
         $response = [];
     }
@@ -53,18 +57,40 @@ register_shutdown_function(function() {
 
 // Starts the session with hardened cookie flags (HttpOnly, SameSite=Lax,
 // strict mode). Must run before any other session handling.
+error_log("LOGIN: Starting session initialization");
 require_once __DIR__ . "/../frontend/core/auth_guard.php";
-auth_session_boot();
+error_log("LOGIN: auth_guard.php loaded");
 
-// Safely include config.php and check if connection was successful
 try {
-    include "./config.php";
+    auth_session_boot();
+    error_log("LOGIN: Session booted successfully");
 } catch (Exception $e) {
-    error_log("Config include failed: " . $e->getMessage());
+    error_log("LOGIN: Session boot failed: " . $e->getMessage());
     http_response_code(500);
     echo json_encode($response);
     exit;
 }
+
+// Safely include config.php and check if connection was successful
+error_log("LOGIN: Including config.php");
+try {
+    include "./config.php";
+    error_log("LOGIN: config.php loaded, checking connection");
+} catch (Exception $e) {
+    error_log("LOGIN: Config include failed: " . $e->getMessage());
+    http_response_code(500);
+    echo json_encode($response);
+    exit;
+}
+
+// Verify connection was established
+if (!isset($conn)) {
+    error_log("LOGIN: Connection variable not set after config.php");
+    http_response_code(500);
+    echo json_encode($response);
+    exit;
+}
+error_log("LOGIN: Connection established successfully");
 
 // Validate database connection
 if (!$conn) {
@@ -81,48 +107,55 @@ $loginPassword = isset($_POST['loginPassword']) ? $_POST['loginPassword'] : '';
 
 // Validate input
 if (empty($loginEmail) || empty($loginPassword)) {
+    error_log("LOGIN: Missing email or password");
     $response['message'] = 'Email and password are required.';
     echo json_encode($response);
     exit;
 }
 
+error_log("LOGIN: Attempting to authenticate user: " . $loginEmail);
+
 // Parameterised: the email came straight from the client and was previously
 // interpolated into the SQL string.
 $stmt = $conn->prepare("SELECT * FROM users WHERE email = ?");
 if (!$stmt) {
-    error_log("Prepare failed in login.php: " . $conn->error);
+    error_log("LOGIN: Prepare failed: " . $conn->error);
     echo json_encode($response);
     exit;
 }
 
 if (!$stmt->bind_param("s", $loginEmail)) {
-    error_log("Bind param failed in login.php: " . $stmt->error);
+    error_log("LOGIN: Bind param failed: " . $stmt->error);
     $stmt->close();
     echo json_encode($response);
     exit;
 }
 
 if (!$stmt->execute()) {
-    error_log("Execute failed in login.php: " . $stmt->error);
+    error_log("LOGIN: Execute failed: " . $stmt->error);
     $stmt->close();
     echo json_encode($response);
     exit;
 }
 
+error_log("LOGIN: Query executed successfully");
 $getUserResult = $stmt->get_result();
 if (!$getUserResult) {
-    error_log("Get result failed in login.php: " . $stmt->error);
+    error_log("LOGIN: Get result failed: " . $stmt->error);
     $stmt->close();
     echo json_encode($response);
     exit;
 }
 
+error_log("LOGIN: Got result set, checking row count");
+
 if ($getUserResult->num_rows > 0) {
+    error_log("LOGIN: User found, fetching data");
     $userData = $getUserResult->fetch_assoc();
     $stmt->close();
 
     if (!$userData) {
-        error_log("Fetch assoc failed in login.php");
+        error_log("LOGIN: Fetch assoc failed");
         echo json_encode($response);
         exit;
     }
@@ -133,46 +166,56 @@ if ($getUserResult->num_rows > 0) {
     $userId = $userData['id'] ?? null;
     $fullName = $userData['fullName'] ?? 'User';
 
+    error_log("LOGIN: User data retrieved - Role: $userRole, ID: $userId");
+
     if (!$hashedPassword || !$userRole || !$userId) {
-        error_log("Missing required user fields in login.php");
+        error_log("LOGIN: Missing required user fields");
         echo json_encode($response);
         exit;
     }
 
     // Verify the provided password
     if (password_verify($loginPassword, $hashedPassword)) {
+        error_log("LOGIN: Password verified, setting up session for user ID: $userId");
+
         // Issues a brand-new session ID so any ID an attacker planted in the
         // victim's browser before login becomes worthless (session fixation),
         // and stamps the session for idle/absolute expiry.
         auth_login_session($userId, $userRole, $fullName);
-        // Password is correct
+        error_log("LOGIN: Session created successfully");
 
+        // Password is correct
         if ($userRole === 'admin') {
             // Redirect to the admin dashboard
             $response['status'] = 'success';
             $response['role'] = 'admin';
             $response['redirect'] = '/admin';
+            error_log("LOGIN: Admin login successful for user ID: $userId");
         } else if ($userRole === 'instructor') {
             // Redirect to the instructor dashboard
             $response['status'] = 'success';
             $response['role'] = 'instructor';
             $response['redirect'] = '../pages/Teacher%20Dashboard/profile-dashboard.php';
+            error_log("LOGIN: Instructor login successful for user ID: $userId");
         } else if ($userRole === 'student') {
             // Redirect to the student dashboard
             $response['status'] = 'success';
             $response['role'] = 'student';
             $response['redirect'] = '../pages/Student%20Dashboard/dashboard.php';
+            error_log("LOGIN: Student login successful for user ID: $userId");
         } else {
-            error_log("Unknown role in login.php: " . $userRole);
+            error_log("LOGIN: Unknown role in login.php: " . $userRole);
             $response['message'] = 'Unknown user role.';
         }
     } else {
         // Incorrect password
+        error_log("LOGIN: Invalid password for user: $loginEmail");
         $response['status'] = 'error';
         $response['message'] = 'Incorrect password. Please try again.';
     }
 } else {
     // Email not found
+    error_log("LOGIN: User not found: $loginEmail");
     $stmt->close();
     $response['status'] = 'error';
     $response['message'] = 'Email not found. Please check your email or register.';
